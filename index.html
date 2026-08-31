@@ -146,14 +146,13 @@
             <p class="text-xs text-slate-500">Elegí fecha y horario disponible</p>
           </div>
 
-          <!-- Card de Pagamento e Envio de Comprovante -->
+          <!-- Card de Pagamento -->
           <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3.5">
             <div class="flex justify-between items-center">
               <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paso final</span>
               <button onclick="cancelBookingSelection()" class="text-xs text-slate-400 hover:text-slate-600">Cancelar</button>
             </div>
 
-            <!-- Dados Mercado Pago -->
             <div class="bg-white p-3.5 rounded-xl border border-emerald-100 space-y-1.5 shadow-sm">
               <p class="text-xs font-bold text-emerald-950">Datos para transferencia:</p>
               <div class="text-xs text-slate-700 space-y-0.5">
@@ -166,7 +165,6 @@
               Podés <b>subir la foto del comprobante aquí</b> para confirmar automáticamente, o enviarla directo a mi WhatsApp:
             </p>
 
-            <!-- Opção 1: Upload no App -->
             <div class="space-y-2">
               <label class="text-[11px] font-bold text-slate-700">Opción 1: Subir comprobante aquí</label>
               <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-white p-2 rounded-xl border border-emerald-200 outline-none">
@@ -181,7 +179,6 @@
               <div class="flex-grow border-t border-emerald-200"></div>
             </div>
 
-            <!-- Opção 2: Enviar no WhatsApp -->
             <div class="space-y-2">
               <label class="text-[11px] font-bold text-slate-700">Opción 2: Enviar comprobante por WhatsApp</label>
               <button onclick="sendReceiptViaWhatsApp()" class="w-full bg-[#25D366] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-600 active:scale-95 transition shadow-sm flex items-center justify-center gap-2">
@@ -232,7 +229,7 @@
 
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
           <i class="fa-regular fa-clipboard text-3xl"></i>
-          <p class="text-sm">Sin tareas aún</p>
+          <p class="text-sm">Sin tarefas ainda</p>
         </div>
       </section>
 
@@ -313,7 +310,7 @@
 
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
-            <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
+            <div id="admin-slots-list" class="space-y-2.5 text-xs text-slate-500">
               Carregando...
             </div>
           </div>
@@ -551,24 +548,106 @@
         }
       });
 
+      if (type === 'slots') loadAdminSlots();
       if (type === 'bookings') loadAdminBookings();
     };
 
+    // CARREGAR HORÁRIOS COM DADOS DO ALUNO E BOTÕES DE AÇÃO
     window.loadAdminSlots = async function() {
       var container = document.getElementById('admin-slots-list');
       var sb = getSupabase();
       if (!sb) return;
-      var res = await sb.from('available_slots').select('*').order('date', { ascending: true });
-      if (res.error || !res.data || res.data.length === 0) {
+
+      var slotsRes = await sb.from('available_slots').select('*').order('date', { ascending: true });
+      var bookingsRes = await sb.from('bookings').select('*');
+
+      var slots = slotsRes.data || [];
+      var bookings = bookingsRes.data || [];
+
+      if (slots.length === 0) {
         container.innerHTML = '<p class="text-slate-400">Nenhum horário cadastrado ainda.</p>';
         return;
       }
-      container.innerHTML = res.data.map(function(slot) {
-        return '<div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">' +
-          '<div><span class="font-bold text-slate-800">' + slot.date + '</span> às <span class="font-bold text-green-700">' + slot.time + '</span></div>' +
-          '<span class="px-2 py-0.5 text-[10px] rounded-full ' + (slot.is_booked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700 font-semibold') + '">' +
-          (slot.is_booked ? 'Reservado' : 'Disponível') + '</span></div>';
+
+      container.innerHTML = slots.map(function(slot) {
+        var booking = bookings.find(b => b.slot_id === slot.id);
+        var studentInfo = '';
+        var actionButtons = '';
+
+        if (slot.is_booked) {
+          var name = booking ? booking.student_name : 'Aluno';
+          var email = booking ? booking.student_email : '';
+          var receiptLink = booking && booking.receipt_url ? '<a href="' + booking.receipt_url + '" target="_blank" class="text-blue-600 underline font-bold ml-1">Ver comprovante</a>' : '';
+
+          studentInfo = '<div class="mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-600">' +
+            '👤 <b>Reservado por:</b> ' + name + ' (' + email + ') ' + receiptLink +
+          '</div>';
+
+          actionButtons = '<div class="flex gap-2 mt-2 pt-1">' +
+            '<button onclick="releaseSlot(\'' + slot.id + '\')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-2 rounded-lg text-[11px] flex items-center justify-center gap-1 transition">' +
+              '<i class="fa-solid fa-rotate-left"></i> Liberar Horário' +
+            '</button>' +
+            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">' +
+              '<i class="fa-solid fa-trash"></i>' +
+            '</button>' +
+          '</div>';
+        } else {
+          actionButtons = '<div class="flex justify-end mt-2">' +
+            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="text-red-500 hover:text-red-700 text-[11px] font-bold flex items-center gap-1 transition">' +
+              '<i class="fa-solid fa-trash"></i> Excluir Horário' +
+            '</button>' +
+          '</div>';
+        }
+
+        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">' +
+          '<div class="flex justify-between items-center">' +
+            '<div><span class="font-bold text-slate-800">' + slot.date + '</span> às <span class="font-bold text-green-700">' + slot.time + '</span></div>' +
+            '<span class="px-2.5 py-0.5 text-[10px] rounded-full ' + (slot.is_booked ? 'bg-red-100 text-red-600 font-bold' : 'bg-green-100 text-green-700 font-semibold') + '">' +
+              (slot.is_booked ? 'Reservado' : 'Disponível') +
+            '</span>' +
+          '</div>' +
+          studentInfo +
+          actionButtons +
+        '</div>';
       }).join('');
+    };
+
+    // FUNÇÃO PARA CANCELAR RESERVA E DEIXAR HORÁRIO DISPONÍVEL DE NOVO
+    window.releaseSlot = async function(slotId) {
+      if (!confirm('Deseja cancelar esta reserva e tornar o horário disponível novamente para outros alunos?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      // 1. Remove o registro de reserva do aluno
+      await sb.from('bookings').delete().eq('slot_id', slotId);
+
+      // 2. Torna o horário disponível novamente
+      var { error } = await sb.from('available_slots').update({ is_booked: false }).eq('id', slotId);
+      if (error) {
+        alert('Erro ao liberar horário: ' + error.message);
+      } else {
+        alert('Horário liberado com sucesso!');
+        loadAdminSlots();
+      }
+    };
+
+    // FUNÇÃO PARA EXCLUIR O HORÁRIO DEFINITIVAMENTE
+    window.deleteSlot = async function(slotId) {
+      if (!confirm('Tem certeza que deseja excluir permanentemente este horário?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      // Deleta reservas vinculadas primeiro
+      await sb.from('bookings').delete().eq('slot_id', slotId);
+
+      // Deleta o slot
+      var { error } = await sb.from('available_slots').delete().eq('id', slotId);
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Horário excluído com sucesso!');
+        loadAdminSlots();
+      }
     };
 
     window.loadAdminBookings = async function() {
@@ -663,7 +742,6 @@
       document.getElementById('payment-receipt-file').value = '';
     };
 
-    // Opção 1: Upload de Comprovante no App
     window.submitBookingWithReceipt = async function() {
       if (!selectedSlot) return alert('Seleccioná un horario');
       var fileInput = document.getElementById('payment-receipt-file');
@@ -711,7 +789,6 @@
       window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
     };
 
-    // Opção 2: Enviar Comprovante direto pelo WhatsApp
     window.sendReceiptViaWhatsApp = async function() {
       if (!selectedSlot) return alert('Seleccioná un horario');
 
