@@ -194,6 +194,12 @@
               <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100 space-y-0.5"></div>
             </div>
 
+            <!-- Botão informativo para rever regras antes de pagar -->
+            <button onclick="navigate('rules')" class="w-full text-left bg-white/70 border border-emerald-200 p-2.5 rounded-xl flex items-center justify-between text-xs text-emerald-900 hover:bg-white transition">
+              <span class="flex items-center gap-1.5 font-medium"><i class="fa-solid fa-circle-info text-emerald-600"></i> Ver reglas de asistencia y cambios</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+            </button>
+
             <p class="text-[11px] text-emerald-900 leading-relaxed">
               Podés <b>subir la foto del comprobante aquí</b> para confirmar todas las fechas juntas, o enviarla por WhatsApp:
             </p>
@@ -231,7 +237,7 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO COM SUBPASTAS POR NÍVEL E MARCADOR DE VISTO -->
+      <!-- ABA 3: CURSO -->
       <section id="tab-course" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
@@ -239,7 +245,6 @@
             <p class="text-xs text-slate-500">Aprendé portugués a tu propio ritmo</p>
           </div>
 
-          <!-- Barra de Progresso Geral -->
           <div class="bg-slate-900 text-white p-3.5 rounded-2xl space-y-1.5 shadow-sm">
             <div class="flex justify-between items-center text-xs font-semibold">
               <span>Tu progreso en el curso</span>
@@ -250,7 +255,6 @@
             </div>
           </div>
 
-          <!-- Subpastas / Níveis (Pills Horizontais) -->
           <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
             <button onclick="switchCourseLevel('iniciante')" id="lvl-btn-iniciante" class="px-3.5 py-2 rounded-xl bg-green-600 text-white whitespace-nowrap shadow-sm transition">
               Iniciante (A1-A2)
@@ -266,7 +270,6 @@
             </button>
           </div>
 
-          <!-- Lista de Vídeos/Aulas -->
           <div id="lessons-container" class="space-y-4 pt-1">
             <div class="text-center py-8 text-slate-400 space-y-2">
               <i class="fa-solid fa-film text-3xl"></i>
@@ -343,6 +346,15 @@
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
           </button>
 
+          <!-- Botão Manual do Aluno & Regras -->
+          <button onclick="navigate('rules')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-book-open-reader text-emerald-600 w-5"></i>
+              <span class="font-medium text-slate-800">Manual del Alumno & Reglas</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
           <button onclick="openWhatsApp()" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
             <div class="flex items-center gap-3">
               <i class="fa-brands fa-whatsapp text-green-600 w-5"></i>
@@ -365,6 +377,68 @@
               <span class="font-medium text-red-500">Cerrar sesión</span>
             </div>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ABA 6: MANUAL DO ALUNO & REGRAS (NOVA TELA) -->
+      <section id="tab-rules" class="space-y-4 hidden">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          
+          <!-- Seção 1: Asistencia y Cambios -->
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 border-l-4 border-emerald-600 pl-2.5">
+              <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Asistencia y Cambios</h3>
+            </div>
+            
+            <div class="space-y-2.5 text-xs text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[11px] font-bold mt-0.5">✕</span>
+                <div>
+                  <b class="text-slate-900">Faltas:</b> Injustificadas no se recuperan (salvo certificado médico).
+                </div>
+              </div>
+
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 text-[11px] font-bold mt-0.5">↻</span>
+                <div>
+                  <b class="text-slate-900">Cambios:</b> Solicitar con un mínimo de <b>48 horas</b> previo a la clase.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção 2: Reglas de Puntualidad -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-l-4 border-blue-900 pl-2.5">
+              <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Reglas de Puntualidad</h3>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 overflow-hidden text-xs">
+              <div class="bg-[#0f2444] text-white p-3 flex justify-between font-bold text-[11px]">
+                <span class="w-1/2">Tiempo de Espera</span>
+                <span class="w-1/2">Condición de la Clase</span>
+              </div>
+              <div class="divide-y divide-slate-100 bg-slate-50">
+                <div class="p-3 flex justify-between items-center">
+                  <span class="w-1/2 font-bold text-slate-800">Hasta 15 Minutos</span>
+                  <span class="w-1/2 text-slate-600">Tolerancia máxima permitida.</span>
+                </div>
+                <div class="p-3 flex justify-between items-center bg-white">
+                  <span class="w-1/2 font-bold text-slate-800">Más de 15 Minutos</span>
+                  <span class="w-1/2 text-slate-600">Se dicta solo el tiempo restante del encuentro.</span>
+                </div>
+                <div class="p-3 flex justify-between items-center">
+                  <span class="w-1/2 font-bold text-slate-800">Respeto Mutuo</span>
+                  <span class="w-1/2 text-slate-600">Garantiza la calidad de enseñanza para todos.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="navigate('calendar')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-2 mt-2">
+            <span>Ir a Agendar Clase</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
         </div>
       </section>
@@ -768,13 +842,14 @@
       }).eq('id', currentUser.id);
     }
 
-    var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin'];
+    var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin', 'rules'];
     var titles = {
       calendar: 'Agendar clases',
       course: 'Curso grabado',
       tasks: 'Tareas y evaluaciones',
       profile: 'Perfil',
-      admin: 'Panel admin'
+      admin: 'Panel admin',
+      rules: 'Manual del Alumno'
     };
 
     window.navigate = function(tabId) {
@@ -842,7 +917,7 @@
     };
 
     // ====================================================
-    // MÓDULO DO CURSO GRAVADO (SUBPASTAS, PROGRESSO & PDF)
+    // MÓDULO DO CURSO GRAVADO
     // ====================================================
     window.switchCourseLevel = function(level) {
       currentCourseLevel = level;
@@ -864,19 +939,16 @@
       var sb = getSupabase();
       if (!sb) return;
 
-      // 1. Carregar aulas do nível selecionado
       var { data: lessons, error } = await sb.from('course_lessons')
         .select('*')
         .eq('level', currentCourseLevel)
         .order('created_at', { ascending: true });
 
-      // 2. Carregar aulas concluídas pelo aluno atual em todo o curso
       if (currentUser) {
         var { data: prog } = await sb.from('lesson_progress').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true);
         userCompletedLessons = new Set((prog || []).map(p => p.lesson_id));
       }
 
-      // 3. Atualizar barra de progresso total
       var { data: allLessons } = await sb.from('course_lessons').select('id');
       var totalLessonsCount = (allLessons || []).length;
       var completedCount = userCompletedLessons.size;
@@ -897,7 +969,6 @@
         var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
         var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
 
-        // Embed do YouTube
         var videoEmbed = '';
         if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
           var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
@@ -907,7 +978,6 @@
           videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
         }
 
-        // Botão para baixar apostila/material
         var materialBtn = lesson.material_url 
           ? '<a href="' + lesson.material_url + '" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm mt-2.5">' +
               '<i class="fa-solid fa-file-arrow-down text-emerald-600 text-sm"></i> Baixar Apostila / Material da Aula (PDF)' +
