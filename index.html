@@ -140,7 +140,7 @@
         </div>
       </section>
 
-      <!-- ABA 2: AGENDAR (COM SELEÇÃO MÚLTIPLA / PACOTE) -->
+      <!-- ABA 2: AGENDAR -->
       <section id="tab-calendar" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div class="flex justify-between items-start">
@@ -153,7 +153,7 @@
             </button>
           </div>
 
-          <!-- Barra Fixa / Card de Resumo de Seleção -->
+          <!-- Barra de Resumo de Seleção -->
           <div id="booking-selection-bar" class="hidden p-4 bg-green-50 border border-green-200 rounded-2xl space-y-3">
             <div class="flex justify-between items-center text-xs font-bold text-green-950">
               <span id="selected-count-label">0 clases seleccionadas</span>
@@ -182,8 +182,8 @@
                 <p>🔹 <b>Alias Mercado Pago:</b> <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-emerald-800 font-bold">renan.barbosa</code></p>
                 <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
               </div>
-              <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100">
-                <!-- Lista de datas selecionadas -->
+              <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100 space-y-0.5">
+                <!-- Lista formatada com dia da semana -->
               </div>
             </div>
 
@@ -214,7 +214,7 @@
             </div>
           </div>
 
-          <div id="slots-container" class="space-y-2 pt-2">
+          <div id="slots-container" class="space-y-2.5 pt-2">
             <div class="text-center py-8 text-slate-400 space-y-2">
               <i class="fa-regular fa-calendar text-3xl"></i>
               <p class="text-sm font-medium">Aún no hay horarios disponibles.</p>
@@ -255,7 +255,7 @@
 
         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
           <i class="fa-regular fa-clipboard text-3xl"></i>
-          <p class="text-sm">Sin tarefas ainda</p>
+          <p class="text-sm">Sin tareas aún</p>
         </div>
       </section>
 
@@ -323,8 +323,6 @@
 
         <!-- Seção 1: Horários -->
         <div id="admin-sec-slots" class="space-y-4">
-          
-          <!-- GERADOR EM MASSA POR FRANJA HORÁRIA -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">⚡</span>
@@ -381,7 +379,6 @@
             </div>
           </div>
 
-          <!-- CADASTRO MANUAL PONTUAL -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Agregar horario individual (Manual)</h3>
             <div class="grid grid-cols-2 gap-2">
@@ -393,7 +390,6 @@
             </button>
           </div>
 
-          <!-- LISTA DE HORÁRIOS -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <div class="flex justify-between items-center">
               <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
@@ -461,6 +457,22 @@
       "renan.barbosa.med@gmail.com"
     ];
 
+    // FORMATAÇÃO AMIGÁVEL DA DATA COM O DIA DA SEMANA
+    function formatSpanishDate(dateStr) {
+      if (!dateStr) return '';
+      var parts = dateStr.split('-');
+      var dateObj = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      
+      var days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      var months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      
+      var dayName = days[dateObj.getDay()];
+      var dayNum = dateObj.getDate();
+      var monthName = months[dateObj.getMonth()];
+      
+      return dayName + ' ' + dayNum + ' de ' + monthName;
+    }
+
     function openWhatsApp() {
       var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola Renan! Me gustaría consultar por las clases de portugués.");
       window.open(url, '_blank');
@@ -479,7 +491,7 @@
 
     var isSignUp = false;
     var currentUser = null;
-    var selectedSlots = []; // Array para agendamento de múltiplas aulas no mês
+    var selectedSlots = [];
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -546,7 +558,7 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
 
-        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || "Renan Barbosa";
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
         document.getElementById('profile-name').innerText = fullName;
         document.getElementById('profile-email').innerText = currentUser.email;
@@ -642,9 +654,7 @@
       if (type === 'bookings') loadAdminBookings();
     };
 
-    // ==========================================
-    // GERADOR EM MASSA POR FRANJA HORÁRIA (ADMIN)
-    // ==========================================
+    // GERADOR EM MASSA ADMIN
     window.generateBulkSlots = async function() {
       var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
       var startTime = document.getElementById('bulk-start-time').value;
@@ -673,7 +683,6 @@
       var slotsToInsert = [];
       var today = new Date();
 
-      // Encontrar as próximas ocorrências do dia da semana escolhido
       for (var w = 0; w < totalWeeks; w++) {
         var loopDate = new Date();
         loopDate.setDate(today.getDate() + ((targetDay - today.getDay() + 7) % 7) + (w * 7));
@@ -683,7 +692,6 @@
         var dd = String(loopDate.getDate()).padStart(2, '0');
         var dateString = yyyy + '-' + mm + '-' + dd;
 
-        // Gerar os blocos de horário dentro da franja
         var currentMinutes = startTotalMinutes;
         while (currentMinutes + duration <= endTotalMinutes) {
           var h = String(Math.floor(currentMinutes / 60)).padStart(2, '0');
@@ -750,6 +758,7 @@
         var booking = bookings.find(b => b.slot_id === slot.id);
         var studentInfo = '';
         var actionButtons = '';
+        var formattedDate = formatSpanishDate(slot.date);
 
         if (slot.is_booked) {
           var name = booking ? booking.student_name : 'Aluno';
@@ -778,7 +787,10 @@
 
         return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">' +
           '<div class="flex justify-between items-center">' +
-            '<div><span class="font-bold text-slate-800">' + slot.date + '</span> às <span class="font-bold text-green-700">' + slot.time + '</span></div>' +
+            '<div>' +
+              '<div class="font-bold text-slate-900 text-xs capitalize">' + formattedDate + '</div>' +
+              '<div class="text-[11px] text-green-700 font-bold">⏰ ' + slot.time + ' hs</div>' +
+            '</div>' +
             '<span class="px-2.5 py-0.5 text-[10px] rounded-full ' + (slot.is_booked ? 'bg-red-100 text-red-600 font-bold' : 'bg-green-100 text-green-700 font-semibold') + '">' +
               (slot.is_booked ? 'Reservado' : 'Disponível') +
             '</span>' +
@@ -832,9 +844,7 @@
       }
     };
 
-    // ==========================================
-    // AGENDAMENTO MÚLTIPLO DO ALUNO
-    // ==========================================
+    // AGENDAMENTO COM DIA DA SEMANA
     window.loadStudentSlots = async function() {
       var container = document.getElementById('slots-container');
       var sb = getSupabase();
@@ -848,16 +858,17 @@
 
       container.innerHTML = res.data.map(function(slot) {
         var isSelected = selectedSlots.some(s => s.id === slot.id);
-        var borderClass = isSelected ? 'border-green-600 bg-green-50/50' : 'border-slate-100 bg-slate-50';
+        var borderClass = isSelected ? 'border-green-600 bg-green-50/50 ring-1 ring-green-600' : 'border-slate-100 bg-slate-50';
         var btnClass = isSelected ? 'bg-green-700 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100';
         var btnText = isSelected ? '<i class="fa-solid fa-check"></i> Seleccionado' : '+ Seleccionar';
+        var formattedDate = formatSpanishDate(slot.date);
 
         return '<div class="flex justify-between items-center p-3.5 ' + borderClass + ' border rounded-2xl transition">' +
           '<div>' +
-            '<span class="font-bold text-slate-900 text-xs">' + slot.date + '</span> às ' +
-            '<span class="font-bold text-green-700 text-xs">' + slot.time + ' hs</span>' +
+            '<div class="font-bold text-slate-900 text-xs capitalize">' + formattedDate + '</div>' +
+            '<div class="text-[11px] text-green-700 font-bold mt-0.5">⏰ ' + slot.time + ' hs</div>' +
           '</div>' +
-          '<button onclick="toggleSlotSelection(\'' + slot.id + '\', \'' + slot.date + '\', \'' + slot.time + '\')" class="' + btnClass + ' text-xs font-bold px-3 py-1.5 rounded-xl transition shadow-sm">' +
+          '<button onclick="toggleSlotSelection(\'' + slot.id + '\', \'' + slot.date + '\', \'' + slot.time + '\')" class="' + btnClass + ' text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm">' +
             btnText +
           '</button>' +
         '</div>';
@@ -910,7 +921,7 @@
       document.getElementById('payment-summary-total').innerText = '$' + total.toLocaleString('es-AR') + ' ARS (' + selectedSlots.length + ' clases)';
 
       var summaryContainer = document.getElementById('payment-slots-summary');
-      summaryContainer.innerHTML = '<p class="font-bold text-slate-800 mb-1">Horarios a reservar:</p>' + selectedSlots.map(s => '<div>🗓️ ' + s.date + ' a las ' + s.time + ' hs</div>').join('');
+      summaryContainer.innerHTML = '<p class="font-bold text-slate-800 mb-1">Horarios a reservar:</p>' + selectedSlots.map(s => '<div>🗓️ <b>' + formatSpanishDate(s.date) + '</b> a las <b>' + s.time + ' hs</b></div>').join('');
 
       paySec.scrollIntoView({ behavior: 'smooth' });
     };
@@ -943,7 +954,6 @@
       var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
       var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
 
-      // Criar os registros de reserva para cada horário selecionado
       var bookingsToInsert = selectedSlots.map(s => ({
         user_id: currentUser.id,
         slot_id: s.id,
@@ -957,14 +967,13 @@
 
       await sb.from('bookings').insert(bookingsToInsert);
 
-      // Atualizar todos os slots para reservados
       var slotIds = selectedSlots.map(s => s.id);
       await sb.from('available_slots').update({ is_booked: true }).in('id', slotIds);
 
       btn.innerText = 'Confirmar y Guardar Reserva';
       btn.disabled = false;
 
-      var datesSummary = selectedSlots.map(s => s.date + ' a las ' + s.time + ' hs').join(', ');
+      var datesSummary = selectedSlots.map(s => formatSpanishDate(s.date) + ' a las ' + s.time + ' hs').join(', ');
       var total = selectedSlots.length * PRICE_PER_LESSON;
 
       selectedSlots = [];
@@ -973,7 +982,7 @@
 
       alert('¡Clases agendadas con éxito! Te estamos redirigiendo a WhatsApp para confirmar con Renan.');
 
-      var msg = "¡Hola Renan! Acabo de agendar un paquete de " + bookingsToInsert.length + " clases de portugués por un total de $" + total.toLocaleString('es-AR') + " ARS. Fechas: " + datesSummary + " (Email: " + currentUser.email + "). Acá está mi comprobante: " + publicUrl;
+      var msg = "¡Hola Renan! Acabo de agendar un paquete de " + bookingsToInsert.length + " clases de portugués por un total de $" + total.toLocaleString('es-AR') + " ARS.\nFechas: " + datesSummary + "\n(Email: " + currentUser.email + ")\n\nAcá está mi comprobante: " + publicUrl;
       window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
     };
 
@@ -999,7 +1008,7 @@
       var slotIds = selectedSlots.map(s => s.id);
       await sb.from('available_slots').update({ is_booked: true }).in('id', slotIds);
 
-      var datesSummary = selectedSlots.map(s => s.date + ' a las ' + s.time + ' hs').join('\n• ');
+      var datesSummary = selectedSlots.map(s => formatSpanishDate(s.date) + ' a las ' + s.time + ' hs').join('\n• ');
       var total = selectedSlots.length * PRICE_PER_LESSON;
 
       selectedSlots = [];
@@ -1033,7 +1042,7 @@
             '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
           '</div>' +
           '<div class="text-xs text-slate-700 pt-1">' +
-            '📅 <b>' + (b.slot_date || '-') + '</b> às ⏰ <b>' + (b.slot_time || '-') + '</b>' +
+            '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
           '</div>' +
           receiptButton +
         '</div>';
