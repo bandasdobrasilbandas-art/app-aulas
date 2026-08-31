@@ -14,7 +14,7 @@
 </head>
 <body class="bg-[#f8f9fa] text-slate-800 font-sans min-h-screen select-none">
 
-  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <!-- TELA DE AUTENTICAÇÃO -->
   <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
     <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm w-full max-w-sm space-y-5">
       <div class="text-center space-y-2">
@@ -139,11 +139,26 @@
       </section>
 
       <!-- ABA 2: AGENDAR -->
-      <section id="tab-calendar" class="hidden space-y-4">
+      <section id="tab-calendar" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Agendar clase</h2>
             <p class="text-xs text-slate-500">Elegí fecha y horario disponible</p>
+          </div>
+
+          <!-- Modal / Card de Pagamento e Confirmação -->
+          <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-xs text-emerald-950">Comprobante de Pago</h4>
+              <button onclick="cancelBookingSelection()" class="text-xs text-slate-400 hover:text-slate-600">Cancelar</button>
+            </div>
+            <p class="text-[11px] text-emerald-800 leading-relaxed">
+              Para confirmar el horario seleccionado, por favor subí la foto o captura del comprobante de transferencia/pago:
+            </p>
+            <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-white p-2 rounded-xl border border-emerald-200 outline-none">
+            <button onclick="submitBookingWithReceipt()" id="confirm-booking-btn" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
+              Confirmar y Enviar Comprobante
+            </button>
           </div>
 
           <div id="slots-container" class="space-y-2 pt-2">
@@ -157,7 +172,7 @@
       </section>
 
       <!-- ABA 3: CURSO -->
-      <section id="tab-course" class="hidden space-y-4">
+      <section id="tab-course" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
@@ -179,7 +194,7 @@
       </section>
 
       <!-- ABA 4: TAREAS -->
-      <section id="tab-tasks" class="hidden space-y-4">
+      <section id="tab-tasks" class="space-y-4 hidden">
         <div class="bg-slate-100 p-1 rounded-xl flex">
           <button class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-green-600 text-white shadow-sm">Tareas</button>
           <button class="flex-1 py-1.5 text-xs font-semibold text-slate-600">Evaluaciones</button>
@@ -192,7 +207,7 @@
       </section>
 
       <!-- ABA 5: PERFIL -->
-      <section id="tab-profile" class="hidden space-y-4">
+      <section id="tab-profile" class="space-y-4 hidden">
         <div class="text-center py-4 space-y-2">
           <div id="profile-avatar" class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
             R
@@ -246,33 +261,56 @@
       </section>
 
       <!-- ABA ADMIN -->
-      <section id="tab-admin" class="hidden space-y-4">
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-          <h3 class="font-bold text-sm text-slate-900">1. Agregar horario de aula</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-            <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-          </div>
-          <button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition">
-            Salvar Horário
-          </button>
+      <section id="tab-admin" class="space-y-4 hidden">
+        <!-- Sub-navegação Admin -->
+        <div class="flex gap-2 border-b border-slate-200 pb-2">
+          <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white">Horarios</button>
+          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Reservas Alumnos</button>
+          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Videos</button>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-          <h3 class="font-bold text-sm text-slate-900">2. Adicionar Vídeo/Aula</h3>
-          <div class="space-y-2">
-            <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-            <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+        <!-- Seção 1: Horários -->
+        <div id="admin-sec-slots" class="space-y-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-bold text-sm text-slate-900">Agregar horario de aula</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            </div>
+            <button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition">
+              Salvar Horário
+            </button>
           </div>
-          <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
-            Salvar Vídeo
-          </button>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
+            <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
+              Carregando...
+            </div>
+          </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-          <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
-          <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
-            Carregando...
+        <!-- Seção 2: Reservas e Comprovantes -->
+        <div id="admin-sec-bookings" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
+            <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
+              Carregando reservas...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 3: Vídeos -->
+        <div id="admin-sec-videos" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-bold text-sm text-slate-900">Adicionar Vídeo ao Curso</h3>
+            <div class="space-y-2">
+              <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            </div>
+            <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
+              Salvar Vídeo
+            </button>
           </div>
         </div>
       </section>
@@ -302,8 +340,6 @@
 
   <script>
     var WHATSAPP_NUMBER = "541122515098";
-
-    // E-mails autorizados como ADMIN
     var ADMIN_EMAILS = [
       "bandasdobrasil.bandas@gmail.com",
       "renan.barbosa.med@gmail.com"
@@ -327,6 +363,7 @@
 
     var isSignUp = false;
     var currentUser = null;
+    var selectedSlot = null;
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -393,7 +430,7 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
 
-        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || "Renan Barbosa";
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
         document.getElementById('profile-name').innerText = fullName;
         document.getElementById('profile-email').innerText = currentUser.email;
@@ -471,6 +508,24 @@
       if (tabId === 'course') loadLessons();
     };
 
+    // CONTROLE DE SUB-ABAS ADMIN
+    window.showAdminTab = function(type) {
+      document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
+      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
+      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
+
+      ['slots', 'bookings', 'videos'].forEach(t => {
+        var btn = document.getElementById('admin-btn-tab-' + t);
+        if (t === type) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600';
+        }
+      });
+
+      if (type === 'bookings') loadAdminBookings();
+    };
+
     window.loadAdminSlots = async function() {
       var container = document.getElementById('admin-slots-list');
       var sb = getSupabase();
@@ -488,6 +543,36 @@
       }).join('');
     };
 
+    window.loadAdminBookings = async function() {
+      var container = document.getElementById('admin-bookings-list');
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('bookings').select('*').order('created_at', { ascending: false });
+      if (res.error || !res.data || res.data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhuma reserva realizada ainda.</p>';
+        return;
+      }
+      container.innerHTML = res.data.map(function(b) {
+        var receiptButton = b.receipt_url 
+          ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
+          : '<span class="text-[11px] text-slate-400 mt-2 block">Sem arquivo anexo</span>';
+
+        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + (b.student_name || 'Aluno') + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + (b.student_email || 'Email não informado') + '</p>' +
+            '</div>' +
+            '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
+          '</div>' +
+          '<div class="text-xs text-slate-700 pt-1">' +
+            '📅 <b>' + (b.slot_date || '-') + '</b> às ⏰ <b>' + (b.slot_time || '-') + '</b>' +
+          '</div>' +
+          receiptButton +
+        '</div>';
+      }).join('');
+    };
+
     window.addSlot = async function() {
       var date = document.getElementById('admin-slot-date').value;
       var time = document.getElementById('admin-slot-time').value;
@@ -497,7 +582,7 @@
       if (!sb) return;
       var res = await sb.from('available_slots').insert([{ date: date, time: time, is_booked: false }]);
       if (res.error) {
-        alert('Erro ao cadastrar: ' + error.message);
+        alert('Erro ao cadastrar: ' + res.error.message);
       } else {
         alert('Horário adicionado!');
         loadAdminSlots();
@@ -533,8 +618,72 @@
       container.innerHTML = res.data.map(function(slot) {
         return '<div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">' +
           '<div><span class="font-bold text-slate-800">' + slot.date + '</span> às <span class="font-bold text-green-700">' + slot.time + '</span></div>' +
-          '<button onclick="bookSlot(\'' + slot.id + '\')" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 transition">Reservar</button></div>';
+          '<button onclick="startBookingSelection(\'' + slot.id + '\', \'' + slot.date + '\', \'' + slot.time + '\')" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 transition">Agendar</button></div>';
       }).join('');
+    };
+
+    window.startBookingSelection = function(slotId, date, time) {
+      selectedSlot = { id: slotId, date: date, time: time };
+      var paySec = document.getElementById('booking-step-payment');
+      paySec.classList.remove('hidden');
+      paySec.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.cancelBookingSelection = function() {
+      selectedSlot = null;
+      document.getElementById('booking-step-payment').classList.add('hidden');
+      document.getElementById('payment-receipt-file').value = '';
+    };
+
+    window.submitBookingWithReceipt = async function() {
+      if (!selectedSlot) return alert('Seleccioná un horario');
+      var fileInput = document.getElementById('payment-receipt-file');
+      var file = fileInput.files[0];
+      if (!file) return alert('Por favor, adjuntá el comprobante de pago');
+
+      var btn = document.getElementById('confirm-booking-btn');
+      btn.innerText = 'Subiendo comprobante...';
+      btn.disabled = true;
+
+      var sb = getSupabase();
+      var fileName = 'receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
+      
+      // 1. Upload do comprovante no Storage
+      var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
+      if (uploadRes.error) {
+        btn.innerText = 'Confirmar y Enviar Comprobante';
+        btn.disabled = false;
+        return alert('Error al subir archivo: ' + uploadRes.error.message);
+      }
+
+      var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
+
+      // 2. Salvar a reserva completa
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+      var bookingRes = await sb.from('bookings').insert([{
+        user_id: currentUser.id,
+        slot_id: selectedSlot.id,
+        slot_date: selectedSlot.date,
+        slot_time: selectedSlot.time,
+        student_name: studentName,
+        student_email: currentUser.email,
+        receipt_url: publicUrl,
+        status: 'confirmed'
+      }]);
+
+      // 3. Atualizar o slot para reservado
+      await sb.from('available_slots').update({ is_booked: true }).eq('id', selectedSlot.id);
+
+      btn.innerText = 'Confirmar y Enviar Comprobante';
+      btn.disabled = false;
+      cancelBookingSelection();
+      loadStudentSlots();
+
+      alert('¡Clase agendada con éxito! Te estamos redirigiendo a WhatsApp para avisar a tu profesor.');
+
+      // 4. Abrir o WhatsApp para avisar na hora
+      var msg = "¡Hola Renan! Acabo de agendar una clase de portugués para el día " + selectedSlot.date + " a las " + selectedSlot.time + " hs. Mi email es " + currentUser.email + ". Acá está mi comprobante: " + publicUrl;
+      window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
     };
 
     window.loadLessons = async function() {
@@ -564,19 +713,6 @@
           videoEmbed +
         '</div>';
       }).join('');
-    };
-
-    window.bookSlot = async function(slotId) {
-      if (!confirm('Deseja confirmar a reserva deste horário?')) return;
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('available_slots').update({ is_booked: true }).eq('id', slotId);
-      if (res.error) {
-        alert('Erro ao agendar: ' + res.error.message);
-      } else {
-        alert('Agendamento realizado com sucesso!');
-        loadStudentSlots();
-      }
     };
   </script>
 </body>
