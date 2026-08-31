@@ -123,7 +123,7 @@
           <div class="relative z-10 space-y-2">
             <span class="bg-yellow-400 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Curso grabado</span>
             <h3 class="text-xl font-bold leading-tight">Curso a tu ritmo</h3>
-            <p class="text-xs text-slate-200">Videos + tareas + evaluaciones</p>
+            <p class="text-xs text-slate-200">Videos por niveles + apostilas + tareas</p>
             <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
               Ver curso <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
@@ -231,29 +231,52 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO -->
+      <!-- ABA 3: CURSO COM SUBPASTAS POR NÍVEL E MARCADOR DE VISTO -->
       <section id="tab-course" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
-            <p class="text-xs text-slate-500">Aprendé a tu ritmo</p>
+            <p class="text-xs text-slate-500">Aprendé portugués a tu propio ritmo</p>
           </div>
 
-          <div class="bg-green-600 text-white p-3 rounded-xl flex items-center justify-between text-xs font-semibold">
-            <span>Aulas disponibles</span>
-            <span id="course-progress">0 lecciones</span>
+          <!-- Barra de Progresso Geral -->
+          <div class="bg-slate-900 text-white p-3.5 rounded-2xl space-y-1.5 shadow-sm">
+            <div class="flex justify-between items-center text-xs font-semibold">
+              <span>Tu progreso en el curso</span>
+              <span id="course-progress-text" class="text-emerald-400 font-bold">0 / 0 aulas (0%)</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="course-progress-bar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
           </div>
 
-          <div id="lessons-container" class="space-y-4 pt-2">
+          <!-- Subpastas / Níveis (Pills Horizontais) -->
+          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
+            <button onclick="switchCourseLevel('iniciante')" id="lvl-btn-iniciante" class="px-3.5 py-2 rounded-xl bg-green-600 text-white whitespace-nowrap shadow-sm transition">
+              Iniciante (A1-A2)
+            </button>
+            <button onclick="switchCourseLevel('medio')" id="lvl-btn-medio" class="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition">
+              Intermedio (B1-B2)
+            </button>
+            <button onclick="switchCourseLevel('avancado')" id="lvl-btn-avancado" class="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition">
+              Avanzado (C1-C2)
+            </button>
+            <button onclick="switchCourseLevel('extras')" id="lvl-btn-extras" class="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition">
+              Clases Extras
+            </button>
+          </div>
+
+          <!-- Lista de Vídeos/Aulas -->
+          <div id="lessons-container" class="space-y-4 pt-1">
             <div class="text-center py-8 text-slate-400 space-y-2">
               <i class="fa-solid fa-film text-3xl"></i>
-              <p class="text-sm">Aún no hay videos cargados</p>
+              <p class="text-sm">Aún no hay videos cargados en este nivel</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ABA 4: TAREAS E EVALUACIONES (ALUNO) -->
+      <!-- ABA 4: TAREAS E EVALUACIONES -->
       <section id="tab-tasks" class="space-y-4 hidden">
         <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
           <button onclick="switchTasksTab('materials')" id="tab-btn-tasks-mat" class="flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition">
@@ -264,7 +287,6 @@
           </button>
         </div>
 
-        <!-- Seção de Tarefas & Apostilas -->
         <div id="tasks-sub-materials" class="space-y-3">
           <div id="student-assignments-list" class="space-y-3">
             <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
@@ -274,13 +296,9 @@
           </div>
         </div>
 
-        <!-- Seção de Provas Online -->
         <div id="tasks-sub-quizzes" class="space-y-3 hidden">
-          <div id="student-quizzes-list" class="space-y-3">
-            <!-- Lista de provas disponíveis -->
-          </div>
+          <div id="student-quizzes-list" class="space-y-3"></div>
 
-          <!-- Questionário / Prova Aberta -->
           <div id="active-quiz-container" class="hidden bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <div class="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
@@ -355,11 +373,11 @@
       <section id="tab-admin" class="space-y-4 hidden">
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos & Actividad</button>
-          <button onclick="showAdminTab('assignments')" id="admin-btn-tab-assignments" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Tareas & Apostilas</button>
-          <button onclick="showAdminTab('quizzes')" id="admin-btn-tab-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Crear Provas Online</button>
+          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos & Apostilas</button>
+          <button onclick="showAdminTab('assignments')" id="admin-btn-tab-assignments" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Tareas</button>
+          <button onclick="showAdminTab('quizzes')" id="admin-btn-tab-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Provas Online</button>
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
           <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas</button>
-          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos</button>
         </div>
 
         <!-- Seção 1: Alunos Registrados -->
@@ -380,14 +398,43 @@
           </div>
         </div>
 
-        <!-- Seção 2: Cadastro de Tarefas & Apostilas (Admin) -->
+        <!-- Seção 2: Adicionar Vídeo + Nível + Apostila (Admin) -->
+        <div id="admin-sec-videos" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
+            <div class="space-y-2">
+              <input id="admin-video-title" type="text" placeholder="Título da aula (ex: Aula 1 - Pronúncia do R e L)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Nível / Módulo:</label>
+                <select id="admin-video-level" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5">
+                  <option value="iniciante">Iniciante (A1-A2)</option>
+                  <option value="medio">Intermedio (B1-B2)</option>
+                  <option value="avancado">Avanzado (C1-C2)</option>
+                  <option value="extras">Clases Extras / Conteúdos Diversos</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Link da Apostila / PDF (Opcional):</label>
+                <input id="admin-video-material" type="text" placeholder="Link do Google Drive ou PDF para download" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 mt-0.5">
+              </div>
+            </div>
+            <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
+              Salvar Aula no Módulo
+            </button>
+          </div>
+        </div>
+
+        <!-- Seção 3: Tarefas & Apostilas -->
         <div id="admin-sec-assignments" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material (PDF)</h3>
+            <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material Individual</h3>
             <div class="space-y-2">
-              <input id="assign-title" type="text" placeholder="Título de la tarea o apostila (ej: Apostila Nivel A1)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <textarea id="assign-desc" rows="2" placeholder="Instrucciones o descripción del ejercicio..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600"></textarea>
-              <input id="assign-url" type="text" placeholder="Link del PDF o Material de Google Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="assign-title" type="text" placeholder="Título de la tarea o material" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <textarea id="assign-desc" rows="2" placeholder="Instrucciones o descripción..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600"></textarea>
+              <input id="assign-url" type="text" placeholder="Link del PDF o Google Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
               
               <div>
                 <label class="text-[11px] font-semibold text-slate-600">Destinatario:</label>
@@ -397,31 +444,28 @@
               </div>
             </div>
             <button onclick="createAssignment()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
-              Publicar Tarea / Material
+              Publicar Tarea
             </button>
           </div>
 
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Tareas y Materiales Publicados</h3>
+            <h3 class="font-bold text-sm text-slate-900">Tareas Publicadas</h3>
             <div id="admin-assignments-list" class="space-y-2 text-xs text-slate-500">
               Cargando tareas...
             </div>
           </div>
         </div>
 
-        <!-- Seção 3: Criador de Provas Online (Admin) -->
+        <!-- Seção 4: Provas Online -->
         <div id="admin-sec-quizzes" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <h3 class="font-bold text-sm text-slate-900">Crear Nueva Evaluación Online</h3>
             <div class="space-y-2">
-              <input id="quiz-title" type="text" placeholder="Título de la prueba (ej: Examen de Verbos en Presente)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <input id="quiz-desc" type="text" placeholder="Breve instrucción (ej: 5 preguntas - Selecciona la correcta)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="quiz-title" type="text" placeholder="Título del examen" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="quiz-desc" type="text" placeholder="Breve instrucción" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
             </div>
 
-            <!-- Criador de Perguntas -->
-            <div id="quiz-questions-builder" class="space-y-3 pt-2">
-              <!-- Perguntas dinâmicas -->
-            </div>
+            <div id="quiz-questions-builder" class="space-y-3 pt-2"></div>
 
             <div class="flex gap-2">
               <button onclick="addQuizQuestionField()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs transition">
@@ -433,7 +477,6 @@
             </div>
           </div>
 
-          <!-- Histórico de Notas dos Alunos -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Notas de Alumnos en Evaluaciones</h3>
             <div id="admin-quiz-scores-list" class="space-y-2 text-xs text-slate-500">
@@ -442,18 +485,17 @@
           </div>
         </div>
 
-        <!-- Seção 4: Horários -->
+        <!-- Seção 5: Horários -->
         <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">⚡</span>
               <h3 class="font-bold text-sm text-slate-900">Generar Franja Horaria en Masa</h3>
             </div>
-            <p class="text-[11px] text-slate-500">Crea múltiples horarios para todo el mes con un solo clic.</p>
 
             <div class="space-y-2.5 pt-1">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600">Día recurrente de la semana:</label>
+                <label class="text-[11px] font-semibold text-slate-600">Día recurrente:</label>
                 <select id="bulk-day-of-week" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white">
                   <option value="1">Todos los Lunes</option>
                   <option value="2">Todos los Martes</option>
@@ -467,18 +509,18 @@
 
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600">Desde (Inicio):</label>
+                  <label class="text-[11px] font-semibold text-slate-600">Inicio:</label>
                   <input id="bulk-start-time" type="time" value="14:00" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
                 </div>
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600">Hasta (Fin):</label>
+                  <label class="text-[11px] font-semibold text-slate-600">Fin:</label>
                   <input id="bulk-end-time" type="time" value="19:00" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600">Bloques de:</label>
+                  <label class="text-[11px] font-semibold text-slate-600">Bloques:</label>
                   <select id="bulk-duration" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white">
                     <option value="60" selected>Cada 60 minutos</option>
                     <option value="50">Cada 50 minutos</option>
@@ -486,10 +528,10 @@
                   </select>
                 </div>
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600">Generar para:</label>
+                  <label class="text-[11px] font-semibold text-slate-600">Semanas:</label>
                   <select id="bulk-weeks" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white">
-                    <option value="4" selected>Próximas 4 semanas (1 mes)</option>
-                    <option value="8">Próximas 8 semanas (2 meses)</option>
+                    <option value="4" selected>4 semanas (1 mes)</option>
+                    <option value="8">8 semanas (2 meses)</option>
                   </select>
                 </div>
               </div>
@@ -522,27 +564,13 @@
           </div>
         </div>
 
-        <!-- Seção 5: Reservas -->
+        <!-- Seção 6: Reservas -->
         <div id="admin-sec-bookings" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
             <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
               Carregando reservas...
             </div>
-          </div>
-        </div>
-
-        <!-- Seção 6: Vídeos -->
-        <div id="admin-sec-videos" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 class="font-bold text-sm text-slate-900">Adicionar Vídeo ao Curso</h3>
-            <div class="space-y-2">
-              <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-            </div>
-            <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
-              Salvar Vídeo
-            </button>
           </div>
         </div>
       </section>
@@ -608,6 +636,8 @@
     var selectedSlots = [];
     var loadedStudents = [];
     var activeQuizData = null;
+    var currentCourseLevel = 'iniciante';
+    var userCompletedLessons = new Set();
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -787,13 +817,13 @@
 
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
+      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
       document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
       document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
       document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
-      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
 
-      ['students', 'assignments', 'quizzes', 'slots', 'bookings', 'videos'].forEach(t => {
+      ['students', 'videos', 'assignments', 'quizzes', 'slots', 'bookings'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
         if (btn) {
           if (t === type) {
@@ -812,7 +842,141 @@
     };
 
     // ====================================================
-    // MÓDULO PEDAGÓGICO: TAREFAS, APOSTILAS & MATERIAIS
+    // MÓDULO DO CURSO GRAVADO (SUBPASTAS, PROGRESSO & PDF)
+    // ====================================================
+    window.switchCourseLevel = function(level) {
+      currentCourseLevel = level;
+      ['iniciante', 'medio', 'avancado', 'extras'].forEach(lvl => {
+        var btn = document.getElementById('lvl-btn-' + lvl);
+        if (btn) {
+          if (lvl === level) {
+            btn.className = 'px-3.5 py-2 rounded-xl bg-green-600 text-white whitespace-nowrap shadow-sm transition';
+          } else {
+            btn.className = 'px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition';
+          }
+        }
+      });
+      loadLessons();
+    };
+
+    window.loadLessons = async function() {
+      var container = document.getElementById('lessons-container');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      // 1. Carregar aulas do nível selecionado
+      var { data: lessons, error } = await sb.from('course_lessons')
+        .select('*')
+        .eq('level', currentCourseLevel)
+        .order('created_at', { ascending: true });
+
+      // 2. Carregar aulas concluídas pelo aluno atual em todo o curso
+      if (currentUser) {
+        var { data: prog } = await sb.from('lesson_progress').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true);
+        userCompletedLessons = new Set((prog || []).map(p => p.lesson_id));
+      }
+
+      // 3. Atualizar barra de progresso total
+      var { data: allLessons } = await sb.from('course_lessons').select('id');
+      var totalLessonsCount = (allLessons || []).length;
+      var completedCount = userCompletedLessons.size;
+      var percentage = totalLessonsCount > 0 ? Math.round((completedCount / totalLessonsCount) * 100) : 0;
+
+      var progText = document.getElementById('course-progress-text');
+      var progBar = document.getElementById('course-progress-bar');
+      if (progText) progText.innerText = completedCount + ' / ' + totalLessonsCount + ' aulas (' + percentage + '%)';
+      if (progBar) progBar.style.width = percentage + '%';
+
+      if (error || !lessons || lessons.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm">Aún no hay videos cargados en este nivel</p></div>';
+        return;
+      }
+
+      container.innerHTML = lessons.map(function(lesson) {
+        var isDone = userCompletedLessons.has(lesson.id);
+        var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+        var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
+
+        // Embed do YouTube
+        var videoEmbed = '';
+        if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
+          var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
+          if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
+          videoEmbed = '<iframe class="w-full h-48 rounded-xl mt-2.5 shadow-sm" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+        } else {
+          videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
+        }
+
+        // Botão para baixar apostila/material
+        var materialBtn = lesson.material_url 
+          ? '<a href="' + lesson.material_url + '" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm mt-2.5">' +
+              '<i class="fa-solid fa-file-arrow-down text-emerald-600 text-sm"></i> Baixar Apostila / Material da Aula (PDF)' +
+            '</a>'
+          : '';
+
+        return '<div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">' +
+          '<div class="flex justify-between items-center gap-2">' +
+            '<h4 class="font-bold text-sm text-slate-900 leading-snug flex-1">' + lesson.title + '</h4>' +
+            '<button onclick="toggleLessonProgress(\'' + lesson.id + '\')" class="text-[11px] font-bold px-2.5 py-1 rounded-full transition ' + doneBadgeClass + '">' +
+              doneBadgeText +
+            '</button>' +
+          '</div>' +
+          videoEmbed +
+          materialBtn +
+        '</div>';
+      }).join('');
+    };
+
+    window.toggleLessonProgress = async function(lessonId) {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var isCompleted = userCompletedLessons.has(lessonId);
+
+      if (isCompleted) {
+        await sb.from('lesson_progress').delete().eq('user_id', currentUser.id).eq('lesson_id', lessonId);
+      } else {
+        await sb.from('lesson_progress').upsert([{
+          user_id: currentUser.id,
+          lesson_id: lessonId,
+          completed: true
+        }]);
+      }
+
+      loadLessons();
+    };
+
+    window.addVideo = async function() {
+      var title = document.getElementById('admin-video-title').value;
+      var url = document.getElementById('admin-video-url').value;
+      var level = document.getElementById('admin-video-level').value;
+      var material = document.getElementById('admin-video-material').value;
+
+      if (!title || !url) return alert('Preencha título e link do vídeo!');
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var res = await sb.from('course_lessons').insert([{
+        title: title,
+        video_url: url,
+        level: level,
+        material_url: material || null
+      }]);
+
+      if (res.error) {
+        alert('Erro ao cadastrar: ' + res.error.message);
+      } else {
+        alert('Aula cadastrada com sucesso no módulo!');
+        document.getElementById('admin-video-title').value = '';
+        document.getElementById('admin-video-url').value = '';
+        document.getElementById('admin-video-material').value = '';
+      }
+    };
+
+    // ====================================================
+    // MÓDULO PEDAGÓGICO: TAREFAS, APOSTILAS & PROVAS
     // ====================================================
     window.createAssignment = async function() {
       var title = document.getElementById('assign-title').value;
@@ -866,9 +1030,6 @@
       }).join('');
     };
 
-    // ====================================================
-    // MÓDULO PEDAGÓGICO: PROVAS ONLINE COM NOTA AUTOMÁTICA
-    // ====================================================
     var quizQuestions = [];
 
     window.initQuizBuilder = function() {
@@ -902,7 +1063,7 @@
               '</div>';
             }).join('') +
           '</div>' +
-          '<p class="text-[10px] text-slate-400">Marca el círculo de la opción que sea correcta.</p>' +
+          '<p class="text-[10px] text-slate-400">Marca el círculo de la opción correcta.</p>' +
         '</div>';
       }).join('');
     };
@@ -970,9 +1131,6 @@
       }).join('');
     };
 
-    // ====================================================
-    // VISÃO DO ALUNO: TAREFAS, APOSTILAS E PROVAS ONLINE
-    // ====================================================
     window.switchTasksTab = function(type) {
       document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
       document.getElementById('tasks-sub-quizzes').classList.toggle('hidden', type !== 'quizzes');
@@ -994,7 +1152,6 @@
       var sb = getSupabase();
       if (!sb) return;
 
-      // 1. Carregar Tarefas & Apostilas destinadas ao aluno ou a todos
       var { data: assignments } = await sb.from('student_assignments')
         .select('*')
         .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email)
@@ -1018,7 +1175,6 @@
         matContainer.innerHTML = '<div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-regular fa-clipboard text-3xl"></i><p class="text-sm">Sin tareas asignadas por el momento</p></div>';
       }
 
-      // 2. Carregar Provas Online
       var { data: quizzes } = await sb.from('online_quizzes').select('*').order('created_at', { ascending: false });
       var quizContainer = document.getElementById('student-quizzes-list');
 
@@ -1089,12 +1245,8 @@
 
       for (var i = 0; i < total; i++) {
         var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
-        if (!selected) {
-          return alert('Por favor responde la pregunta #' + (i + 1));
-        }
-        if (parseInt(selected.value) === questions[i].correct) {
-          score++;
-        }
+        if (!selected) return alert('Por favor responde la pregunta #' + (i + 1));
+        if (parseInt(selected.value) === questions[i].correct) score++;
       }
 
       var percentage = Math.round((score / total) * 100);
@@ -1116,7 +1268,7 @@
     };
 
     // ====================================================
-    // DEMAIS FUNÇÕES DO ADMIN E DO APP
+    // GESTÃO DE ALUNOS & RASTREAMENTO
     // ====================================================
     window.loadAdminStudents = async function() {
       var container = document.getElementById('admin-students-list');
@@ -1124,12 +1276,42 @@
       var sb = getSupabase();
       if (!sb) return;
 
-      var { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-      loadedStudents = data || [];
+      var { data: profilesData } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+      var { data: bookingsData } = await sb.from('bookings').select('student_name, student_email, created_at');
+
+      var studentMap = new Map();
+
+      (profilesData || []).forEach(p => {
+        if (p.email) {
+          studentMap.set(p.email.toLowerCase(), {
+            id: p.id,
+            full_name: p.full_name || 'Estudiante',
+            email: p.email,
+            status: p.status || 'Ativo',
+            last_sign_in_at: p.last_sign_in_at,
+            last_content_viewed: p.last_content_viewed || 'Inicio'
+          });
+        }
+      });
+
+      (bookingsData || []).forEach(b => {
+        if (b.student_email && !studentMap.has(b.student_email.toLowerCase())) {
+          studentMap.set(b.student_email.toLowerCase(), {
+            id: b.student_email,
+            full_name: b.student_name || 'Estudiante',
+            email: b.student_email,
+            status: 'Ativo',
+            last_sign_in_at: b.created_at,
+            last_content_viewed: 'Agendamento de aula'
+          });
+        }
+      });
+
+      loadedStudents = Array.from(studentMap.values());
 
       if (select) {
         select.innerHTML = '<option value="TODOS">Para Todos los Alumnos</option>' +
-          loadedStudents.map(s => '<option value="' + s.email + '">' + (s.full_name || 'Estudiante') + ' (' + s.email + ')</option>').join('');
+          loadedStudents.map(s => '<option value="' + s.email + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
       }
 
       if (container) {
@@ -1139,25 +1321,25 @@
         }
 
         container.innerHTML = loadedStudents.map(function(s) {
-          var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Nunca';
+          var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente';
           var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
 
           return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
             '<div class="flex justify-between items-start">' +
               '<div>' +
-                '<h4 class="font-bold text-slate-900 text-sm">' + (s.full_name || 'Estudiante') + '</h4>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + s.full_name + '</h4>' +
                 '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
               '</div>' +
               '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
-                (s.status || 'Ativo') +
+                s.status +
               '</button>' +
             '</div>' +
             '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-0.5">' +
               '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
-              '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + (s.last_content_viewed || 'Inicio') + '</span></div>' +
+              '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + s.last_content_viewed + '</span></div>' +
             '</div>' +
             '<div class="pt-1">' +
-              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + (s.full_name || 'Estudiante') + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
+              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
                 '<i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Mensaje / Archivo' +
               '</button>' +
             '</div>' +
@@ -1258,6 +1440,9 @@
       }
     };
 
+    // ====================================================
+    // HORÁRIOS & AGENDAMENTOS
+    // ====================================================
     window.generateBulkSlots = async function() {
       var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
       var startTime = document.getElementById('bulk-start-time').value;
@@ -1275,9 +1460,7 @@
       var startTotalMinutes = startHour * 60 + startMin;
       var endTotalMinutes = endHour * 60 + endMin;
 
-      if (endTotalMinutes <= startTotalMinutes) {
-        return alert('La hora de fin debe ser posterior a la de inicio.');
-      }
+      if (endTotalMinutes <= startTotalMinutes) return alert('La hora de fin debe ser posterior a la de inicio.');
 
       var btn = document.getElementById('bulk-btn');
       btn.innerText = 'Generando horarios...';
@@ -1435,7 +1618,7 @@
     };
 
     window.deleteAllAvailableSlots = async function() {
-      if (!confirm('Deseja excluir TODOS os horários que estão vagos/disponíveis? Os já reservados serão mantidos.')) return;
+      if (!confirm('Deseja excluir TODOS os horários que estão vagos/disponíveis?')) return;
       var sb = getSupabase();
       if (!sb) return;
       var { error } = await sb.from('available_slots').delete().eq('is_booked', false);
@@ -1647,52 +1830,6 @@
             '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
           '</div>' +
           receiptButton +
-        '</div>';
-      }).join('');
-    };
-
-    window.addVideo = async function() {
-      var title = document.getElementById('admin-video-title').value;
-      var url = document.getElementById('admin-video-url').value;
-      if (!title || !url) return alert('Preencha título e link do vídeo!');
-
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('course_lessons').insert([{ title: title, video_url: url }]);
-      if (res.error) {
-        alert('Erro ao cadastrar: ' + res.error.message);
-      } else {
-        alert('Vídeo adicionado ao curso!');
-        document.getElementById('admin-video-title').value = '';
-        document.getElementById('admin-video-url').value = '';
-      }
-    };
-
-    window.loadLessons = async function() {
-      var container = document.getElementById('lessons-container');
-      var progress = document.getElementById('course-progress');
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('course_lessons').select('*').order('created_at', { ascending: true });
-      if (res.error || !res.data || res.data.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm">Aún no hay videos cargados</p></div>';
-        if (progress) progress.innerText = '0 lecciones';
-        return;
-      }
-      if (progress) progress.innerText = res.data.length + ' lecciones';
-      container.innerHTML = res.data.map(function(lesson) {
-        var videoEmbed = '';
-        if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
-          var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
-          if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
-          videoEmbed = '<iframe class="w-full h-48 rounded-xl mt-2" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
-        } else {
-          videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
-        }
-
-        return '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">' +
-          '<h4 class="font-bold text-sm text-slate-800">' + lesson.title + '</h4>' +
-          videoEmbed +
         '</div>';
       }).join('');
     };
