@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <!-- APLICATIVO PRINCIPAL (OCULTO ATÉ O LOGIN) -->
+  <!-- APLICATIVO PRINCIPAL -->
   <div id="app-screen" class="hidden pb-24">
     
     <!-- TOP BAR -->
@@ -195,10 +195,10 @@
       <section id="tab-profile" class="hidden space-y-4">
         <div class="text-center py-4 space-y-2">
           <div id="profile-avatar" class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
-            U
+            R
           </div>
-          <h3 id="profile-name" class="font-bold text-base text-slate-900">Usuario</h3>
-          <p id="profile-email" class="text-xs text-slate-500">usuario@email.com</p>
+          <h3 id="profile-name" class="font-bold text-base text-slate-900">Renan Barbosa</h3>
+          <p id="profile-email" class="text-xs text-slate-500">email@email.com</p>
           <span id="profile-badge" class="inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">ESTUDIANTE</span>
         </div>
 
@@ -303,6 +303,12 @@
   <script>
     var WHATSAPP_NUMBER = "541122515098";
 
+    // E-mails autorizados como ADMIN
+    var ADMIN_EMAILS = [
+      "bandasdobrasil.bandas@gmail.com",
+      "renan.barbosa.med@gmail.com"
+    ];
+
     function openWhatsApp() {
       var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
       window.open(url, '_blank');
@@ -387,19 +393,27 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
 
-        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || "Renan Barbosa";
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
         document.getElementById('profile-name').innerText = fullName;
         document.getElementById('profile-email').innerText = currentUser.email;
         document.getElementById('profile-avatar').innerText = fullName.charAt(0).toUpperCase();
 
-        var isAdmin = currentUser.email.includes('renan');
+        var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+        var homeAdminBtn = document.getElementById('home-admin-btn');
+        var profileAdminBtn = document.getElementById('profile-admin-btn');
+        var badge = document.getElementById('profile-badge');
+
         if (isAdmin) {
-          document.getElementById('home-admin-btn').classList.remove('hidden');
-          document.getElementById('profile-admin-btn').classList.remove('hidden');
-          var badge = document.getElementById('profile-badge');
+          homeAdminBtn.classList.remove('hidden');
+          profileAdminBtn.classList.remove('hidden');
           badge.innerText = 'ADMIN';
           badge.className = 'inline-block bg-[#0f2444] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
+        } else {
+          homeAdminBtn.classList.add('hidden');
+          profileAdminBtn.classList.add('hidden');
+          badge.innerText = 'ESTUDIANTE';
+          badge.className = 'inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
         }
 
         navigate('home');
@@ -483,7 +497,7 @@
       if (!sb) return;
       var res = await sb.from('available_slots').insert([{ date: date, time: time, is_booked: false }]);
       if (res.error) {
-        alert('Erro ao cadastrar: ' + res.error.message);
+        alert('Erro ao cadastrar: ' + error.message);
       } else {
         alert('Horário adicionado!');
         loadAdminSlots();
