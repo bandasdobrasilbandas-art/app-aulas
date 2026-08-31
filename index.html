@@ -6,6 +6,8 @@
   <title>Aulas de Português</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -90,6 +92,15 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
+        <!-- Mensagens do Professor para o Aluno -->
+        <div id="student-inbox-section" class="hidden space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <h4 class="font-bold text-xs text-slate-900">Mensajes de tu profesor</h4>
+            <span class="text-[10px] text-green-700 bg-green-50 font-bold px-2 py-0.5 rounded-full">Nuevos avisos</span>
+          </div>
+          <div id="student-inbox-list" class="space-y-2"></div>
+        </div>
+
         <!-- Card Clases 1:1 -->
         <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
           <img src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
@@ -153,7 +164,6 @@
             </button>
           </div>
 
-          <!-- Barra de Resumo de Seleção -->
           <div id="booking-selection-bar" class="hidden p-4 bg-green-50 border border-green-200 rounded-2xl space-y-3">
             <div class="flex justify-between items-center text-xs font-bold text-green-950">
               <span id="selected-count-label">0 clases seleccionadas</span>
@@ -165,7 +175,6 @@
             </button>
           </div>
 
-          <!-- Card de Pagamento e Envio de Comprovante -->
           <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3.5">
             <div class="flex justify-between items-center">
               <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paso final de confirmación</span>
@@ -182,9 +191,7 @@
                 <p>🔹 <b>Alias Mercado Pago:</b> <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-emerald-800 font-bold">renan.barbosa</code></p>
                 <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
               </div>
-              <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100 space-y-0.5">
-                <!-- Lista formatada com dia da semana -->
-              </div>
+              <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100 space-y-0.5"></div>
             </div>
 
             <p class="text-[11px] text-emerald-900 leading-relaxed">
@@ -315,14 +322,34 @@
 
       <!-- ABA ADMIN -->
       <section id="tab-admin" class="space-y-4 hidden">
-        <div class="flex gap-2 border-b border-slate-200 pb-2">
-          <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white">Horarios</button>
-          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Reservas Alumnos</button>
-          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Videos</button>
+        <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+          <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos & Actividad</button>
+          <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
+          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas Alumnos</button>
+          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos</button>
         </div>
 
-        <!-- Seção 1: Horários -->
-        <div id="admin-sec-slots" class="space-y-4">
+        <!-- Seção 1: Alunos Registrados & Rastreamento -->
+        <div id="admin-sec-students" class="space-y-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-bold text-sm text-slate-900">Listado de Alumnos</h3>
+                <p class="text-[11px] text-slate-500">Rastreo de accesos, estados y envíos</p>
+              </div>
+              <button onclick="exportStudentsToPDF()" class="bg-[#0f2444] text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-800 transition shadow-sm">
+                <i class="fa-solid fa-file-pdf text-red-400"></i> Descargar PDF
+              </button>
+            </div>
+
+            <div id="admin-students-list" class="space-y-3 pt-2 text-xs text-slate-500">
+              Cargando alumnos...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 2: Horários -->
+        <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">⚡</span>
@@ -401,7 +428,7 @@
           </div>
         </div>
 
-        <!-- Seção 2: Reservas e Comprovantes -->
+        <!-- Seção 3: Reservas e Comprovantes -->
         <div id="admin-sec-bookings" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
@@ -411,7 +438,7 @@
           </div>
         </div>
 
-        <!-- Seção 3: Vídeos -->
+        <!-- Seção 4: Vídeos -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Vídeo ao Curso</h3>
@@ -457,20 +484,13 @@
       "renan.barbosa.med@gmail.com"
     ];
 
-    // FORMATAÇÃO AMIGÁVEL DA DATA COM O DIA DA SEMANA
     function formatSpanishDate(dateStr) {
       if (!dateStr) return '';
       var parts = dateStr.split('-');
       var dateObj = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
-      
       var days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       var months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-      
-      var dayName = days[dateObj.getDay()];
-      var dayNum = dateObj.getDate();
-      var monthName = months[dateObj.getMonth()];
-      
-      return dayName + ' ' + dayNum + ' de ' + monthName;
+      return days[dateObj.getDay()] + ' ' + dateObj.getDate() + ' de ' + months[dateObj.getMonth()];
     }
 
     function openWhatsApp() {
@@ -492,6 +512,7 @@
     var isSignUp = false;
     var currentUser = null;
     var selectedSlots = [];
+    var loadedStudents = [];
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -525,6 +546,17 @@
         if (res.error) {
           alert('Error al registrarse: ' + res.error.message);
         } else {
+          // Registrar perfil na tabela profiles
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              full_name: name || 'Estudiante',
+              email: email,
+              status: 'Ativo',
+              last_sign_in_at: new Date().toISOString(),
+              last_content_viewed: 'Registro'
+            }]);
+          }
           alert('Cuenta creada con éxito!');
           checkSession();
         }
@@ -536,6 +568,15 @@
         if (res.error) {
           alert('Error al iniciar sesión: ' + res.error.message);
         } else {
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              email: email,
+              full_name: (res.data.user.user_metadata && res.data.user.user_metadata.full_name) || email.split('@')[0],
+              status: 'Ativo',
+              last_sign_in_at: new Date().toISOString()
+            }]);
+          }
           checkSession();
         }
       }
@@ -579,6 +620,7 @@
           profileAdminBtn.classList.add('hidden');
           badge.innerText = 'ESTUDIANTE';
           badge.className = 'inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
+          loadStudentInbox();
         }
 
         navigate('home');
@@ -591,6 +633,17 @@
     window.addEventListener('load', function() {
       checkSession();
     });
+
+    // Rastrear Conteúdo Visualizado pelo Aluno
+    async function trackActivity(contentName) {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({
+        last_content_viewed: contentName,
+        last_sign_in_at: new Date().toISOString()
+      }).eq('id', currentUser.id);
+    }
 
     var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin'];
     var titles = {
@@ -631,27 +684,171 @@
         headerTitle.innerText = titles[tabId] || '';
       }
 
-      if (tabId === 'admin') loadAdminSlots();
+      trackActivity(titles[tabId] || 'Inicio');
+
+      if (tabId === 'admin') showAdminTab('students');
       if (tabId === 'calendar') loadStudentSlots();
       if (tabId === 'course') loadLessons();
     };
 
     window.showAdminTab = function(type) {
+      document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
       document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
       document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
 
-      ['slots', 'bookings', 'videos'].forEach(t => {
+      ['students', 'slots', 'bookings', 'videos'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
         if (t === type) {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white';
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';
         } else {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600';
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';
         }
       });
 
+      if (type === 'students') loadAdminStudents();
       if (type === 'slots') loadAdminSlots();
       if (type === 'bookings') loadAdminBookings();
+    };
+
+    // ==========================================
+    // GESTÃO DE ALUNOS & RASTREAMENTO (ADMIN)
+    // ==========================================
+    window.loadAdminStudents = async function() {
+      var container = document.getElementById('admin-students-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+      loadedStudents = data || [];
+
+      if (error || loadedStudents.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Ningún alumno registrado todavía.</p>';
+        return;
+      }
+
+      container.innerHTML = loadedStudents.map(function(s) {
+        var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Nunca';
+        var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
+
+        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + (s.full_name || 'Estudiante') + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
+            '</div>' +
+            '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
+              (s.status || 'Ativo') +
+            '</button>' +
+          '</div>' +
+
+          '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-0.5">' +
+            '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
+            '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + (s.last_content_viewed || 'Inicio') + '</span></div>' +
+          '</div>' +
+
+          '<div class="pt-1">' +
+            '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + (s.full_name || 'Estudiante') + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
+              '<i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Mensaje / Archivo' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.toggleStudentStatus = async function(studentId, currentStatus) {
+      var newStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ status: newStatus }).eq('id', studentId);
+      loadAdminStudents();
+    };
+
+    // Exportação em PDF dos alunos e dados
+    window.exportStudentsToPDF = function() {
+      if (!loadedStudents || loadedStudents.length === 0) return alert('No hay alumnos para exportar');
+
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("Listado Oficial de Alumnos - Aulas de Portugues", 14, 18);
+      doc.setFontSize(10);
+      doc.text("Profesor: Renan Barbosa | Fecha: " + new Date().toLocaleDateString('es-AR'), 14, 25);
+
+      var tableData = loadedStudents.map(function(s) {
+        var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleDateString('es-AR') + ' ' + new Date(s.last_sign_in_at).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}) : 'Sin registro';
+        return [
+          s.full_name || 'Estudiante',
+          s.email,
+          s.status || 'Ativo',
+          lastLogin,
+          s.last_content_viewed || 'Inicio'
+        ];
+      });
+
+      doc.autoTable({
+        startY: 30,
+        head: [['Nombre', 'Email', 'Estado', 'Ultimo Acceso', 'Contenido Visto']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 36, 68] },
+        styles: { fontSize: 8 }
+      });
+
+      doc.save('listado_alumnos_portugues.pdf');
+    };
+
+    // Modal de envio de mensagens e arquivos
+    window.openSendMessageModal = async function(studentId, email, name) {
+      var message = prompt('Escribí el mensaje o devolución para ' + name + ':');
+      if (!message) return;
+
+      var fileUrl = prompt('¿Deseás adjuntar el link de algún archivo/documento de Drive o PDF? (Dejar vacío si no aplica):');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('student_messages').insert([{
+        student_id: studentId,
+        student_email: email,
+        sender: 'Renan Barbosa',
+        message_text: message,
+        file_url: fileUrl || null
+      }]);
+
+      if (error) {
+        alert('Error al enviar: ' + error.message);
+      } else {
+        alert('¡Mensaje enviado al alumno con éxito!');
+      }
+    };
+
+    // Carregar caixa de entrada de mensagens do aluno logado
+    window.loadStudentInbox = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data } = await sb.from('student_messages').select('*').eq('student_email', currentUser.email).order('created_at', { ascending: false });
+      var container = document.getElementById('student-inbox-list');
+      var section = document.getElementById('student-inbox-section');
+
+      if (data && data.length > 0) {
+        section.classList.remove('hidden');
+        container.innerHTML = data.map(function(m) {
+          var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline mt-1.5"><i class="fa-solid fa-paperclip"></i> Descargar / Ver archivo adjunto</a>' : '';
+
+          return '<div class="p-3 bg-white border border-green-200 rounded-2xl shadow-sm space-y-1">' +
+            '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
+              '<span class="font-bold text-slate-800">' + m.sender + '</span>' +
+              '<span>' + new Date(m.created_at).toLocaleDateString('es-AR') + '</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
+            fileBtn +
+          '</div>';
+        }).join('');
+      } else {
+        section.classList.add('hidden');
+      }
     };
 
     // GERADOR EM MASSA ADMIN
