@@ -12,248 +12,295 @@
     .nav-active { color: #16a34a !important; }
   </style>
 </head>
-<body class="bg-[#f8f9fa] text-slate-800 font-sans pb-24 select-none">
+<body class="bg-[#f8f9fa] text-slate-800 font-sans min-h-screen select-none">
 
-  <!-- TOP BAR -->
-  <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between">
-    <button onclick="navigate('home')" class="p-1 text-slate-700 text-lg hover:text-green-600 transition">
-      <i class="fa-solid fa-chevron-left"></i>
-    </button>
-    <h1 id="header-title" class="font-bold text-base text-slate-900"></h1>
-    <div class="w-6"></div>
-  </header>
-
-  <!-- CONTAINER PRINCIPAL -->
-  <main class="max-w-md mx-auto min-h-screen px-4 pt-4">
-
-    <!-- ABA 1: INÍCIO (HOME) -->
-    <section id="tab-home" class="space-y-4">
-      <div class="flex items-center justify-between pt-2">
-        <div>
-          <h2 class="text-2xl font-bold text-slate-900">Olá! 👋</h2>
-          <p class="text-sm text-slate-500">¿Qué querés hacer hoy?</p>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-xl shadow-sm">
+  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm w-full max-w-sm space-y-5">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 rounded-2xl bg-yellow-400 text-slate-900 text-2xl flex items-center justify-center mx-auto shadow-sm">
           🇧🇷
         </div>
+        <h2 id="auth-title" class="text-xl font-bold text-slate-900">Iniciar sesión</h2>
+        <p id="auth-subtitle" class="text-xs text-slate-500">Ingresá a tu plataforma de portugués</p>
       </div>
 
-      <button onclick="navigate('admin')" class="w-full bg-[#0f2444] text-white py-3 px-4 rounded-2xl font-medium text-sm flex items-center justify-between shadow-sm active:scale-[0.98] transition">
-        <div class="flex items-center gap-3">
-          <i class="fa-solid fa-shield-halved text-blue-400"></i>
-          <span>Panel de administrador</span>
+      <div class="space-y-3">
+        <div id="name-field" class="hidden">
+          <label class="text-[11px] font-semibold text-slate-500 ml-1">Nombre completo</label>
+          <input id="auth-name" type="text" placeholder="Tu nombre" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:border-green-600">
         </div>
-        <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-500 ml-1">Email</label>
+          <input id="auth-email" type="email" placeholder="ejemplo@email.com" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:border-green-600">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-semibold text-slate-500 ml-1">Contraseña</label>
+          <input id="auth-password" type="password" placeholder="••••••••" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:border-green-600">
+        </div>
+
+        <button onclick="handleAuth()" id="auth-btn" class="w-full bg-green-600 text-white py-3 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm mt-2">
+          Entrar
+        </button>
+      </div>
+
+      <div class="text-center pt-2">
+        <p class="text-xs text-slate-500">
+          <span id="auth-toggle-text">¿No tenés cuenta?</span> 
+          <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-green-600 font-bold ml-1 underline">Crear cuenta</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICATIVO PRINCIPAL (OCULTO ATÉ O LOGIN) -->
+  <div id="app-screen" class="hidden pb-24">
+    
+    <!-- TOP BAR -->
+    <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between">
+      <button onclick="navigate('home')" class="p-1 text-slate-700 text-lg hover:text-green-600 transition">
+        <i class="fa-solid fa-chevron-left"></i>
       </button>
+      <h1 id="header-title" class="font-bold text-base text-slate-900"></h1>
+      <div class="w-6"></div>
+    </header>
 
-      <!-- Card Clases 1:1 -->
-      <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
-        <img src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
-        <div class="relative z-10 space-y-2">
-          <span class="bg-[#16a34a] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Aulas particulares</span>
-          <h3 class="text-xl font-bold leading-tight">Clases 1:1 vía Meet</h3>
-          <p class="text-xs text-slate-200">Agendá tu horario de clase</p>
-          <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
-            Agendar ahora <i class="fa-solid fa-arrow-right text-[10px]"></i>
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="max-w-md mx-auto px-4 pt-4">
+
+      <!-- ABA 1: INÍCIO (HOME) -->
+      <section id="tab-home" class="space-y-4">
+        <div class="flex items-center justify-between pt-2">
+          <div>
+            <h2 id="home-greeting" class="text-2xl font-bold text-slate-900">Olá! 👋</h2>
+            <p class="text-sm text-slate-500">¿Qué querés hacer hoy?</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-xl shadow-sm">
+            🇧🇷
+          </div>
+        </div>
+
+        <!-- Botão Admin (visível apenas para você) -->
+        <button id="home-admin-btn" onclick="navigate('admin')" class="hidden w-full bg-[#0f2444] text-white py-3 px-4 rounded-2xl font-medium text-sm flex items-center justify-between shadow-sm active:scale-[0.98] transition">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-blue-400"></i>
+            <span>Panel de administrador</span>
+          </div>
+          <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
+        </button>
+
+        <!-- Card Clases 1:1 -->
+        <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
+          <img src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
+          <div class="relative z-10 space-y-2">
+            <span class="bg-[#16a34a] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Aulas particulares</span>
+            <h3 class="text-xl font-bold leading-tight">Clases 1:1 vía Meet</h3>
+            <p class="text-xs text-slate-200">Agendá tu horario de clase</p>
+            <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
+              Agendar ahora <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Curso a tu ritmo -->
+        <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
+          <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
+          <div class="relative z-10 space-y-2">
+            <span class="bg-yellow-400 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Curso grabado</span>
+            <h3 class="text-xl font-bold leading-tight">Curso a tu ritmo</h3>
+            <p class="text-xs text-slate-200">Videos + tareas + evaluaciones</p>
+            <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
+              Ver curso <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          <div onclick="navigate('tasks')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm mb-3">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900 leading-snug">Tareas y evaluaciones</h4>
+            </div>
+          </div>
+
+          <button onclick="openWhatsApp()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition text-left w-full">
+            <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-sm mb-3">
+              <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900 leading-snug">Chat WhatsApp</h4>
+            </div>
           </button>
         </div>
-      </div>
+      </section>
 
-      <!-- Card Curso a tu ritmo -->
-      <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
-        <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
-        <div class="relative z-10 space-y-2">
-          <span class="bg-yellow-400 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Curso grabado</span>
-          <h3 class="text-xl font-bold leading-tight">Curso a tu ritmo</h3>
-          <p class="text-xs text-slate-200">Videos + tareas + evaluaciones</p>
-          <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
-            Ver curso <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      <!-- ABA 2: AGENDAR -->
+      <section id="tab-calendar" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Agendar clase</h2>
+            <p class="text-xs text-slate-500">Elegí fecha y horario disponible</p>
+          </div>
+
+          <div id="slots-container" class="space-y-2 pt-2">
+            <div class="text-center py-8 text-slate-400 space-y-2">
+              <i class="fa-regular fa-calendar text-3xl"></i>
+              <p class="text-sm font-medium">Aún no hay horarios disponibles.</p>
+              <p class="text-xs">Se agregarán fechas pronto ✨</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: CURSO -->
+      <section id="tab-course" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
+            <p class="text-xs text-slate-500">Aprendé a tu ritmo</p>
+          </div>
+
+          <div class="bg-green-600 text-white p-3 rounded-xl flex items-center justify-between text-xs font-semibold">
+            <span>Aulas disponibles</span>
+            <span id="course-progress">0 lecciones</span>
+          </div>
+
+          <div id="lessons-container" class="space-y-4 pt-2">
+            <div class="text-center py-8 text-slate-400 space-y-2">
+              <i class="fa-solid fa-film text-3xl"></i>
+              <p class="text-sm">Aún no hay videos cargados</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 4: TAREAS -->
+      <section id="tab-tasks" class="hidden space-y-4">
+        <div class="bg-slate-100 p-1 rounded-xl flex">
+          <button class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-green-600 text-white shadow-sm">Tareas</button>
+          <button class="flex-1 py-1.5 text-xs font-semibold text-slate-600">Evaluaciones</button>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
+          <i class="fa-regular fa-clipboard text-3xl"></i>
+          <p class="text-sm">Sin tareas aún</p>
+        </div>
+      </section>
+
+      <!-- ABA 5: PERFIL -->
+      <section id="tab-profile" class="hidden space-y-4">
+        <div class="text-center py-4 space-y-2">
+          <div id="profile-avatar" class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
+            U
+          </div>
+          <h3 id="profile-name" class="font-bold text-base text-slate-900">Usuario</h3>
+          <p id="profile-email" class="text-xs text-slate-500">usuario@email.com</p>
+          <span id="profile-badge" class="inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">ESTUDIANTE</span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden text-sm">
+          <button onclick="navigate('calendar')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-regular fa-calendar text-slate-500 w-5"></i>
+              <span class="font-medium text-slate-800">Mis reservas</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
+          <button onclick="navigate('tasks')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-clipboard-list text-slate-500 w-5"></i>
+              <span class="font-medium text-slate-800">Tareas y evaluaciones</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
+          <button onclick="openWhatsApp()" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-brands fa-whatsapp text-green-600 w-5"></i>
+              <span class="font-medium text-green-600">Chatear por WhatsApp</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
+          <button id="profile-admin-btn" onclick="navigate('admin')" class="hidden w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-shield-halved text-blue-600 w-5"></i>
+              <span class="font-medium text-slate-800">Panel de administrador</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
+          <button onclick="handleLogout()" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-arrow-right-from-bracket text-red-500 w-5"></i>
+              <span class="font-medium text-red-500">Cerrar sesión</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
           </button>
         </div>
-      </div>
+      </section>
 
-      <div class="grid grid-cols-2 gap-3 pt-1">
-        <div onclick="navigate('tasks')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition">
-          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm mb-3">
-            <i class="fa-solid fa-clipboard-list"></i>
+      <!-- ABA ADMIN -->
+      <section id="tab-admin" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-900">1. Agregar horario de aula</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
           </div>
-          <div>
-            <h4 class="font-bold text-xs text-slate-900 leading-snug">Tareas y evaluaciones</h4>
-          </div>
+          <button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition">
+            Salvar Horário
+          </button>
         </div>
 
-        <button onclick="openWhatsApp()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition text-left w-full">
-          <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-sm mb-3">
-            <i class="fa-brands fa-whatsapp"></i>
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-900">2. Adicionar Vídeo/Aula</h3>
+          <div class="space-y-2">
+            <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
           </div>
-          <div>
-            <h4 class="font-bold text-xs text-slate-900 leading-snug">Chat WhatsApp</h4>
-          </div>
-        </button>
-      </div>
-    </section>
-
-    <!-- ABA 2: AGENDAR -->
-    <section id="tab-calendar" class="hidden space-y-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">Agendar clase</h2>
-          <p class="text-xs text-slate-500">Elegí fecha y horario disponible</p>
+          <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
+            Salvar Vídeo
+          </button>
         </div>
 
-        <div id="slots-container" class="space-y-2 pt-2">
-          <div class="text-center py-8 text-slate-400 space-y-2">
-            <i class="fa-regular fa-calendar text-3xl"></i>
-            <p class="text-sm font-medium">Aún no hay horarios disponibles.</p>
-            <p class="text-xs">Se agregarán fechas pronto ✨</p>
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+          <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
+          <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
+            Carregando...
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ABA 3: CURSO -->
-    <section id="tab-course" class="hidden space-y-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
-          <p class="text-xs text-slate-500">Aprendé a tu ritmo</p>
-        </div>
+    </main>
 
-        <div class="bg-green-600 text-white p-3 rounded-xl flex items-center justify-between text-xs font-semibold">
-          <span>Aulas disponibles</span>
-          <span id="course-progress">0 lecciones</span>
-        </div>
-
-        <div id="lessons-container" class="space-y-4 pt-2">
-          <div class="text-center py-8 text-slate-400 space-y-2">
-            <i class="fa-solid fa-film text-3xl"></i>
-            <p class="text-sm">Aún no hay videos cargados</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ABA 4: TAREAS -->
-    <section id="tab-tasks" class="hidden space-y-4">
-      <div class="bg-slate-100 p-1 rounded-xl flex">
-        <button class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-green-600 text-white shadow-sm">Tareas</button>
-        <button class="flex-1 py-1.5 text-xs font-semibold text-slate-600">Evaluaciones</button>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
-        <i class="fa-regular fa-clipboard text-3xl"></i>
-        <p class="text-sm">Sin tareas aún</p>
-      </div>
-    </section>
-
-    <!-- ABA 5: PERFIL -->
-    <section id="tab-profile" class="hidden space-y-4">
-      <div class="text-center py-4 space-y-2">
-        <div class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
-          P
-        </div>
-        <h3 class="font-bold text-base text-slate-900">Mi Perfil</h3>
-        <p class="text-xs text-slate-500">Panel de estudiante y profesor</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden text-sm">
-        <button onclick="navigate('calendar')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
-          <div class="flex items-center gap-3">
-            <i class="fa-regular fa-calendar text-slate-500 w-5"></i>
-            <span class="font-medium text-slate-800">Mis reservas</span>
-          </div>
-          <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-        </button>
-
-        <button onclick="navigate('tasks')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-clipboard-list text-slate-500 w-5"></i>
-            <span class="font-medium text-slate-800">Tareas y evaluaciones</span>
-          </div>
-          <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-        </button>
-
-        <button onclick="openWhatsApp()" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
-          <div class="flex items-center gap-3">
-            <i class="fa-brands fa-whatsapp text-green-600 w-5"></i>
-            <span class="font-medium text-green-600">Chatear por WhatsApp</span>
-          </div>
-          <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-        </button>
-
-        <button onclick="navigate('admin')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-shield-halved text-blue-600 w-5"></i>
-            <span class="font-medium text-slate-800">Panel de administrador</span>
-          </div>
-          <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-        </button>
-      </div>
-    </section>
-
-    <!-- ABA ADMIN -->
-    <section id="tab-admin" class="hidden space-y-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-        <h3 class="font-bold text-sm text-slate-900">1. Agregar horário de aula</h3>
-        <div class="grid grid-cols-2 gap-2">
-          <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-          <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-        </div>
-        <button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition">
-          Salvar Horário
-        </button>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-        <h3 class="font-bold text-sm text-slate-900">2. Adicionar Vídeo/Aula</h3>
-        <div class="space-y-2">
-          <input id="admin-video-title" type="text" placeholder="Título da aula (ex: Aula 1 - Pronúncia)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-          <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-        </div>
-        <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
-          Salvar Vídeo
-        </button>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
-        <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
-          Carregando...
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-6 py-2.5 flex justify-around items-center z-50 max-w-md mx-auto">
-    <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[10px] font-medium nav-active">
-      <i class="fa-solid fa-house text-lg"></i>
-      <span>Inicio</span>
-    </button>
-    <button onclick="navigate('calendar')" id="nav-calendar" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
-      <i class="fa-regular fa-calendar text-lg"></i>
-      <span>Agendar</span>
-    </button>
-    <button onclick="navigate('course')" id="nav-course" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
-      <i class="fa-solid fa-circle-play text-lg"></i>
-      <span>Curso</span>
-    </button>
-    <button onclick="navigate('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
-      <i class="fa-regular fa-user text-lg"></i>
-      <span>Perfil</span>
-    </button>
-  </nav>
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-6 py-2.5 flex justify-around items-center z-50 max-w-md mx-auto">
+      <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[10px] font-medium nav-active">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span>Inicio</span>
+      </button>
+      <button onclick="navigate('calendar')" id="nav-calendar" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
+        <i class="fa-regular fa-calendar text-lg"></i>
+        <span>Agendar</span>
+      </button>
+      <button onclick="navigate('course')" id="nav-course" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
+        <i class="fa-solid fa-circle-play text-lg"></i>
+        <span>Curso</span>
+      </button>
+      <button onclick="navigate('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-400">
+        <i class="fa-regular fa-user text-lg"></i>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
 
   <script>
-    // Digite aqui o número do WhatsApp com código do país e DDD (sem espaços ou traços)
-    var WHATSAPP_NUMBER = "5491122515098"; // Substitua pelo seu número
-
-    function openWhatsApp() {
-      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
-      window.open(url, '_blank');
-    }
-
     var SUPABASE_URL = "https://wukagpszsmlbvcwxhfsw.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a2FncHN6c21sYnZjd3hoZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNDIxMzksImV4cCI6MjEwMzcxODEzOX0.rIRZ9hb5rjeW3-0YepVezCuiDyEkvq36h7CsUwDWXqE";
     var supabaseClient = null;
@@ -263,6 +310,109 @@
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
       return supabaseClient;
+    }
+
+    var isSignUp = false;
+    var currentUser = null;
+
+    function toggleAuthMode() {
+      isSignUp = !isSignUp;
+      document.getElementById('auth-title').innerText = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
+      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Registrate para acceder a las clases' : 'Ingresá a tu plataforma de portugués';
+      document.getElementById('auth-btn').innerText = isSignUp ? 'Registrarse' : 'Entrar';
+      document.getElementById('auth-toggle-text').innerText = isSignUp ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?';
+      document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Iniciar sesión' : 'Crear cuenta';
+      var nameField = document.getElementById('name-field');
+      if (isSignUp) {
+        nameField.classList.remove('hidden');
+      } else {
+        nameField.classList.add('hidden');
+      }
+    }
+
+    async function handleAuth() {
+      var email = document.getElementById('auth-email').value;
+      var password = document.getElementById('auth-password').value;
+      var name = document.getElementById('auth-name').value;
+      var sb = getSupabase();
+
+      if (!email || !password) return alert('Por favor, ingresá email y contraseña');
+
+      if (isSignUp) {
+        var res = await sb.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { full_name: name || 'Estudiante' } }
+        });
+        if (res.error) {
+          alert('Error al registrarse: ' + res.error.message);
+        } else {
+          alert('Cuenta creada con éxito!');
+          checkSession();
+        }
+      } else {
+        var res = await sb.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        if (res.error) {
+          alert('Error al iniciar sesión: ' + res.error.message);
+        } else {
+          checkSession();
+        }
+      }
+    }
+
+    async function handleLogout() {
+      var sb = getSupabase();
+      await sb.auth.signOut();
+      document.getElementById('app-screen').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+    }
+
+    async function checkSession() {
+      var sb = getSupabase();
+      var sessionRes = await sb.auth.getSession();
+      var session = sessionRes.data.session;
+
+      if (session) {
+        currentUser = session.user;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
+        document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
+        document.getElementById('profile-name').innerText = fullName;
+        document.getElementById('profile-email').innerText = currentUser.email;
+        document.getElementById('profile-avatar').innerText = fullName.charAt(0).toUpperCase();
+
+        // O admin é identificado pelo seu email
+        var isAdmin = currentUser.email.includes('renan');
+        if (isAdmin) {
+          document.getElementById('home-admin-btn').classList.remove('hidden');
+          document.getElementById('profile-admin-btn').classList.remove('hidden');
+          var badge = document.getElementById('profile-badge');
+          badge.innerText = 'ADMIN';
+          badge.className = 'inline-block bg-[#0f2444] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
+        }
+
+        navigate('home');
+      } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('app-screen').classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('load', function() {
+      checkSession();
+    });
+
+    // NAVEGAÇÃO E REGRAS DO APP
+    var WHATSAPP_NUMBER = "5491100000000";
+
+    function openWhatsApp() {
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
+      window.open(url, '_blank');
     }
 
     var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin'];
