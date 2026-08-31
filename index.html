@@ -30,7 +30,7 @@
     <section id="tab-home" class="space-y-4">
       <div class="flex items-center justify-between pt-2">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Olá, Aluno! 👋</h2>
+          <h2 class="text-2xl font-bold text-slate-900">Olá! 👋</h2>
           <p class="text-sm text-slate-500">¿Qué querés hacer hoy?</p>
         </div>
         <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-xl shadow-sm">
@@ -52,7 +52,7 @@
         <div class="relative z-10 space-y-2">
           <span class="bg-[#16a34a] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Aulas particulares</span>
           <h3 class="text-xl font-bold leading-tight">Clases 1:1 vía Meet</h3>
-          <p class="text-xs text-slate-200">Agendá tu horario con tu profesor</p>
+          <p class="text-xs text-slate-200">Agendá tu horario de clase</p>
           <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
             Agendar ahora <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
@@ -82,14 +82,14 @@
           </div>
         </div>
 
-        <a href="https://wa.me/" target="_blank" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition">
+        <button onclick="openWhatsApp()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition text-left w-full">
           <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-sm mb-3">
             <i class="fa-brands fa-whatsapp"></i>
           </div>
           <div>
             <h4 class="font-bold text-xs text-slate-900 leading-snug">Chat WhatsApp</h4>
           </div>
-        </a>
+        </button>
       </div>
     </section>
 
@@ -120,11 +120,11 @@
         </div>
 
         <div class="bg-green-600 text-white p-3 rounded-xl flex items-center justify-between text-xs font-semibold">
-          <span>Tu avance</span>
-          <span id="course-progress">0 / 0 lecciones</span>
+          <span>Aulas disponibles</span>
+          <span id="course-progress">0 lecciones</span>
         </div>
 
-        <div id="lessons-container" class="space-y-3 pt-2">
+        <div id="lessons-container" class="space-y-4 pt-2">
           <div class="text-center py-8 text-slate-400 space-y-2">
             <i class="fa-solid fa-film text-3xl"></i>
             <p class="text-sm">Aún no hay videos cargados</p>
@@ -150,11 +150,10 @@
     <section id="tab-profile" class="hidden space-y-4">
       <div class="text-center py-4 space-y-2">
         <div class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
-          R
+          P
         </div>
-        <h3 class="font-bold text-base text-slate-900">Renan Barbosa</h3>
-        <p class="text-xs text-slate-500">renan.barbosa.med@gmail.com</p>
-        <span class="inline-block bg-[#0f2444] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">ADMIN</span>
+        <h3 class="font-bold text-base text-slate-900">Mi Perfil</h3>
+        <p class="text-xs text-slate-500">Panel de estudiante y profesor</p>
       </div>
 
       <div class="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden text-sm">
@@ -174,13 +173,13 @@
           <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </button>
 
-        <a href="https://wa.me/" target="_blank" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+        <button onclick="openWhatsApp()" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
           <div class="flex items-center gap-3">
             <i class="fa-brands fa-whatsapp text-green-600 w-5"></i>
             <span class="font-medium text-green-600">Chatear por WhatsApp</span>
           </div>
           <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-        </a>
+        </button>
 
         <button onclick="navigate('admin')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
           <div class="flex items-center gap-3">
@@ -194,31 +193,30 @@
 
     <!-- ABA ADMIN -->
     <section id="tab-admin" class="hidden space-y-4">
-      <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-semibold">
-        <button class="bg-green-600 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0">
-          <i class="fa-regular fa-calendar"></i> Horarios
-        </button>
-        <button class="bg-white text-slate-600 border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0">
-          <i class="fa-solid fa-list-check"></i> Reservas
-        </button>
-        <button class="bg-white text-slate-600 border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-1.5 shrink-0">
-          <i class="fa-solid fa-video"></i> Videos
-        </button>
-      </div>
-
       <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-        <h3 class="font-bold text-sm text-slate-900">Agregar horario</h3>
+        <h3 class="font-bold text-sm text-slate-900">1. Agregar horário de aula</h3>
         <div class="grid grid-cols-2 gap-2">
           <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
           <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
         </div>
         <button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition">
-          Agregar horario
+          Salvar Horário
+        </button>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+        <h3 class="font-bold text-sm text-slate-900">2. Adicionar Vídeo/Aula</h3>
+        <div class="space-y-2">
+          <input id="admin-video-title" type="text" placeholder="Título da aula (ex: Aula 1 - Pronúncia)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+          <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+        </div>
+        <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
+          Salvar Vídeo
         </button>
       </div>
 
       <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-slate-900">Horarios cargados</h3>
+        <h3 class="font-bold text-sm text-slate-900">Horários Cadastrados</h3>
         <div id="admin-slots-list" class="space-y-2 text-xs text-slate-500">
           Carregando...
         </div>
@@ -248,6 +246,14 @@
   </nav>
 
   <script>
+    // Digite aqui o número do WhatsApp com código do país e DDD (sem espaços ou traços)
+    var WHATSAPP_NUMBER = "5491100000000"; // Substitua pelo seu número
+
+    function openWhatsApp() {
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
+      window.open(url, '_blank');
+    }
+
     var SUPABASE_URL = "https://wukagpszsmlbvcwxhfsw.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a2FncHN6c21sYnZjd3hoZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNDIxMzksImV4cCI6MjEwMzcxODEzOX0.rIRZ9hb5rjeW3-0YepVezCuiDyEkvq36h7CsUwDWXqE";
     var supabaseClient = null;
@@ -300,6 +306,7 @@
 
       if (tabId === 'admin') loadAdminSlots();
       if (tabId === 'calendar') loadStudentSlots();
+      if (tabId === 'course') loadLessons();
     };
 
     window.loadAdminSlots = async function() {
@@ -335,6 +342,23 @@
       }
     };
 
+    window.addVideo = async function() {
+      var title = document.getElementById('admin-video-title').value;
+      var url = document.getElementById('admin-video-url').value;
+      if (!title || !url) return alert('Preencha título e link do vídeo!');
+
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('course_lessons').insert([{ title: title, video_url: url }]);
+      if (res.error) {
+        alert('Erro ao cadastrar: ' + res.error.message);
+      } else {
+        alert('Vídeo adicionado ao curso!');
+        document.getElementById('admin-video-title').value = '';
+        document.getElementById('admin-video-url').value = '';
+      }
+    };
+
     window.loadStudentSlots = async function() {
       var container = document.getElementById('slots-container');
       var sb = getSupabase();
@@ -348,6 +372,35 @@
         return '<div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">' +
           '<div><span class="font-bold text-slate-800">' + slot.date + '</span> às <span class="font-bold text-green-700">' + slot.time + '</span></div>' +
           '<button onclick="bookSlot(\'' + slot.id + '\')" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-green-700 transition">Reservar</button></div>';
+      }).join('');
+    };
+
+    window.loadLessons = async function() {
+      var container = document.getElementById('lessons-container');
+      var progress = document.getElementById('course-progress');
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('course_lessons').select('*').order('created_at', { ascending: true });
+      if (res.error || !res.data || res.data.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm">Aún no hay videos cargados</p></div>';
+        if (progress) progress.innerText = '0 lecciones';
+        return;
+      }
+      if (progress) progress.innerText = res.data.length + ' lecciones';
+      container.innerHTML = res.data.map(function(lesson) {
+        var videoEmbed = '';
+        if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
+          var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
+          if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
+          videoEmbed = '<iframe class="w-full h-48 rounded-xl mt-2" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+        } else {
+          videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
+        }
+
+        return '<div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">' +
+          '<h4 class="font-bold text-sm text-slate-800">' + lesson.title + '</h4>' +
+          videoEmbed +
+        '</div>';
       }).join('');
     };
 
