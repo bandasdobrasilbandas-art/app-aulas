@@ -253,16 +253,47 @@
         </div>
       </section>
 
-      <!-- ABA 4: TAREAS -->
+      <!-- ABA 4: TAREAS E EVALUACIONES (ALUNO) -->
       <section id="tab-tasks" class="space-y-4 hidden">
-        <div class="bg-slate-100 p-1 rounded-xl flex">
-          <button class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-green-600 text-white shadow-sm">Tareas</button>
-          <button class="flex-1 py-1.5 text-xs font-semibold text-slate-600">Evaluaciones</button>
+        <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
+          <button onclick="switchTasksTab('materials')" id="tab-btn-tasks-mat" class="flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition">
+            Tareas & Apostilas
+          </button>
+          <button onclick="switchTasksTab('quizzes')" id="tab-btn-tasks-quiz" class="flex-1 py-2 rounded-lg text-slate-600 transition">
+            Evaluaciones Online
+          </button>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
-          <i class="fa-regular fa-clipboard text-3xl"></i>
-          <p class="text-sm">Sin tareas aún</p>
+        <!-- Seção de Tarefas & Apostilas -->
+        <div id="tasks-sub-materials" class="space-y-3">
+          <div id="student-assignments-list" class="space-y-3">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2">
+              <i class="fa-regular fa-clipboard text-3xl"></i>
+              <p class="text-sm">Sin tareas asignadas por el momento</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção de Provas Online -->
+        <div id="tasks-sub-quizzes" class="space-y-3 hidden">
+          <div id="student-quizzes-list" class="space-y-3">
+            <!-- Lista de provas disponíveis -->
+          </div>
+
+          <!-- Questionário / Prova Aberta -->
+          <div id="active-quiz-container" class="hidden bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div>
+                <h3 id="active-quiz-title" class="font-bold text-sm text-slate-900"></h3>
+                <p id="active-quiz-desc" class="text-xs text-slate-500"></p>
+              </div>
+              <button onclick="closeActiveQuiz()" class="text-xs text-slate-400 hover:text-slate-600">Cerrar</button>
+            </div>
+            <div id="active-quiz-questions" class="space-y-4 text-xs"></div>
+            <button onclick="submitQuizAnswers()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition">
+              Finalizar y Calificar Examen
+            </button>
+          </div>
         </div>
       </section>
 
@@ -324,12 +355,14 @@
       <section id="tab-admin" class="space-y-4 hidden">
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos & Actividad</button>
+          <button onclick="showAdminTab('assignments')" id="admin-btn-tab-assignments" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Tareas & Apostilas</button>
+          <button onclick="showAdminTab('quizzes')" id="admin-btn-tab-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Crear Provas Online</button>
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
-          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas Alumnos</button>
+          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas</button>
           <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos</button>
         </div>
 
-        <!-- Seção 1: Alunos Registrados & Rastreamento -->
+        <!-- Seção 1: Alunos Registrados -->
         <div id="admin-sec-students" class="space-y-4">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <div class="flex justify-between items-center">
@@ -341,14 +374,75 @@
                 <i class="fa-solid fa-file-pdf text-red-400"></i> Descargar PDF
               </button>
             </div>
-
             <div id="admin-students-list" class="space-y-3 pt-2 text-xs text-slate-500">
               Cargando alumnos...
             </div>
           </div>
         </div>
 
-        <!-- Seção 2: Horários -->
+        <!-- Seção 2: Cadastro de Tarefas & Apostilas (Admin) -->
+        <div id="admin-sec-assignments" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material (PDF)</h3>
+            <div class="space-y-2">
+              <input id="assign-title" type="text" placeholder="Título de la tarea o apostila (ej: Apostila Nivel A1)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <textarea id="assign-desc" rows="2" placeholder="Instrucciones o descripción del ejercicio..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600"></textarea>
+              <input id="assign-url" type="text" placeholder="Link del PDF o Material de Google Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Destinatario:</label>
+                <select id="assign-target-student" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-1">
+                  <option value="TODOS">Para Todos los Alumnos</option>
+                </select>
+              </div>
+            </div>
+            <button onclick="createAssignment()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
+              Publicar Tarea / Material
+            </button>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Tareas y Materiales Publicados</h3>
+            <div id="admin-assignments-list" class="space-y-2 text-xs text-slate-500">
+              Cargando tareas...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 3: Criador de Provas Online (Admin) -->
+        <div id="admin-sec-quizzes" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
+            <h3 class="font-bold text-sm text-slate-900">Crear Nueva Evaluación Online</h3>
+            <div class="space-y-2">
+              <input id="quiz-title" type="text" placeholder="Título de la prueba (ej: Examen de Verbos en Presente)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="quiz-desc" type="text" placeholder="Breve instrucción (ej: 5 preguntas - Selecciona la correcta)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            </div>
+
+            <!-- Criador de Perguntas -->
+            <div id="quiz-questions-builder" class="space-y-3 pt-2">
+              <!-- Perguntas dinâmicas -->
+            </div>
+
+            <div class="flex gap-2">
+              <button onclick="addQuizQuestionField()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs transition">
+                + Agregar Pregunta
+              </button>
+              <button onclick="saveNewQuiz()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">
+                Guardar Evaluación
+              </button>
+            </div>
+          </div>
+
+          <!-- Histórico de Notas dos Alunos -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Notas de Alumnos en Evaluaciones</h3>
+            <div id="admin-quiz-scores-list" class="space-y-2 text-xs text-slate-500">
+              Cargando notas...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 4: Horários -->
         <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
@@ -428,7 +522,7 @@
           </div>
         </div>
 
-        <!-- Seção 3: Reservas e Comprovantes -->
+        <!-- Seção 5: Reservas -->
         <div id="admin-sec-bookings" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
@@ -438,7 +532,7 @@
           </div>
         </div>
 
-        <!-- Seção 4: Vídeos -->
+        <!-- Seção 6: Vídeos -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Vídeo ao Curso</h3>
@@ -513,6 +607,7 @@
     var currentUser = null;
     var selectedSlots = [];
     var loadedStudents = [];
+    var activeQuizData = null;
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -546,7 +641,6 @@
         if (res.error) {
           alert('Error al registrarse: ' + res.error.message);
         } else {
-          // Registrar perfil na tabela profiles
           if (res.data.user) {
             await sb.from('profiles').upsert([{
               id: res.data.user.id,
@@ -634,7 +728,6 @@
       checkSession();
     });
 
-    // Rastrear Conteúdo Visualizado pelo Aluno
     async function trackActivity(contentName) {
       if (!currentUser) return;
       var sb = getSupabase();
@@ -689,71 +782,388 @@
       if (tabId === 'admin') showAdminTab('students');
       if (tabId === 'calendar') loadStudentSlots();
       if (tabId === 'course') loadLessons();
+      if (tabId === 'tasks') loadStudentTasksAndQuizzes();
     };
 
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
+      document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
+      document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
       document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
       document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
 
-      ['students', 'slots', 'bookings', 'videos'].forEach(t => {
+      ['students', 'assignments', 'quizzes', 'slots', 'bookings', 'videos'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
-        if (t === type) {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';
-        } else {
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';
+        if (btn) {
+          if (t === type) {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';
+          }
         }
       });
 
       if (type === 'students') loadAdminStudents();
+      if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
+      if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
       if (type === 'slots') loadAdminSlots();
       if (type === 'bookings') loadAdminBookings();
     };
 
-    // ==========================================
-    // GESTÃO DE ALUNOS & RASTREAMENTO (ADMIN)
-    // ==========================================
-    window.loadAdminStudents = async function() {
-      var container = document.getElementById('admin-students-list');
+    // ====================================================
+    // MÓDULO PEDAGÓGICO: TAREFAS, APOSTILAS & MATERIAIS
+    // ====================================================
+    window.createAssignment = async function() {
+      var title = document.getElementById('assign-title').value;
+      var desc = document.getElementById('assign-desc').value;
+      var url = document.getElementById('assign-url').value;
+      var target = document.getElementById('assign-target-student').value;
+
+      if (!title) return alert('Por favor, ingresá un título.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('student_assignments').insert([{
+        title: title,
+        description: desc,
+        material_url: url,
+        target_student_email: target
+      }]);
+
+      if (error) {
+        alert('Error al publicar: ' + error.message);
+      } else {
+        alert('¡Tarea/Material publicado con éxito!');
+        document.getElementById('assign-title').value = '';
+        document.getElementById('assign-desc').value = '';
+        document.getElementById('assign-url').value = '';
+        loadAdminAssignments();
+      }
+    };
+
+    window.loadAdminAssignments = async function() {
+      var container = document.getElementById('admin-assignments-list');
       var sb = getSupabase();
       if (!sb) return;
 
-      var { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-      loadedStudents = data || [];
-
-      if (error || loadedStudents.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">Ningún alumno registrado todavía.</p>';
+      var { data } = await sb.from('student_assignments').select('*').order('created_at', { ascending: false });
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">No hay tareas o materiales publicados aún.</p>';
         return;
       }
 
-      container.innerHTML = loadedStudents.map(function(s) {
-        var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Nunca';
-        var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
+      container.innerHTML = data.map(function(a) {
+        var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="text-blue-600 underline font-bold text-[11px] block mt-1"><i class="fa-solid fa-link"></i> Abrir Material / PDF</a>' : '';
 
-        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
+        return '<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1">' +
           '<div class="flex justify-between items-start">' +
+            '<h4 class="font-bold text-slate-800 text-xs">' + a.title + '</h4>' +
+            '<span class="bg-slate-200 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">' + a.target_student_email + '</span>' +
+          '</div>' +
+          '<p class="text-[11px] text-slate-600">' + (a.description || 'Sin descripción') + '</p>' +
+          linkBtn +
+        '</div>';
+      }).join('');
+    };
+
+    // ====================================================
+    // MÓDULO PEDAGÓGICO: PROVAS ONLINE COM NOTA AUTOMÁTICA
+    // ====================================================
+    var quizQuestions = [];
+
+    window.initQuizBuilder = function() {
+      if (quizQuestions.length === 0) {
+        quizQuestions = [
+          { question: '', options: ['', '', '', ''], correct: 0 }
+        ];
+      }
+      renderQuizBuilder();
+    };
+
+    window.addQuizQuestionField = function() {
+      quizQuestions.push({ question: '', options: ['', '', '', ''], correct: 0 });
+      renderQuizBuilder();
+    };
+
+    window.renderQuizBuilder = function() {
+      var container = document.getElementById('quiz-questions-builder');
+      container.innerHTML = quizQuestions.map(function(q, qIndex) {
+        return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">' +
+          '<div class="flex justify-between items-center">' +
+            '<span class="font-bold text-xs text-slate-800">Pregunta #' + (qIndex + 1) + '</span>' +
+            (quizQuestions.length > 1 ? '<button onclick="removeQuizQuestion(' + qIndex + ')" class="text-[10px] text-red-500 font-bold">Eliminar</button>' : '') +
+          '</div>' +
+          '<input type="text" placeholder="Enunciado de la pregunta" value="' + q.question + '" onchange="quizQuestions[' + qIndex + '].question = this.value" class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none bg-white">' +
+          '<div class="space-y-1.5 pt-1">' +
+            q.options.map(function(opt, optIndex) {
+              return '<div class="flex items-center gap-2">' +
+                '<input type="radio" name="correct-' + qIndex + '" ' + (q.correct === optIndex ? 'checked' : '') + ' onchange="quizQuestions[' + qIndex + '].correct = ' + optIndex + '">' +
+                '<input type="text" placeholder="Opción ' + (optIndex + 1) + '" value="' + opt + '" onchange="quizQuestions[' + qIndex + '].options[' + optIndex + '] = this.value" class="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none bg-white">' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          '<p class="text-[10px] text-slate-400">Marca el círculo de la opción que sea correcta.</p>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.removeQuizQuestion = function(index) {
+      quizQuestions.splice(index, 1);
+      renderQuizBuilder();
+    };
+
+    window.saveNewQuiz = async function() {
+      var title = document.getElementById('quiz-title').value;
+      var desc = document.getElementById('quiz-desc').value;
+
+      if (!title) return alert('Ingresá el título del examen');
+
+      var valid = quizQuestions.every(q => q.question.trim() !== '' && q.options.every(o => o.trim() !== ''));
+      if (!valid) return alert('Por favor, completá todas las preguntas y opciones');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('online_quizzes').insert([{
+        title: title,
+        description: desc,
+        questions_json: quizQuestions
+      }]);
+
+      if (error) {
+        alert('Error al guardar prueba: ' + error.message);
+      } else {
+        alert('¡Evaluación online creada con éxito!');
+        document.getElementById('quiz-title').value = '';
+        document.getElementById('quiz-desc').value = '';
+        quizQuestions = [];
+        initQuizBuilder();
+        loadAdminQuizScores();
+      }
+    };
+
+    window.loadAdminQuizScores = async function() {
+      var container = document.getElementById('admin-quiz-scores-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data } = await sb.from('quiz_submissions').select('*').order('created_at', { ascending: false });
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Aún ningún alumno ha completado evaluaciones.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(function(sub) {
+        var percentage = Math.round((sub.score / sub.total_questions) * 100);
+        var badgeColor = percentage >= 60 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+        return '<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1">' +
+          '<div class="flex justify-between items-center">' +
             '<div>' +
-              '<h4 class="font-bold text-slate-900 text-sm">' + (s.full_name || 'Estudiante') + '</h4>' +
-              '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
+              '<h4 class="font-bold text-slate-800 text-xs">' + sub.quiz_title + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + sub.student_name + ' (' + sub.student_email + ')</p>' +
             '</div>' +
-            '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
-              (s.status || 'Ativo') +
-            '</button>' +
+            '<span class="px-2 py-0.5 rounded-full text-xs font-bold ' + badgeColor + '">' +
+              sub.score + ' / ' + sub.total_questions + ' (' + percentage + '%)' +
+            '</span>' +
           '</div>' +
+          '<span class="text-[10px] text-slate-400">Completado el: ' + new Date(sub.created_at).toLocaleDateString('es-AR') + '</span>' +
+        '</div>';
+      }).join('');
+    };
 
-          '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-0.5">' +
-            '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
-            '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + (s.last_content_viewed || 'Inicio') + '</span></div>' +
-          '</div>' +
+    // ====================================================
+    // VISÃO DO ALUNO: TAREFAS, APOSTILAS E PROVAS ONLINE
+    // ====================================================
+    window.switchTasksTab = function(type) {
+      document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
+      document.getElementById('tasks-sub-quizzes').classList.toggle('hidden', type !== 'quizzes');
 
-          '<div class="pt-1">' +
-            '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + (s.full_name || 'Estudiante') + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
-              '<i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Mensaje / Archivo' +
+      var btnMat = document.getElementById('tab-btn-tasks-mat');
+      var btnQuiz = document.getElementById('tab-btn-tasks-quiz');
+
+      if (type === 'materials') {
+        btnMat.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnQuiz.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      } else {
+        btnQuiz.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnMat.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      }
+    };
+
+    window.loadStudentTasksAndQuizzes = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      // 1. Carregar Tarefas & Apostilas destinadas ao aluno ou a todos
+      var { data: assignments } = await sb.from('student_assignments')
+        .select('*')
+        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email)
+        .order('created_at', { ascending: false });
+
+      var matContainer = document.getElementById('student-assignments-list');
+      if (assignments && assignments.length > 0) {
+        matContainer.innerHTML = assignments.map(function(a) {
+          var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-xl font-bold text-xs mt-2 hover:bg-green-100 transition"><i class="fa-solid fa-file-pdf"></i> Abrir Apostila / Material</a>' : '';
+
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-1.5">' +
+            '<div class="flex justify-between items-start">' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + a.title + '</h4>' +
+              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Material</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-600 leading-relaxed">' + (a.description || '') + '</p>' +
+            linkBtn +
+          '</div>';
+        }).join('');
+      } else {
+        matContainer.innerHTML = '<div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-regular fa-clipboard text-3xl"></i><p class="text-sm">Sin tareas asignadas por el momento</p></div>';
+      }
+
+      // 2. Carregar Provas Online
+      var { data: quizzes } = await sb.from('online_quizzes').select('*').order('created_at', { ascending: false });
+      var quizContainer = document.getElementById('student-quizzes-list');
+
+      if (quizzes && quizzes.length > 0) {
+        quizContainer.innerHTML = quizzes.map(function(q) {
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-2">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + q.title + '</h4>' +
+                '<p class="text-xs text-slate-500">' + (q.description || 'Evaluación con corrección automática') + '</p>' +
+              '</div>' +
+              '<span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Online</span>' +
+            '</div>' +
+            '<button onclick="startStudentQuiz(\'' + q.id + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">' +
+              'Realizar Evaluación' +
             '</button>' +
+          '</div>';
+        }).join('');
+      } else {
+        quizContainer.innerHTML = '<div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-solid fa-graduation-cap text-3xl"></i><p class="text-sm">Sin evaluaciones disponibles</p></div>';
+      }
+    };
+
+    window.startStudentQuiz = async function(quizId) {
+      var sb = getSupabase();
+      var { data } = await sb.from('online_quizzes').select('*').eq('id', quizId).single();
+      if (!data) return;
+
+      activeQuizData = data;
+      document.getElementById('student-quizzes-list').classList.add('hidden');
+      var container = document.getElementById('active-quiz-container');
+      container.classList.remove('hidden');
+
+      document.getElementById('active-quiz-title').innerText = data.title;
+      document.getElementById('active-quiz-desc').innerText = data.description || '';
+
+      var questionsDiv = document.getElementById('active-quiz-questions');
+      var questions = data.questions_json || [];
+
+      questionsDiv.innerHTML = questions.map(function(q, qIdx) {
+        return '<div class="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-100">' +
+          '<p class="font-bold text-slate-800">' + (qIdx + 1) + '. ' + q.question + '</p>' +
+          '<div class="space-y-1.5">' +
+            q.options.map(function(opt, optIdx) {
+              return '<label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">' +
+                '<input type="radio" name="student-ans-' + qIdx + '" value="' + optIdx + '" class="text-green-600">' +
+                '<span class="text-slate-700">' + opt + '</span>' +
+              '</label>';
+            }).join('') +
           '</div>' +
         '</div>';
       }).join('');
+
+      container.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeActiveQuiz = function() {
+      activeQuizData = null;
+      document.getElementById('active-quiz-container').classList.add('hidden');
+      document.getElementById('student-quizzes-list').classList.remove('hidden');
+    };
+
+    window.submitQuizAnswers = async function() {
+      if (!activeQuizData) return;
+      var questions = activeQuizData.questions_json || [];
+      var score = 0;
+      var total = questions.length;
+
+      for (var i = 0; i < total; i++) {
+        var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
+        if (!selected) {
+          return alert('Por favor responde la pregunta #' + (i + 1));
+        }
+        if (parseInt(selected.value) === questions[i].correct) {
+          score++;
+        }
+      }
+
+      var percentage = Math.round((score / total) * 100);
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+
+      var sb = getSupabase();
+      await sb.from('quiz_submissions').insert([{
+        quiz_id: activeQuizData.id,
+        quiz_title: activeQuizData.title,
+        student_email: currentUser.email,
+        student_name: studentName,
+        score: score,
+        total_questions: total
+      }]);
+
+      alert('¡Evaluación finalizada!\nTu puntuación: ' + score + '/' + total + ' (' + percentage + '%)');
+      closeActiveQuiz();
+      loadStudentTasksAndQuizzes();
+    };
+
+    // ====================================================
+    // DEMAIS FUNÇÕES DO ADMIN E DO APP
+    // ====================================================
+    window.loadAdminStudents = async function() {
+      var container = document.getElementById('admin-students-list');
+      var select = document.getElementById('assign-target-student');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+      loadedStudents = data || [];
+
+      if (select) {
+        select.innerHTML = '<option value="TODOS">Para Todos los Alumnos</option>' +
+          loadedStudents.map(s => '<option value="' + s.email + '">' + (s.full_name || 'Estudiante') + ' (' + s.email + ')</option>').join('');
+      }
+
+      if (container) {
+        if (loadedStudents.length === 0) {
+          container.innerHTML = '<p class="text-slate-400">Ningún alumno registrado todavía.</p>';
+          return;
+        }
+
+        container.innerHTML = loadedStudents.map(function(s) {
+          var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Nunca';
+          var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
+
+          return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + (s.full_name || 'Estudiante') + '</h4>' +
+                '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
+              '</div>' +
+              '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
+                (s.status || 'Ativo') +
+              '</button>' +
+            '</div>' +
+            '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-0.5">' +
+              '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
+              '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + (s.last_content_viewed || 'Inicio') + '</span></div>' +
+            '</div>' +
+            '<div class="pt-1">' +
+              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + (s.full_name || 'Estudiante') + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
+                '<i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Mensaje / Archivo' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
     };
 
     window.toggleStudentStatus = async function(studentId, currentStatus) {
@@ -764,7 +1174,6 @@
       loadAdminStudents();
     };
 
-    // Exportação em PDF dos alunos e dados
     window.exportStudentsToPDF = function() {
       if (!loadedStudents || loadedStudents.length === 0) return alert('No hay alumnos para exportar');
 
@@ -799,7 +1208,6 @@
       doc.save('listado_alumnos_portugues.pdf');
     };
 
-    // Modal de envio de mensagens e arquivos
     window.openSendMessageModal = async function(studentId, email, name) {
       var message = prompt('Escribí el mensaje o devolución para ' + name + ':');
       if (!message) return;
@@ -822,7 +1230,6 @@
       }
     };
 
-    // Carregar caixa de entrada de mensagens do aluno logado
     window.loadStudentInbox = async function() {
       if (!currentUser) return;
       var sb = getSupabase();
@@ -851,7 +1258,6 @@
       }
     };
 
-    // GERADOR EM MASSA ADMIN
     window.generateBulkSlots = async function() {
       var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
       var startTime = document.getElementById('bulk-start-time').value;
@@ -1041,7 +1447,6 @@
       }
     };
 
-    // AGENDAMENTO COM DIA DA SEMANA
     window.loadStudentSlots = async function() {
       var container = document.getElementById('slots-container');
       var sb = getSupabase();
