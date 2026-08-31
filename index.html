@@ -82,7 +82,7 @@
           </div>
         </div>
 
-        <!-- Botão Admin (visível apenas para você) -->
+        <!-- Botão Admin -->
         <button id="home-admin-btn" onclick="navigate('admin')" class="hidden w-full bg-[#0f2444] text-white py-3 px-4 rounded-2xl font-medium text-sm flex items-center justify-between shadow-sm active:scale-[0.98] transition">
           <div class="flex items-center gap-3">
             <i class="fa-solid fa-shield-halved text-blue-400"></i>
@@ -301,6 +301,13 @@
   </div>
 
   <script>
+    var WHATSAPP_NUMBER = "541122515098";
+
+    function openWhatsApp() {
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
+      window.open(url, '_blank');
+    }
+
     var SUPABASE_URL = "https://wukagpszsmlbvcwxhfsw.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a2FncHN6c21sYnZjd3hoZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNDIxMzksImV4cCI6MjEwMzcxODEzOX0.rIRZ9hb5rjeW3-0YepVezCuiDyEkvq36h7CsUwDWXqE";
     var supabaseClient = null;
@@ -386,7 +393,6 @@
         document.getElementById('profile-email').innerText = currentUser.email;
         document.getElementById('profile-avatar').innerText = fullName.charAt(0).toUpperCase();
 
-        // O admin é identificado pelo seu email
         var isAdmin = currentUser.email.includes('renan');
         if (isAdmin) {
           document.getElementById('home-admin-btn').classList.remove('hidden');
@@ -406,14 +412,6 @@
     window.addEventListener('load', function() {
       checkSession();
     });
-
-    // NAVEGAÇÃO E REGRAS DO APP
-    var WHATSAPP_NUMBER = "5491100000000";
-
-    function openWhatsApp() {
-      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
-      window.open(url, '_blank');
-    }
 
     var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin'];
     var titles = {
