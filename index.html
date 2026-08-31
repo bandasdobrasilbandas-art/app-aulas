@@ -146,19 +146,49 @@
             <p class="text-xs text-slate-500">Elegí fecha y horario disponible</p>
           </div>
 
-          <!-- Modal / Card de Pagamento e Confirmação -->
-          <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3">
+          <!-- Card de Pagamento e Envio de Comprovante -->
+          <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3.5">
             <div class="flex justify-between items-center">
-              <h4 class="font-bold text-xs text-emerald-950">Comprobante de Pago</h4>
+              <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paso final</span>
               <button onclick="cancelBookingSelection()" class="text-xs text-slate-400 hover:text-slate-600">Cancelar</button>
             </div>
-            <p class="text-[11px] text-emerald-800 leading-relaxed">
-              Para confirmar el horario seleccionado, por favor subí la foto o captura del comprobante de transferencia/pago:
+
+            <!-- Dados Mercado Pago -->
+            <div class="bg-white p-3.5 rounded-xl border border-emerald-100 space-y-1.5 shadow-sm">
+              <p class="text-xs font-bold text-emerald-950">Datos para transferencia:</p>
+              <div class="text-xs text-slate-700 space-y-0.5">
+                <p>🔹 <b>Alias Mercado Pago:</b> <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-emerald-800 font-bold">renan.barbosa</code></p>
+                <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-emerald-900 leading-relaxed">
+              Podés <b>subir la foto del comprobante aquí</b> para confirmar automáticamente, o enviarla directo a mi WhatsApp:
             </p>
-            <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-white p-2 rounded-xl border border-emerald-200 outline-none">
-            <button onclick="submitBookingWithReceipt()" id="confirm-booking-btn" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
-              Confirmar y Enviar Comprobante
-            </button>
+
+            <!-- Opção 1: Upload no App -->
+            <div class="space-y-2">
+              <label class="text-[11px] font-bold text-slate-700">Opción 1: Subir comprobante aquí</label>
+              <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-white p-2 rounded-xl border border-emerald-200 outline-none">
+              <button onclick="submitBookingWithReceipt()" id="confirm-booking-btn" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
+                Confirmar y Guardar Reserva
+              </button>
+            </div>
+
+            <div class="relative flex py-1 items-center">
+              <div class="flex-grow border-t border-emerald-200"></div>
+              <span class="flex-shrink mx-2 text-[10px] text-emerald-600 font-semibold uppercase">O también</span>
+              <div class="flex-grow border-t border-emerald-200"></div>
+            </div>
+
+            <!-- Opção 2: Enviar no WhatsApp -->
+            <div class="space-y-2">
+              <label class="text-[11px] font-bold text-slate-700">Opción 2: Enviar comprobante por WhatsApp</label>
+              <button onclick="sendReceiptViaWhatsApp()" class="w-full bg-[#25D366] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-600 active:scale-95 transition shadow-sm flex items-center justify-center gap-2">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                Enviar captura a WhatsApp (541122515098)
+              </button>
+            </div>
           </div>
 
           <div id="slots-container" class="space-y-2 pt-2">
@@ -262,7 +292,6 @@
 
       <!-- ABA ADMIN -->
       <section id="tab-admin" class="space-y-4 hidden">
-        <!-- Sub-navegação Admin -->
         <div class="flex gap-2 border-b border-slate-200 pb-2">
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white">Horarios</button>
           <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Reservas Alumnos</button>
@@ -346,7 +375,7 @@
     ];
 
     function openWhatsApp() {
-      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola! Me gustaría consultar por las clases de portugués.");
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola Renan! Me gustaría consultar por las clases de portugués.");
       window.open(url, '_blank');
     }
 
@@ -430,7 +459,7 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
 
-        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || "Renan Barbosa";
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
         document.getElementById('profile-name').innerText = fullName;
         document.getElementById('profile-email').innerText = currentUser.email;
@@ -508,7 +537,6 @@
       if (tabId === 'course') loadLessons();
     };
 
-    // CONTROLE DE SUB-ABAS ADMIN
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
       document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
@@ -555,7 +583,7 @@
       container.innerHTML = res.data.map(function(b) {
         var receiptButton = b.receipt_url 
           ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
-          : '<span class="text-[11px] text-slate-400 mt-2 block">Sem arquivo anexo</span>';
+          : '<span class="text-[11px] text-slate-400 mt-2 block">Comprobante enviado por WhatsApp</span>';
 
         return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
           '<div class="flex justify-between items-start">' +
@@ -635,11 +663,12 @@
       document.getElementById('payment-receipt-file').value = '';
     };
 
+    // Opção 1: Upload de Comprovante no App
     window.submitBookingWithReceipt = async function() {
       if (!selectedSlot) return alert('Seleccioná un horario');
       var fileInput = document.getElementById('payment-receipt-file');
       var file = fileInput.files[0];
-      if (!file) return alert('Por favor, adjuntá el comprobante de pago');
+      if (!file) return alert('Por favor, adjuntá el comprobante de pago o usá la opción de enviar por WhatsApp');
 
       var btn = document.getElementById('confirm-booking-btn');
       btn.innerText = 'Subiendo comprobante...';
@@ -648,19 +677,17 @@
       var sb = getSupabase();
       var fileName = 'receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
       
-      // 1. Upload do comprovante no Storage
       var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
       if (uploadRes.error) {
-        btn.innerText = 'Confirmar y Enviar Comprobante';
+        btn.innerText = 'Confirmar y Guardar Reserva';
         btn.disabled = false;
         return alert('Error al subir archivo: ' + uploadRes.error.message);
       }
 
       var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
 
-      // 2. Salvar a reserva completa
       var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
-      var bookingRes = await sb.from('bookings').insert([{
+      await sb.from('bookings').insert([{
         user_id: currentUser.id,
         slot_id: selectedSlot.id,
         slot_date: selectedSlot.date,
@@ -671,18 +698,43 @@
         status: 'confirmed'
       }]);
 
-      // 3. Atualizar o slot para reservado
       await sb.from('available_slots').update({ is_booked: true }).eq('id', selectedSlot.id);
 
-      btn.innerText = 'Confirmar y Enviar Comprobante';
+      btn.innerText = 'Confirmar y Guardar Reserva';
       btn.disabled = false;
       cancelBookingSelection();
       loadStudentSlots();
 
-      alert('¡Clase agendada con éxito! Te estamos redirigiendo a WhatsApp para avisar a tu profesor.');
+      alert('¡Clase agendada con éxito! Te estamos redirigiendo a WhatsApp para confirmar con Renan.');
 
-      // 4. Abrir o WhatsApp para avisar na hora
-      var msg = "¡Hola Renan! Acabo de agendar una clase de portugués para el día " + selectedSlot.date + " a las " + selectedSlot.time + " hs. Mi email es " + currentUser.email + ". Acá está mi comprobante: " + publicUrl;
+      var msg = "¡Hola Renan! Acabo de agendar una clase de portugués para el " + selectedSlot.date + " a las " + selectedSlot.time + " hs. Mi email es " + currentUser.email + ". Acá está mi comprobante: " + publicUrl;
+      window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
+    };
+
+    // Opção 2: Enviar Comprovante direto pelo WhatsApp
+    window.sendReceiptViaWhatsApp = async function() {
+      if (!selectedSlot) return alert('Seleccioná un horario');
+
+      var sb = getSupabase();
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+
+      await sb.from('bookings').insert([{
+        user_id: currentUser.id,
+        slot_id: selectedSlot.id,
+        slot_date: selectedSlot.date,
+        slot_time: selectedSlot.time,
+        student_name: studentName,
+        student_email: currentUser.email,
+        receipt_url: null,
+        status: 'pending_receipt'
+      }]);
+
+      await sb.from('available_slots').update({ is_booked: true }).eq('id', selectedSlot.id);
+
+      cancelBookingSelection();
+      loadStudentSlots();
+
+      var msg = "¡Hola Renan! Quiero agendar la clase de portugués para el " + selectedSlot.date + " a las " + selectedSlot.time + " hs (Email: " + currentUser.email + "). Te adjunto a continuación la captura del comprobante de transferencia a tu Alias renan.barbosa:";
       window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
     };
 
