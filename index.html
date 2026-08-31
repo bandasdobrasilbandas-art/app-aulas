@@ -12,6 +12,29 @@
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     .nav-active { color: #16a34a !important; }
+    .video-secure-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border-radius: 1rem;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-secure-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    /* Bloqueia cliques no título superior e logotipo para impedir navegação externa */
+    .video-top-shield {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 55px;
+      z-index: 10;
+      background: transparent;
+    }
   </style>
 </head>
 <body class="bg-[#f8f9fa] text-slate-800 font-sans min-h-screen select-none">
@@ -92,7 +115,7 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
-        <!-- Mensagens do Professor para o Aluno -->
+        <!-- Mensagens do Professor -->
         <div id="student-inbox-section" class="hidden space-y-2">
           <div class="flex items-center justify-between px-1">
             <h4 class="font-bold text-xs text-slate-900">Mensajes de tu profesor</h4>
@@ -194,7 +217,6 @@
               <div id="payment-slots-summary" class="text-[11px] text-slate-600 pt-1 border-t border-slate-100 space-y-0.5"></div>
             </div>
 
-            <!-- Botão informativo para rever regras antes de pagar -->
             <button onclick="navigate('rules')" class="w-full text-left bg-white/70 border border-emerald-200 p-2.5 rounded-xl flex items-center justify-between text-xs text-emerald-900 hover:bg-white transition">
               <span class="flex items-center gap-1.5 font-medium"><i class="fa-solid fa-circle-info text-emerald-600"></i> Ver reglas de asistencia y cambios</span>
               <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
@@ -237,7 +259,7 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO -->
+      <!-- ABA 3: CURSO GRAVADO (COM BLOQUEIO DE LINKS EXTERNOS) -->
       <section id="tab-course" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
@@ -346,7 +368,6 @@
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
           </button>
 
-          <!-- Botão Manual do Aluno & Regras -->
           <button onclick="navigate('rules')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
             <div class="flex items-center gap-3">
               <i class="fa-solid fa-book-open-reader text-emerald-600 w-5"></i>
@@ -381,11 +402,9 @@
         </div>
       </section>
 
-      <!-- ABA 6: MANUAL DO ALUNO & REGRAS (NOVA TELA) -->
+      <!-- ABA 6: MANUAL DO ALUNO & REGRAS -->
       <section id="tab-rules" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-          
-          <!-- Seção 1: Asistencia y Cambios -->
           <div class="space-y-3">
             <div class="flex items-center gap-2 border-l-4 border-emerald-600 pl-2.5">
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Asistencia y Cambios</h3>
@@ -408,7 +427,6 @@
             </div>
           </div>
 
-          <!-- Seção 2: Reglas de Puntualidad -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center gap-2 border-l-4 border-blue-900 pl-2.5">
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Reglas de Puntualidad</h3>
@@ -472,7 +490,7 @@
           </div>
         </div>
 
-        <!-- Seção 2: Adicionar Vídeo + Nível + Apostila (Admin) -->
+        <!-- Seção 2: Gerenciamento de Vídeos e Aulas (Com Excluir e Pausar) -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
@@ -498,6 +516,14 @@
             <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
               Salvar Aula no Módulo
             </button>
+          </div>
+
+          <!-- LISTA DE AULAS CADASTRADAS (ADMIN) -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Aulas Cadastradas no Curso</h3>
+            <div id="admin-lessons-management-list" class="space-y-3 text-xs text-slate-500">
+              Carregando aulas...
+            </div>
           </div>
         </div>
 
@@ -910,6 +936,7 @@
       });
 
       if (type === 'students') loadAdminStudents();
+      if (type === 'videos') loadAdminLessonsManagement();
       if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
       if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
       if (type === 'slots') loadAdminSlots();
@@ -917,7 +944,7 @@
     };
 
     // ====================================================
-    // MÓDULO DO CURSO GRAVADO
+    // MÓDULO DO CURSO GRAVADO (PROTEÇÃO ANTI-LINK EXTERNO)
     // ====================================================
     window.switchCourseLevel = function(level) {
       currentCourseLevel = level;
@@ -942,6 +969,7 @@
       var { data: lessons, error } = await sb.from('course_lessons')
         .select('*')
         .eq('level', currentCourseLevel)
+        .neq('is_active', false) // Carrega apenas as ativas/visíveis
         .order('created_at', { ascending: true });
 
       if (currentUser) {
@@ -949,7 +977,7 @@
         userCompletedLessons = new Set((prog || []).map(p => p.lesson_id));
       }
 
-      var { data: allLessons } = await sb.from('course_lessons').select('id');
+      var { data: allLessons } = await sb.from('course_lessons').select('id').neq('is_active', false);
       var totalLessonsCount = (allLessons || []).length;
       var completedCount = userCompletedLessons.size;
       var percentage = totalLessonsCount > 0 ? Math.round((completedCount / totalLessonsCount) * 100) : 0;
@@ -969,11 +997,16 @@
         var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
         var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
 
+        // Embed Protegido sem vazamento de link e com camada superior anti-clique
         var videoEmbed = '';
         if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
           var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
           if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
-          videoEmbed = '<iframe class="w-full h-48 rounded-xl mt-2.5 shadow-sm" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+          
+          videoEmbed = '<div class="video-secure-container mt-2.5 shadow-sm">' +
+            '<div class="video-top-shield"></div>' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
+          '</div>';
         } else {
           videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
         }
@@ -1032,7 +1065,8 @@
         title: title,
         video_url: url,
         level: level,
-        material_url: material || null
+        material_url: material || null,
+        is_active: true
       }]);
 
       if (res.error) {
@@ -1042,6 +1076,76 @@
         document.getElementById('admin-video-title').value = '';
         document.getElementById('admin-video-url').value = '';
         document.getElementById('admin-video-material').value = '';
+        loadAdminLessonsManagement();
+      }
+    };
+
+    // Gerenciamento de Aulas no Admin (Pausar e Deletar)
+    window.loadAdminLessonsManagement = async function() {
+      var container = document.getElementById('admin-lessons-management-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data, error } = await sb.from('course_lessons').select('*').order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhuma aula cadastrada ainda.</p>';
+        return;
+      }
+
+      var levelLabels = { iniciante: 'Iniciante (A1-A2)', medio: 'Intermedio (B1-B2)', avancado: 'Avanzado (C1-C2)', extras: 'Clases Extras' };
+
+      container.innerHTML = data.map(function(lesson) {
+        var activeStatus = lesson.is_active !== false;
+        var toggleBtnClass = activeStatus ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white';
+        var toggleBtnText = activeStatus ? '<i class="fa-solid fa-eye-slash"></i> Pausar / Ocultar' : '<i class="fa-solid fa-eye"></i> Tornar Disponível';
+
+        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">' +
+          '<div class="flex justify-between items-start gap-2">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-xs">' + lesson.title + '</h4>' +
+              '<span class="text-[10px] font-semibold text-slate-500">Módulo: ' + (levelLabels[lesson.level] || lesson.level) + '</span>' +
+            '</div>' +
+            '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + (activeStatus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600') + '">' +
+              (activeStatus ? 'Visível' : 'Indisponível') +
+            '</span>' +
+          '</div>' +
+          '<div class="flex gap-2 pt-1">' +
+            '<button onclick="toggleLessonVisibility(\'' + lesson.id + '\', ' + activeStatus + ')" class="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition shadow-sm ' + toggleBtnClass + '">' +
+              toggleBtnText +
+            '</button>' +
+            '<button onclick="deleteLessonPermanently(\'' + lesson.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-xl text-[11px] transition">' +
+              '<i class="fa-solid fa-trash"></i> Excluir' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.toggleLessonVisibility = async function(lessonId, currentStatus) {
+      var sb = getSupabase();
+      if (!sb) return;
+      var { error } = await sb.from('course_lessons').update({ is_active: !currentStatus }).eq('id', lessonId);
+      if (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      } else {
+        loadAdminLessonsManagement();
+      }
+    };
+
+    window.deleteLessonPermanently = async function(lessonId) {
+      if (!confirm('Tem certeza que deseja excluir esta aula permanentemente?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+      
+      await sb.from('lesson_progress').delete().eq('lesson_id', lessonId);
+      var { error } = await sb.from('course_lessons').delete().eq('id', lessonId);
+      
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Aula excluída com sucesso!');
+        loadAdminLessonsManagement();
       }
     };
 
