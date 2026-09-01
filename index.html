@@ -459,7 +459,7 @@
         </div>
       </section>
 
-      <!-- ABA 4: TAREAS E EVALUACIONES -->
+      <!-- ABA 4: TAREAS E EVALUACIONES COM CORREÇÃO PEDAGÓGICA -->
       <section id="tab-tasks" class="space-y-4 hidden">
         <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
           <button onclick="switchTasksTab('materials')" id="tab-btn-tasks-mat" class="flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition">
@@ -482,6 +482,7 @@
         <div id="tasks-sub-quizzes" class="space-y-3 hidden">
           <div id="student-quizzes-list" class="space-y-3"></div>
 
+          <!-- CONTENEDOR DE EXAME EM ANDAMENTO -->
           <div id="active-quiz-container" class="hidden bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
             <div class="flex justify-between items-start border-b border-slate-100 pb-3">
               <div>
@@ -494,6 +495,19 @@
             <button onclick="submitQuizAnswers()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition">
               Finalizar y Calificar Examen
             </button>
+          </div>
+
+          <!-- RESULTADO E CORREÇÃO DETALHADA PARA O ALUNO -->
+          <div id="quiz-review-container" class="hidden bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <div>
+                <h3 class="font-bold text-sm text-slate-900">Resultado de tu Evaluación</h3>
+                <p id="quiz-review-score-badge" class="text-xs font-bold mt-0.5"></p>
+              </div>
+              <button onclick="closeQuizReview()" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">Volver</button>
+            </div>
+            <p class="text-xs text-slate-600">Revisá a continuación las respuestas correctas para reforzar tu aprendizaje:</p>
+            <div id="quiz-review-questions-list" class="space-y-3 text-xs"></div>
           </div>
         </div>
       </section>
@@ -649,6 +663,7 @@
       <section id="tab-admin" class="space-y-4 hidden">
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos</button>
+          <button onclick="showAdminTab('finance')" id="admin-btn-tab-finance" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">💰 Faturamento & Caixa</button>
           <button onclick="showAdminTab('broadcast')" id="admin-btn-tab-broadcast" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">💬 Avisos & Chat</button>
           <button onclick="showAdminTab('syllabus')" id="admin-btn-tab-syllabus" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">📖 Programa Curso</button>
           <button onclick="showAdminTab('design')" id="admin-btn-tab-design" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">🎨 Design</button>
@@ -660,7 +675,7 @@
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
         </div>
 
-        <!-- Seção 1: Alunos (com Filtros de PDF, Comprovantes com Justificativa e Tags de Planos) -->
+        <!-- Seção 1: Alunos -->
         <div id="admin-sec-students" class="space-y-4">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             
@@ -670,7 +685,6 @@
                 <p class="text-[11px] text-slate-500">Filtrá por plan, subí comprobantes y exportá</p>
               </div>
 
-              <!-- Filtro e Botão de Download PDF -->
               <div class="flex items-center gap-1.5">
                 <select id="pdf-filter-select" class="text-[11px] font-bold border border-slate-200 bg-slate-50 rounded-xl px-2.5 py-1.5 outline-none text-slate-700">
                   <option value="all">Todos los alumnos</option>
@@ -684,7 +698,6 @@
               </div>
             </div>
 
-            <!-- Filtros de exibição na tela -->
             <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] font-bold">
               <button onclick="filterStudentsView('all')" id="btn-filter-all" class="px-3 py-1 rounded-xl bg-slate-900 text-white transition whitespace-nowrap">Todos</button>
               <button onclick="filterStudentsView('course')" id="btn-filter-course" class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap">🟡 Curso Grabado</button>
@@ -711,7 +724,7 @@
               <div>
                 <label class="font-bold text-slate-700">Justificación del Pago:</label>
                 <select id="receipt-modal-type" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none mt-1 bg-white">
-                  <option value="curso_completo">Pago de Curso Grabado Completo ($30.000)</option>
+                  <option value="curso_completo">Pago de Curso Grabado Completo</option>
                   <option value="clase_meet">Pago de Clase Particular vía Meet</option>
                   <option value="otro">Otro / Personalizado</option>
                 </select>
@@ -767,7 +780,140 @@
           </div>
         </div>
 
-        <!-- Seção 2: Avisos & Chat Direto com Histórico (NOVA) -->
+        <!-- Seção 2: FATURAMENTO & CONTROLE DE CAIXA COM PROTEÇÃO DE SENHA (NOVA) -->
+        <div id="admin-sec-finance" class="space-y-4 hidden">
+          
+          <!-- TELA DE BLOQUEIO POR SENHA DE ADMIN -->
+          <div id="finance-lock-screen" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-slate-900 text-yellow-400 text-2xl flex items-center justify-center mx-auto shadow-sm">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="space-y-1">
+              <h3 class="font-bold text-base text-slate-900">Control de Caja Protegido</h3>
+              <p class="text-xs text-slate-500">Por seguridad, confirmá tu contraseña de administrador para ver el faturamento:</p>
+            </div>
+            <div class="max-w-xs mx-auto space-y-2">
+              <input id="finance-admin-pass" type="password" placeholder="Tu contraseña de admin" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 bg-white">
+              <button onclick="unlockFinanceSection()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm">
+                Desbloquear Faturamento
+              </button>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO LIBERADO DE FATURAMENTO E CAIXA -->
+          <div id="finance-unlocked-content" class="hidden space-y-4">
+            
+            <!-- Balanço Geral de Números -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-sm space-y-1">
+                <span class="text-[10px] font-bold uppercase opacity-80">Saldo Líquido en Caja</span>
+                <h4 id="fin-net-balance" class="text-xl font-extrabold">$0</h4>
+                <p class="text-[10px] opacity-90">Entradas menos salidas</p>
+              </div>
+
+              <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-sm space-y-1">
+                <span class="text-[10px] font-bold uppercase text-yellow-400">Total Faturado</span>
+                <h4 id="fin-total-income" class="text-xl font-extrabold text-white">$0</h4>
+                <p class="text-[10px] text-slate-300">Total histórico bruto</p>
+              </div>
+            </div>
+
+            <!-- Desglose por Serviços -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
+              <h4 class="font-bold text-xs text-slate-900">Ingresos por Tipo de Servicio:</h4>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
+                  <span class="text-slate-500 font-semibold text-[11px]">Clases 1:1 Meet</span>
+                  <p id="fin-meet-income" class="font-extrabold text-emerald-700 text-sm">$0</p>
+                  <span id="fin-meet-count" class="text-[10px] text-slate-400">0 clases pagadas</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
+                  <span class="text-slate-500 font-semibold text-[11px]">Curso Grabado</span>
+                  <p id="fin-course-income" class="font-extrabold text-amber-600 text-sm">$0</p>
+                  <span id="fin-course-count" class="text-[10px] text-slate-400">0 cursos vendidos</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gerador de Relatórios em PDF -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+              <div class="flex justify-between items-center">
+                <h4 class="font-bold text-xs text-slate-900">Generar Informe de Faturamento (PDF)</h4>
+                <i class="fa-solid fa-file-pdf text-red-500 text-base"></i>
+              </div>
+              
+              <div class="space-y-2 text-xs">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-600">Período:</label>
+                  <select id="fin-report-period" onchange="toggleManualReportDates(this.value)" class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white outline-none mt-0.5 font-medium">
+                    <option value="current_month">Mes Actual</option>
+                    <option value="last_month">Mes Anterior</option>
+                    <option value="all_time">Todo el Historial</option>
+                    <option value="custom">Rango Manual de Fechas</option>
+                  </select>
+                </div>
+
+                <div id="fin-custom-dates-row" class="hidden grid grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600">Desde:</label>
+                    <input id="fin-report-start" type="date" class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white outline-none mt-0.5">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600">Hasta:</label>
+                    <input id="fin-report-end" type="date" class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white outline-none mt-0.5">
+                  </div>
+                </div>
+
+                <button onclick="generateFinancePDFReport()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-download"></i> Descargar Informe Financiero
+                </button>
+              </div>
+            </div>
+
+            <!-- Registro de Saída / Despesa de Caixa -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+              <h4 class="font-bold text-xs text-slate-900">Registrar Salida / Retiro de Dinero</h4>
+              
+              <div class="space-y-2 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600">Monto ($ ARS):</label>
+                    <input id="fin-expense-amount" type="number" placeholder="Ej: 15000" class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none mt-0.5">
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-600">Categoría:</label>
+                    <select id="fin-expense-cat" class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white outline-none mt-0.5">
+                      <option value="uso_proprio">Retiro / Uso Propio</option>
+                      <option value="publicidade">Publicidad (Instagram / Google)</option>
+                      <option value="equipamento">Equipamiento / Software</option>
+                      <option value="outro">Otro</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[10px] font-bold text-slate-600">Justificación / Motivo:</label>
+                  <input id="fin-expense-desc" type="text" placeholder="Ej: Campaña de anuncios en Meta o retiro personal..." class="w-full border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none mt-0.5">
+                </div>
+
+                <button onclick="registerCashExpense()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">
+                  Registrar Salida de Caja
+                </button>
+              </div>
+            </div>
+
+            <!-- Histórico das Movimentações de Caixa -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
+              <h4 class="font-bold text-xs text-slate-900">Movimientos Recientes del Libro de Caja:</h4>
+              <div id="fin-cashflow-list" class="space-y-2 text-xs text-slate-500">
+                Cargando movimientos...
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Seção 3: Avisos & Chat Direto -->
         <div id="admin-sec-broadcast" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <h3 class="font-bold text-sm text-slate-900">Enviar Aviso o Mensaje Directo</h3>
@@ -785,7 +931,6 @@
                 </select>
               </div>
 
-              <!-- Histórico da Conversa com o Aluno Selecionado -->
               <div id="admin-chat-history-box" class="hidden p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
                 <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold border-b border-slate-200 pb-1">
                   <span>Historial de conversación con este alumno:</span>
@@ -804,7 +949,7 @@
           </div>
         </div>
 
-        <!-- Seção 3: Conteúdo Programático -->
+        <!-- Seção 4: Conteúdo Programático -->
         <div id="admin-sec-syllabus" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <div>
@@ -830,7 +975,7 @@
           </div>
         </div>
 
-        <!-- Seção 4: Design -->
+        <!-- Seção 5: Design -->
         <div id="admin-sec-design" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
             <div>
@@ -870,7 +1015,7 @@
           </div>
         </div>
 
-        <!-- Seção 5: Preços -->
+        <!-- Seção 6: Preços -->
         <div id="admin-sec-prices" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Configurar Precios de la Plataforma</h3>
@@ -892,7 +1037,7 @@
           </div>
         </div>
 
-        <!-- Seção 6: Tarefas -->
+        <!-- Seção 7: Tarefas -->
         <div id="admin-sec-assignments" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material</h3>
@@ -919,7 +1064,7 @@
           </div>
         </div>
 
-        <!-- Seção 7: Vídeos -->
+        <!-- Seção 8: Vídeos -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
@@ -960,7 +1105,7 @@
           </div>
         </div>
 
-        <!-- Seção 8: Provas Online -->
+        <!-- Seção 9: Provas Online -->
         <div id="admin-sec-quizzes" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <h3 class="font-bold text-sm text-slate-900">Crear Nueva Evaluación Online</h3>
@@ -989,7 +1134,7 @@
           </div>
         </div>
 
-        <!-- Seção 9: Reservas -->
+        <!-- Seção 10: Reservas -->
         <div id="admin-sec-bookings" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Agendar Alumno Manualmente</h3>
@@ -1016,7 +1161,7 @@
           </div>
         </div>
 
-        <!-- Seção 10: Horários -->
+        <!-- Seção 11: Horários -->
         <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
@@ -1170,7 +1315,6 @@
     var sessionCheckInterval = null;
     var ytPlayersMap = {};
     
-    // Variáveis para upload de comprovante com justificativa
     var currentReceiptTargetStudent = null;
     var currentStudentsFilter = 'all';
 
@@ -1534,6 +1678,7 @@
 
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
+      document.getElementById('admin-sec-finance').classList.toggle('hidden', type !== 'finance');
       document.getElementById('admin-sec-broadcast').classList.toggle('hidden', type !== 'broadcast');
       document.getElementById('admin-sec-syllabus').classList.toggle('hidden', type !== 'syllabus');
       document.getElementById('admin-sec-design').classList.toggle('hidden', type !== 'design');
@@ -1544,7 +1689,7 @@
       document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
 
-      ['students', 'broadcast', 'syllabus', 'design', 'prices', 'assignments', 'videos', 'quizzes', 'bookings', 'slots'].forEach(t => {
+      ['students', 'finance', 'broadcast', 'syllabus', 'design', 'prices', 'assignments', 'videos', 'quizzes', 'bookings', 'slots'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
         if (btn) {
           if (t === type) {
@@ -1556,6 +1701,7 @@
       });
 
       if (type === 'students') { loadAdminStudents(); cacheAllLessons(); }
+      if (type === 'finance') checkFinanceLockStatus();
       if (type === 'broadcast') { loadAdminStudents(); populateBroadcastStudentOptions(); }
       if (type === 'syllabus') loadAppSettings();
       if (type === 'prices') loadAppSettings();
@@ -2014,7 +2160,6 @@
 
       var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
 
-      // Salvar registro na tabela student_receipts
       await sb.from('student_receipts').insert([{
         student_id: currentReceiptTargetStudent.id.includes('@') ? null : currentReceiptTargetStudent.id,
         student_email: currentReceiptTargetStudent.email,
@@ -2023,7 +2168,6 @@
         file_url: publicUrl
       }]);
 
-      // Se for curso completo, libera automaticamente o curso para ele
       if (rType === 'curso_completo') {
         await sb.from('profiles').update({
           has_course_access: true,
@@ -2099,7 +2243,223 @@
     };
 
     // ====================================================
-    // CHAT INDIVIDUAL NO ADMIN COM HISTÓRICO COMPLETO
+    // FATURAMENTO & CONTROLE DE CAIXA (ADMIN COM SENHA)
+    // ====================================================
+    var isFinanceUnlocked = false;
+
+    function checkFinanceLockStatus() {
+      var lockScreen = document.getElementById('finance-lock-screen');
+      var unlockedContent = document.getElementById('finance-unlocked-content');
+      if (isFinanceUnlocked) {
+        lockScreen.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        loadFinanceData();
+      } else {
+        lockScreen.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    }
+
+    window.unlockFinanceSection = async function() {
+      var pass = document.getElementById('finance-admin-pass').value;
+      if (!pass) return alert('Por favor ingresá tu contraseña.');
+
+      var sb = getSupabase();
+      // Validar senha do admin no Supabase
+      var res = await sb.auth.signInWithPassword({
+        email: currentUser.email,
+        password: pass
+      });
+
+      if (res.error) {
+        alert('Contraseña incorrecta. Acceso denegado al faturamento.');
+      } else {
+        isFinanceUnlocked = true;
+        document.getElementById('finance-admin-pass').value = '';
+        checkFinanceLockStatus();
+      }
+    };
+
+    async function loadFinanceData() {
+      var sb = getSupabase();
+      if (!sb) return;
+
+      // 1. Total de aulas meet contratadas
+      var { data: bookings } = await sb.from('bookings').select('id, created_at, status');
+      var meetCount = (bookings || []).length;
+      var meetTotal = meetCount * PRICE_PER_LESSON;
+
+      // 2. Total de cursos vendidos (perfis com has_course_access = true excluindo admin)
+      var { data: courses } = await sb.from('profiles').select('id, email, created_at').eq('has_course_access', true);
+      var validCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()));
+      var courseCount = validCourses.length;
+      var courseTotal = courseCount * PRICE_COURSE;
+
+      // 3. Total de saídas do fluxo de caixa
+      var { data: cashFlow } = await sb.from('cash_flow').select('*').order('created_at', { ascending: false });
+      var totalExpenses = 0;
+      (cashFlow || []).forEach(cf => {
+        if (cf.type === 'expense') totalExpenses += parseFloat(cf.amount) || 0;
+      });
+
+      var grossIncome = meetTotal + courseTotal;
+      var netBalance = grossIncome - totalExpenses;
+
+      document.getElementById('fin-total-income').innerText = '$' + grossIncome.toLocaleString('es-AR');
+      document.getElementById('fin-net-balance').innerText = '$' + netBalance.toLocaleString('es-AR');
+      document.getElementById('fin-meet-income').innerText = '$' + meetTotal.toLocaleString('es-AR');
+      document.getElementById('fin-meet-count').innerText = meetCount + ' clase(s) contratada(s)';
+      document.getElementById('fin-course-income').innerText = '$' + courseTotal.toLocaleString('es-AR');
+      document.getElementById('fin-course-count').innerText = courseCount + ' curso(s) vendido(s)';
+
+      // Renderizar lista de saídas e despesas
+      var listContainer = document.getElementById('fin-cashflow-list');
+      if (!cashFlow || cashFlow.length === 0) {
+        listContainer.innerHTML = '<p class="text-slate-400">No hay movimientos o retiros registrados aún.</p>';
+      } else {
+        listContainer.innerHTML = cashFlow.map(function(cf) {
+          var dateStr = new Date(cf.created_at).toLocaleDateString('es-AR', { dateStyle: 'short' });
+          var catLabels = { uso_proprio: 'Uso Propio', publicidade: 'Publicidad', equipamento: 'Equipamiento', outro: 'Otro' };
+          return '<div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center">' +
+            '<div>' +
+              '<span class="font-bold text-slate-800">' + cf.description + '</span>' +
+              '<div class="text-[10px] text-slate-400">' + dateStr + ' • ' + (catLabels[cf.category] || cf.category) + '</div>' +
+            '</div>' +
+            '<span class="font-extrabold text-red-600">-$' + parseFloat(cf.amount).toLocaleString('es-AR') + '</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
+
+    window.registerCashExpense = async function() {
+      var amount = parseFloat(document.getElementById('fin-expense-amount').value);
+      var cat = document.getElementById('fin-expense-cat').value;
+      var desc = document.getElementById('fin-expense-desc').value.trim();
+
+      if (!amount || amount <= 0) return alert('Por favor ingresá un monto válido.');
+      if (!desc) return alert('Por favor escribí la justificación del retiro.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('cash_flow').insert([{
+        type: 'expense',
+        amount: amount,
+        category: cat,
+        description: desc
+      }]);
+
+      if (error) {
+        alert('Error al registrar: ' + error.message);
+      } else {
+        alert('¡Salida de caja registrada con éxito!');
+        document.getElementById('fin-expense-amount').value = '';
+        document.getElementById('fin-expense-desc').value = '';
+        loadFinanceData();
+      }
+    };
+
+    window.toggleManualReportDates = function(val) {
+      document.getElementById('fin-custom-dates-row').classList.toggle('hidden', val !== 'custom');
+    };
+
+    window.generateFinancePDFReport = async function() {
+      var period = document.getElementById('fin-report-period').value;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var now = new Date();
+      var startDate = null;
+      var endDate = null;
+      var periodTitle = 'Todo el Historial';
+
+      if (period === 'current_month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        periodTitle = 'Mes Actual (' + (now.getMonth() + 1) + '/' + now.getFullYear() + ')';
+      } else if (period === 'last_month') {
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        periodTitle = 'Mes Anterior';
+      } else if (period === 'custom') {
+        var startInput = document.getElementById('fin-report-start').value;
+        var endInput = document.getElementById('fin-report-end').value;
+        if (!startInput || !endInput) return alert('Por favor seleccioná fecha de inicio y fin.');
+        startDate = new Date(startInput);
+        endDate = new Date(endInput + 'T23:59:59');
+        periodTitle = 'Del ' + startInput + ' al ' + endInput;
+      }
+
+      var { data: bookings } = await sb.from('bookings').select('*');
+      var { data: courses } = await sb.from('profiles').select('*').eq('has_course_access', true);
+      var { data: expenses } = await sb.from('cash_flow').select('*');
+
+      var filterByDate = function(itemDate) {
+        if (!startDate || !endDate) return true;
+        var d = new Date(itemDate);
+        return d >= startDate && d <= endDate;
+      };
+
+      var filteredBookings = (bookings || []).filter(b => filterByDate(b.created_at));
+      var filteredCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()) && filterByDate(c.created_at));
+      var filteredExpenses = (expenses || []).filter(e => filterByDate(e.created_at));
+
+      var meetIncome = filteredBookings.length * PRICE_PER_LESSON;
+      var courseIncome = filteredCourses.length * PRICE_COURSE;
+      var totalIncome = meetIncome + courseIncome;
+      var totalExpenses = filteredExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      var netProfit = totalIncome - totalExpenses;
+
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("Informe Financiero Oficial - Portugues con Renan", 14, 18);
+      doc.setFontSize(10);
+      doc.text("Profesor: Renan Barbosa | Periodo: " + periodTitle, 14, 25);
+      doc.text("Fecha de emision: " + new Date().toLocaleDateString('es-AR'), 14, 31);
+
+      var summaryRows = [
+        ['Ingresos Clases Particulares Meet (' + filteredBookings.length + ' clases)', '$' + meetIncome.toLocaleString('es-AR')],
+        ['Ingresos Cursos Grabados Vendidos (' + filteredCourses.length + ' cursos)', '$' + courseIncome.toLocaleString('es-AR')],
+        ['TOTAL INGRESOS BRUTOS', '$' + totalIncome.toLocaleString('es-AR')],
+        ['TOTAL SALIDAS Y RETIROS DE CAJA', '-$' + totalExpenses.toLocaleString('es-AR')],
+        ['SALDO LIQUIDO FINAL EN CAJA', '$' + netProfit.toLocaleString('es-AR')]
+      ];
+
+      doc.autoTable({
+        startY: 36,
+        head: [['Concepto Resumen', 'Monto ($ ARS)']],
+        body: summaryRows,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 36, 68] },
+        styles: { fontSize: 9 }
+      });
+
+      var expenseRows = filteredExpenses.map(function(e) {
+        return [
+          new Date(e.created_at).toLocaleDateString('es-AR'),
+          e.category,
+          e.description,
+          '-$' + parseFloat(e.amount).toLocaleString('es-AR')
+        ];
+      });
+
+      if (expenseRows.length > 0) {
+        doc.text("Detalle de Salidas y Gastos Registrados:", 14, doc.lastAutoTable.finalY + 12);
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 16,
+          head: [['Fecha', 'Categoria', 'Justificacion', 'Monto']],
+          body: expenseRows,
+          theme: 'grid',
+          headStyles: { fillColor: [180, 40, 40] },
+          styles: { fontSize: 8 }
+        });
+      }
+
+      doc.save('informe_financiero_' + period + '.pdf');
+    };
+
+    // ====================================================
+    // CHAT INDIVIDUAL NO ADMIN COM HISTÓRICO
     // ====================================================
     function populateBroadcastStudentOptions() {
       var group = document.getElementById('broadcast-students-group');
@@ -2195,515 +2555,197 @@
       }
     };
 
-    window.openStudentDetailModal = async function(studentId, email, name) {
-      var modal = document.getElementById('student-detail-modal');
-      modal.classList.remove('hidden');
-      document.getElementById('modal-student-name').innerText = name;
-      document.getElementById('modal-student-email').innerText = email;
-
-      var sb = getSupabase();
-
-      // 1. Planos contratados
-      var { data: bookings } = await sb.from('bookings').select('*').eq('student_email', email);
-      var plansContainer = document.getElementById('modal-student-plans');
-      var bookingsCount = (bookings || []).length;
-      plansContainer.innerHTML = '• Clases 1:1 Meet agendadas: <b>' + bookingsCount + ' clase(s)</b><br>' +
-        (bookings || []).map(b => '  - 📅 ' + formatSpanishDate(b.slot_date) + ' a las ' + b.slot_time + ' hs').join('<br>');
-
-      // 2. Histórico de comprovantes com justificativa
-      var { data: receipts } = await sb.from('student_receipts').select('*').eq('student_email', email).order('created_at', { ascending: false });
-      var receiptsContainer = document.getElementById('modal-student-receipts-list');
-      if (receipts && receipts.length > 0) {
-        receiptsContainer.innerHTML = receipts.map(function(r) {
-          var typeLabel = r.receipt_type === 'curso_completo' ? 'Curso Grabado' : (r.receipt_type === 'clase_meet' ? 'Clase Meet' : 'Otro');
-          return '<div class="p-2 bg-white rounded-lg border border-slate-200 flex justify-between items-center text-xs">' +
-            '<div>' +
-              '<b>' + typeLabel + ':</b> ' + (r.note || 'Sin nota') +
-              '<div class="text-[10px] text-slate-400">' + new Date(r.created_at).toLocaleDateString('es-AR') + '</div>' +
-            '</div>' +
-            '<a href="' + r.file_url + '" target="_blank" class="text-blue-600 font-bold underline">Ver Archivo</a>' +
-          '</div>';
-        }).join('');
-      } else {
-        receiptsContainer.innerHTML = '<p class="text-slate-400">No hay comprobantes guardados para este alumno.</p>';
-      }
-
-      // 3. Aulas concluídas
-      var { data: prog } = await sb.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', studentId);
-      var lessonsDoneContainer = document.getElementById('modal-student-lessons-done');
-      if (prog && prog.length > 0) {
-        lessonsDoneContainer.innerHTML = 'Total: <b>' + prog.length + ' lecciones completadas</b>';
-      } else {
-        lessonsDoneContainer.innerHTML = 'Aún no ha completado lecciones';
-      }
-
-      // 4. Provas
-      var { data: quizzes } = await sb.from('quiz_submissions').select('*').eq('student_email', email);
-      var quizzesContainer = document.getElementById('modal-student-quizzes-detail');
-
-      if (quizzes && quizzes.length > 0) {
-        quizzesContainer.innerHTML = quizzes.map(function(q) {
-          var feedback = q.feedback_text ? '<p class="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg mt-1"><b>Tu devolución:</b> ' + q.feedback_text + '</p>' : '';
-
-          return '<div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">' +
-            '<div class="flex justify-between font-bold text-slate-800">' +
-              '<span>' + q.quiz_title + '</span>' +
-              '<span class="text-emerald-700">' + q.score + '/' + q.total_questions + '</span>' +
-            '</div>' +
-            feedback +
-            '<button onclick="sendTeacherFeedback(\'' + q.id + '\')" class="text-[10px] text-blue-600 underline font-bold block mt-1">+ Enviar / Editar Devolución</button>' +
-          '</div>';
-        }).join('');
-      } else {
-        quizzesContainer.innerHTML = '<p class="text-slate-400">Sin exámenes completados</p>';
-      }
-
-      modal.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.sendTeacherFeedback = async function(submissionId) {
-      var feedback = prompt('Escribí tu devolución pedagógica para el alumno sobre esta prueba:');
-      if (!feedback) return;
-
-      var sb = getSupabase();
-      await sb.from('quiz_submissions').update({ feedback_text: feedback }).eq('id', submissionId);
-      alert('¡Devolución guardada con éxito!');
-    };
-
-    window.closeStudentDetailModal = function() {
-      document.getElementById('student-detail-modal').classList.add('hidden');
-    };
-
-    window.setStudentCourseAccess = async function(studentId, accessType) {
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var updates = {};
-      if (accessType === 'full') {
-        updates = { has_course_access: true, trial_lesson_id: null };
-      } else {
-        updates = { has_course_access: false, trial_lesson_id: null };
-      }
-
-      await sb.from('profiles').update(updates).eq('id', studentId);
-      alert('¡Acceso al curso actualizado!');
-      loadAdminStudents();
-    };
-
-    window.grantTrialLesson = async function(studentId) {
-      var select = document.getElementById('trial-select-' + studentId);
-      var lessonId = select.value;
-
-      if (!lessonId) return alert('Por favor selecciona una lección para habilitar como prueba.');
-
-      var sb = getSupabase();
-      if (!sb) return;
-
-      await sb.from('profiles').update({
-        has_course_access: false,
-        trial_lesson_id: lessonId
-      }).eq('id', studentId);
-
-      alert('¡Lección de prueba asignada al alumno!');
-      loadAdminStudents();
-    };
-
-    window.updateStudentLevel = async function(studentId, newLevel) {
-      var sb = getSupabase();
-      if (!sb) return;
-      await sb.from('profiles').update({ student_level: newLevel }).eq('id', studentId);
-      alert('¡Nivel del alumno actualizado con éxito!');
-    };
-
-    window.toggleStudentStatus = async function(studentId, currentStatus) {
-      var newStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
-      var sb = getSupabase();
-      if (!sb) return;
-      await sb.from('profiles').update({ status: newStatus }).eq('id', studentId);
-      loadAdminStudents();
-    };
-
     // ====================================================
-    // CENTRAL DE INFORMACIONES (ALUNO)
+    // PROVAS ONLINE E CORREÇÃO PEDAGÓGICA DO ALUNO
     // ====================================================
-    window.loadInfoCenter = async function() {
-      if (!currentUser) return;
-      var sb = getSupabase();
-      if (!sb) return;
+    window.submitQuizAnswers = async function() {
+      if (!activeQuizData) return;
+      var questions = activeQuizData.questions_json || [];
+      var score = 0;
+      var total = questions.length;
+      var answersDetail = [];
 
-      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+      for (var i = 0; i < total; i++) {
+        var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
+        if (!selected) return alert('Por favor responde la pregunta #' + (i + 1));
+        var userChoice = parseInt(selected.value);
+        var isCorrect = userChoice === questions[i].correct;
+        if (isCorrect) score++;
 
-      var { data: messages } = await sb.from('student_messages')
-        .select('*')
-        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
-        .order('created_at', { ascending: false });
-
-      var container = document.getElementById('info-center-list');
-      if (!messages || messages.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-regular fa-bell text-3xl"></i><p class="text-sm font-medium">No tenés nuevos avisos por el momento.</p></div>';
-        return;
+        answersDetail.push({
+          question_number: i + 1,
+          question: questions[i].question,
+          options: questions[i].options,
+          user_choice_idx: userChoice,
+          user_choice: questions[i].options[userChoice],
+          correct_choice_idx: questions[i].correct,
+          correct_choice: questions[i].options[questions[i].correct],
+          is_correct: isCorrect
+        });
       }
 
-      container.innerHTML = messages.map(function(m) {
-        var isFromStudent = m.sender_type === 'student';
-        var cardBg = isFromStudent ? 'bg-blue-50/70 border-blue-100' : 'bg-slate-50 border-slate-100';
-        var senderName = isFromStudent ? 'Vos (Consulta enviada)' : (m.sender || 'Profesor Renan');
-        var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 underline mt-2"><i class="fa-solid fa-paperclip"></i> Ver archivo o material</a>' : '';
-
-        return '<div class="p-3.5 ' + cardBg + ' border rounded-2xl space-y-1">' +
-          '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
-            '<span class="font-bold text-slate-800">' + senderName + '</span>' +
-            '<span>' + new Date(m.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) + '</span>' +
-          '</div>' +
-          '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
-          fileBtn +
-        '</div>';
-      }).join('');
-    };
-
-    window.studentSendMessage = async function() {
-      var input = document.getElementById('student-msg-input');
-      var text = input.value.trim();
-      if (!text) return alert('Por favor escribí un mensaje.');
-
-      var sb = getSupabase();
+      var percentage = Math.round((score / total) * 100);
       var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
 
-      await sb.from('student_messages').insert([{
-        student_id: currentUser.id,
+      var sb = getSupabase();
+      await sb.from('quiz_submissions').insert([{
+        quiz_id: activeQuizData.id,
+        quiz_title: activeQuizData.title,
         student_email: currentUser.email,
-        sender: studentName,
-        sender_type: 'student',
-        message_text: text,
-        file_url: null
+        student_name: studentName,
+        score: score,
+        total_questions: total,
+        answers_detail: answersDetail
       }]);
 
-      input.value = '';
-      alert('¡Tu consulta fue enviada a Renan con éxito!');
-      loadInfoCenter();
+      // Fechar exame ativo e exibir tela pedagógica detalhada
+      closeActiveQuiz();
+      showStudentQuizReview(activeQuizData.title, score, total, percentage, answersDetail);
+      loadStudentTasksAndQuizzes();
     };
 
-    window.loadStudentInbox = async function() {
+    function showStudentQuizReview(title, score, total, percentage, details) {
+      document.getElementById('student-quizzes-list').classList.add('hidden');
+      var reviewBox = document.getElementById('quiz-review-container');
+      reviewBox.classList.remove('hidden');
+
+      var scoreBadge = document.getElementById('quiz-review-score-badge');
+      scoreBadge.innerText = 'Puntaje: ' + score + ' de ' + total + ' (' + percentage + '%)';
+      scoreBadge.className = percentage >= 60 ? 'text-xs font-bold text-green-700' : 'text-xs font-bold text-red-600';
+
+      var container = document.getElementById('quiz-review-questions-list');
+      container.innerHTML = details.map(function(item) {
+        var statusBadge = item.is_correct 
+          ? '<span class="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check"></i> Acertaste</span>'
+          : '<span class="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-xmark"></i> Erraste</span>';
+
+        return '<div class="p-3.5 ' + (item.is_correct ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200') + ' rounded-2xl border space-y-2">' +
+          '<div class="flex justify-between items-start">' +
+            '<p class="font-bold text-slate-900">' + item.question_number + '. ' + item.question + '</p>' +
+            statusBadge +
+          '</div>' +
+          '<div class="space-y-1 text-xs">' +
+            '<div>Tu respuesta: <b class="' + (item.is_correct ? 'text-green-700' : 'text-red-600') + '">' + item.user_choice + '</b></div>' +
+            (!item.is_correct ? '<div class="text-emerald-800 bg-white p-2 rounded-xl border border-emerald-200 mt-1">💡 <b>Respuesta correcta:</b> ' + item.correct_choice + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      reviewBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.closeQuizReview = function() {
+      document.getElementById('quiz-review-container').classList.add('hidden');
+      document.getElementById('student-quizzes-list').classList.remove('hidden');
+    };
+
+    window.startStudentQuiz = async function(quizId) {
+      var sb = getSupabase();
+      var { data } = await sb.from('online_quizzes').select('*').eq('id', quizId).single();
+      if (!data) return;
+
+      activeQuizData = data;
+      document.getElementById('student-quizzes-list').classList.add('hidden');
+      document.getElementById('quiz-review-container').classList.add('hidden');
+      var container = document.getElementById('active-quiz-container');
+      container.classList.remove('hidden');
+
+      document.getElementById('active-quiz-title').innerText = data.title;
+      document.getElementById('active-quiz-desc').innerText = data.description || '';
+
+      var questionsDiv = document.getElementById('active-quiz-questions');
+      var questions = data.questions_json || [];
+
+      questionsDiv.innerHTML = questions.map(function(q, qIdx) {
+        return '<div class="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-100">' +
+          '<p class="font-bold text-slate-800">' + (qIdx + 1) + '. ' + q.question + '</p>' +
+          '<div class="space-y-1.5">' +
+            q.options.map(function(opt, optIdx) {
+              return '<label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">' +
+                '<input type="radio" name="student-ans-' + qIdx + '" value="' + optIdx + '" class="text-green-600">' +
+                '<span class="text-slate-700">' + opt + '</span>' +
+              '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      container.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeActiveQuiz = function() {
+      activeQuizData = null;
+      document.getElementById('active-quiz-container').classList.add('hidden');
+      document.getElementById('student-quizzes-list').classList.remove('hidden');
+    };
+
+    window.switchTasksTab = function(type) {
+      document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
+      document.getElementById('tasks-sub-quizzes').classList.toggle('hidden', type !== 'quizzes');
+
+      var btnMat = document.getElementById('tab-btn-tasks-mat');
+      var btnQuiz = document.getElementById('tab-btn-tasks-quiz');
+
+      if (type === 'materials') {
+        btnMat.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnQuiz.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      } else {
+        btnQuiz.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnMat.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      }
+    };
+
+    window.loadStudentTasksAndQuizzes = async function() {
       if (!currentUser) return;
       var sb = getSupabase();
       if (!sb) return;
 
       var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
 
-      var { data } = await sb.from('student_messages')
+      var { data: assignments } = await sb.from('student_assignments')
         .select('*')
-        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email + ',target_student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false });
 
-      var container = document.getElementById('student-inbox-list');
-      var section = document.getElementById('student-inbox-section');
+      var matContainer = document.getElementById('student-assignments-list');
+      if (assignments && assignments.length > 0) {
+        matContainer.innerHTML = assignments.map(function(a) {
+          var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-xl font-bold text-xs mt-2 hover:bg-green-100 transition"><i class="fa-solid fa-file-pdf"></i> Abrir Apostila / Material</a>' : '';
 
-      if (data && data.length > 0) {
-        section.classList.remove('hidden');
-        container.innerHTML = data.map(function(m) {
-          var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline mt-1.5"><i class="fa-solid fa-paperclip"></i> Ver archivo adjunto</a>' : '';
-
-          return '<div class="p-3 bg-white border border-green-200 rounded-2xl shadow-sm space-y-1">' +
-            '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
-              '<span class="font-bold text-slate-800">' + m.sender + '</span>' +
-              '<span>' + new Date(m.created_at).toLocaleDateString('es-AR') + '</span>' +
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-1.5">' +
+            '<div class="flex justify-between items-start">' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + a.title + '</h4>' +
+              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Material</span>' +
             '</div>' +
-            '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
-            fileBtn +
+            '<p class="text-xs text-slate-600 leading-relaxed">' + (a.description || '') + '</p>' +
+            linkBtn +
           '</div>';
         }).join('');
       } else {
-        section.classList.add('hidden');
+        matContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-regular fa-clipboard text-3xl"></i><p class="text-sm">Sin tareas asignadas por el momento</p></div>';
       }
-    };
 
-    // ====================================================
-    // HORÁRIOS & RESERVAS
-    // ====================================================
-    window.loadAvailableSlotsForAdmin = async function() {
-      var select = document.getElementById('admin-manual-slot-select');
-      var sb = getSupabase();
-      if (!sb || !select) return;
+      var { data: quizzes } = await sb.from('online_quizzes').select('*').order('created_at', { ascending: false });
+      var quizContainer = document.getElementById('student-quizzes-list');
 
-      var { data } = await sb.from('available_slots').select('*').eq('is_booked', false).order('date', { ascending: true }).order('time', { ascending: true });
-      availableSlotsCache = data || [];
-
-      if (availableSlotsCache.length === 0) {
-        select.innerHTML = '<option value="">No hay horarios libres disponibles</option>';
-      } else {
-        select.innerHTML = availableSlotsCache.map(s => '<option value="' + s.id + '" data-date="' + s.date + '" data-time="' + s.time + '">' + formatSpanishDate(s.date) + ' - ' + s.time + ' hs</option>').join('');
-      }
-    };
-
-    window.adminBookStudentManually = async function() {
-      var studentSelect = document.getElementById('admin-manual-student-select');
-      var slotSelect = document.getElementById('admin-manual-slot-select');
-
-      var studentEmail = studentSelect.value;
-      var selectedOption = studentSelect.options[studentSelect.selectedIndex];
-      var studentName = selectedOption.getAttribute('data-name');
-      var studentId = selectedOption.getAttribute('data-id');
-
-      var slotId = slotSelect.value;
-      if (!slotId) return alert('Selecciona un horario disponible');
-      var selectedSlotOpt = slotSelect.options[slotSelect.selectedIndex];
-      var slotDate = selectedSlotOpt.getAttribute('data-date');
-      var slotTime = selectedSlotOpt.getAttribute('data-time');
-
-      var sb = getSupabase();
-      
-      await sb.from('bookings').insert([{
-        user_id: studentId.includes('@') ? null : studentId,
-        slot_id: slotId,
-        slot_date: slotDate,
-        slot_time: slotTime,
-        student_name: studentName,
-        student_email: studentEmail,
-        receipt_url: null,
-        status: 'confirmed'
-      }]);
-
-      await sb.from('available_slots').update({ is_booked: true }).eq('id', slotId);
-
-      alert('¡Clase agendada con éxito para ' + studentName + '!');
-      loadAdminBookings();
-      loadAvailableSlotsForAdmin();
-      loadAdminStudents();
-    };
-
-    window.loadAdminBookings = async function() {
-      var container = document.getElementById('admin-bookings-list');
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('bookings').select('*').order('created_at', { ascending: false });
-      if (res.error || !res.data || res.data.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">Nenhuma reserva realizada ainda.</p>';
-        return;
-      }
-      container.innerHTML = res.data.map(function(b) {
-        var receiptSection = b.receipt_url 
-          ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
-          : '<div class="mt-2 flex items-center gap-2">' +
-              '<span class="text-[11px] text-amber-600 font-semibold">Sin comprobante subido</span>' +
-              '<button onclick="uploadReceiptManuallyForBooking(\'' + b.id + '\')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-2 py-1 rounded-lg text-[10px] transition"><i class="fa-solid fa-upload"></i> Subir Ahora</button>' +
-            '</div>';
-
-        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
-          '<div class="flex justify-between items-start">' +
-            '<div>' +
-              '<h4 class="font-bold text-slate-900 text-sm">' + (b.student_name || 'Aluno') + '</h4>' +
-              '<p class="text-[11px] text-slate-500">' + (b.student_email || 'Email não informado') + '</p>' +
+      if (quizzes && quizzes.length > 0) {
+        quizContainer.innerHTML = quizzes.map(function(q) {
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-2">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + q.title + '</h4>' +
+                '<p class="text-xs text-slate-500">' + (q.description || 'Evaluación con corrección automática') + '</p>' +
+              '</div>' +
+              '<span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Online</span>' +
             '</div>' +
-            '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
-          '</div>' +
-          '<div class="text-xs text-slate-700 pt-1">' +
-            '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
-          '</div>' +
-          receiptSection +
-        '</div>';
-      }).join('');
-    };
-
-    window.uploadReceiptManuallyForBooking = async function(bookingId) {
-      var fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*,.pdf';
-
-      fileInput.onchange = async function() {
-        var file = fileInput.files[0];
-        if (!file) return;
-
-        var sb = getSupabase();
-        var fileName = 'receipt_admin_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
-
-        var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
-        if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
-
-        var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
-        await sb.from('bookings').update({ receipt_url: publicUrl }).eq('id', bookingId);
-
-        alert('¡Comprobante adjuntado con éxito a la reserva!');
-        loadAdminBookings();
-      };
-
-      fileInput.click();
-    };
-
-    // ====================================================
-    // VÍDEOS & AULAS
-    // ====================================================
-    window.addVideo = async function() {
-      var title = document.getElementById('admin-video-title').value;
-      var url = document.getElementById('admin-video-url').value;
-      var level = document.getElementById('admin-video-level').value;
-      var material = document.getElementById('admin-video-material').value;
-      var shouldNotify = document.getElementById('admin-video-notify').checked;
-
-      if (!title || !url) return alert('Preencha título e link do vídeo!');
-
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var res = await sb.from('course_lessons').insert([{
-        title: title,
-        video_url: url,
-        level: level,
-        material_url: material || null,
-        is_active: true
-      }]);
-
-      if (res.error) {
-        alert('Erro ao cadastrar: ' + res.error.message);
-      } else {
-        if (shouldNotify) {
-          await sb.from('student_messages').insert([{
-            student_email: 'nivel_' + level,
-            sender: 'Profesor Renan Barbosa',
-            sender_type: 'teacher',
-            message_text: 'Nova aula publicada no seu módulo: "' + title + '". Já disponível no Curso Gravado!',
-            file_url: material || null
-          }]);
-        }
-
-        alert('Aula cadastrada com sucesso!');
-        document.getElementById('admin-video-title').value = '';
-        document.getElementById('admin-video-url').value = '';
-        document.getElementById('admin-video-material').value = '';
-        document.getElementById('admin-video-notify').checked = false;
-        loadAdminLessonsManagement();
-      }
-    };
-
-    window.loadAdminLessonsManagement = async function() {
-      var container = document.getElementById('admin-lessons-management-list');
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var { data, error } = await sb.from('course_lessons').select('*').order('created_at', { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">Nenhuma aula cadastrada ainda.</p>';
-        return;
-      }
-
-      var levelLabels = { iniciante: 'Iniciante (A1-A2)', medio: 'Intermedio (B1-B2)', avancado: 'Avanzado (C1-C2)', extras: 'Clases Extras' };
-
-      container.innerHTML = data.map(function(lesson) {
-        var activeStatus = lesson.is_active !== false;
-        var toggleBtnClass = activeStatus ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white';
-        var toggleBtnText = activeStatus ? '<i class="fa-solid fa-eye-slash"></i> Pausar / Ocultar' : '<i class="fa-solid fa-eye"></i> Tornar Disponível';
-
-        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">' +
-          '<div class="flex justify-between items-start gap-2">' +
-            '<div>' +
-              '<h4 class="font-bold text-slate-900 text-xs">' + lesson.title + '</h4>' +
-              '<span class="text-[10px] font-semibold text-slate-500">Módulo: ' + (levelLabels[lesson.level] || lesson.level) + '</span>' +
-            '</div>' +
-            '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + (activeStatus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600') + '">' +
-              (activeStatus ? 'Visível' : 'Indisponível') +
-            '</span>' +
-          '</div>' +
-          '<div class="flex gap-2 pt-1">' +
-            '<button onclick="toggleLessonVisibility(\'' + lesson.id + '\', ' + activeStatus + ')" class="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition shadow-sm ' + toggleBtnClass + '">' +
-              toggleBtnText +
+            '<button onclick="startStudentQuiz(\'' + q.id + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">' +
+              'Realizar Evaluación' +
             '</button>' +
-            '<button onclick="deleteLessonPermanently(\'' + lesson.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-xl text-[11px] transition">' +
-              '<i class="fa-solid fa-trash"></i> Excluir' +
-            '</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-    };
-
-    window.toggleLessonVisibility = async function(lessonId, currentStatus) {
-      var sb = getSupabase();
-      if (!sb) return;
-      var { error } = await sb.from('course_lessons').update({ is_active: !currentStatus }).eq('id', lessonId);
-      if (error) {
-        alert('Erro: ' + error.message);
+          '</div>';
+        }).join('');
       } else {
-        loadAdminLessonsManagement();
+        quizContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-solid fa-graduation-cap text-3xl"></i><p class="text-sm">Sin evaluaciones disponibles</p></div>';
       }
-    };
-
-    window.deleteLessonPermanently = async function(lessonId) {
-      if (!confirm('Tem certeza que deseja excluir esta aula permanentemente?')) return;
-      var sb = getSupabase();
-      if (!sb) return;
-      
-      await sb.from('lesson_progress').delete().eq('lesson_id', lessonId);
-      var { error } = await sb.from('course_lessons').delete().eq('id', lessonId);
-      
-      if (error) {
-        alert('Erro ao excluir: ' + error.message);
-      } else {
-        alert('Aula excluída com sucesso!');
-        loadAdminLessonsManagement();
-      }
-    };
-
-    // ====================================================
-    // TAREFAS & PROVAS ONLINE
-    // ====================================================
-    window.createAssignment = async function() {
-      var title = document.getElementById('assign-title').value;
-      var desc = document.getElementById('assign-desc').value;
-      var url = document.getElementById('assign-url').value;
-      var target = document.getElementById('assign-target-student').value;
-
-      if (!title) return alert('Por favor, ingresá un título.');
-
-      var sb = getSupabase();
-      var { error } = await sb.from('student_assignments').insert([{
-        title: title,
-        description: desc,
-        material_url: url,
-        target_student_email: target
-      }]);
-
-      if (error) {
-        alert('Error: ' + error.message);
-      } else {
-        await sb.from('student_messages').insert([{
-          student_email: target,
-          sender: 'Profesor Renan Barbosa',
-          sender_type: 'teacher',
-          message_text: 'Nueva tarea asignada: "' + title + '". Podés revisarla en la sección de Tareas & Evaluaciones.',
-          file_url: url || null
-        }]);
-
-        alert('¡Tarea publicada y notificada con éxito!');
-        document.getElementById('assign-title').value = '';
-        document.getElementById('assign-desc').value = '';
-        document.getElementById('assign-url').value = '';
-        loadAdminAssignments();
-      }
-    };
-
-    window.loadAdminAssignments = async function() {
-      var container = document.getElementById('admin-assignments-list');
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var { data } = await sb.from('student_assignments').select('*').order('created_at', { ascending: false });
-      if (!data || data.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">No hay tareas o materiales publicados aún.</p>';
-        return;
-      }
-
-      container.innerHTML = data.map(function(a) {
-        var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="text-blue-600 underline font-bold text-[11px] block mt-1"><i class="fa-solid fa-link"></i> Abrir Material / PDF</a>' : '';
-
-        return '<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1">' +
-          '<div class="flex justify-between items-start">' +
-            '<h4 class="font-bold text-slate-800 text-xs">' + a.title + '</h4>' +
-            '<span class="bg-slate-200 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">' + a.target_student_email + '</span>' +
-          '</div>' +
-          '<p class="text-[11px] text-slate-600">' + (a.description || 'Sin descripción') + '</p>' +
-          linkBtn +
-        '</div>';
-      }).join('');
     };
 
     var quizQuestions = [];
@@ -2807,153 +2849,53 @@
       }).join('');
     };
 
-    window.switchTasksTab = function(type) {
-      document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
-      document.getElementById('tasks-sub-quizzes').classList.toggle('hidden', type !== 'quizzes');
-
-      var btnMat = document.getElementById('tab-btn-tasks-mat');
-      var btnQuiz = document.getElementById('tab-btn-tasks-quiz');
-
-      if (type === 'materials') {
-        btnMat.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
-        btnQuiz.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
-      } else {
-        btnQuiz.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
-        btnMat.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
-      }
+    window.toggleStudentStatus = async function(studentId, currentStatus) {
+      var newStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ status: newStatus }).eq('id', studentId);
+      loadAdminStudents();
     };
 
-    window.loadStudentTasksAndQuizzes = async function() {
-      if (!currentUser) return;
+    window.setStudentCourseAccess = async function(studentId, accessType) {
       var sb = getSupabase();
       if (!sb) return;
 
-      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
-
-      var { data: assignments } = await sb.from('student_assignments')
-        .select('*')
-        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email + ',target_student_email.eq.' + levelTag)
-        .order('created_at', { ascending: false });
-
-      var matContainer = document.getElementById('student-assignments-list');
-      if (assignments && assignments.length > 0) {
-        matContainer.innerHTML = assignments.map(function(a) {
-          var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-xl font-bold text-xs mt-2 hover:bg-green-100 transition"><i class="fa-solid fa-file-pdf"></i> Abrir Apostila / Material</a>' : '';
-
-          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-1.5">' +
-            '<div class="flex justify-between items-start">' +
-              '<h4 class="font-bold text-slate-900 text-sm">' + a.title + '</h4>' +
-              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Material</span>' +
-            '</div>' +
-            '<p class="text-xs text-slate-600 leading-relaxed">' + (a.description || '') + '</p>' +
-            linkBtn +
-          '</div>';
-        }).join('');
+      var updates = {};
+      if (accessType === 'full') {
+        updates = { has_course_access: true, trial_lesson_id: null };
       } else {
-        matContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-regular fa-clipboard text-3xl"></i><p class="text-sm">Sin tareas asignadas por el momento</p></div>';
+        updates = { has_course_access: false, trial_lesson_id: null };
       }
 
-      var { data: quizzes } = await sb.from('online_quizzes').select('*').order('created_at', { ascending: false });
-      var quizContainer = document.getElementById('student-quizzes-list');
-
-      if (quizzes && quizzes.length > 0) {
-        quizContainer.innerHTML = quizzes.map(function(q) {
-          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-2">' +
-            '<div class="flex justify-between items-start">' +
-              '<div>' +
-                '<h4 class="font-bold text-slate-900 text-sm">' + q.title + '</h4>' +
-                '<p class="text-xs text-slate-500">' + (q.description || 'Evaluación con corrección automática') + '</p>' +
-              '</div>' +
-              '<span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Online</span>' +
-            '</div>' +
-            '<button onclick="startStudentQuiz(\'' + q.id + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">' +
-              'Realizar Evaluación' +
-            '</button>' +
-          '</div>';
-        }).join('');
-      } else {
-        quizContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-solid fa-graduation-cap text-3xl"></i><p class="text-sm">Sin evaluaciones disponibles</p></div>';
-      }
+      await sb.from('profiles').update(updates).eq('id', studentId);
+      alert('¡Acceso al curso actualizado!');
+      loadAdminStudents();
     };
 
-    window.startStudentQuiz = async function(quizId) {
-      var sb = getSupabase();
-      var { data } = await sb.from('online_quizzes').select('*').eq('id', quizId).single();
-      if (!data) return;
+    window.grantTrialLesson = async function(studentId) {
+      var select = document.getElementById('trial-select-' + studentId);
+      var lessonId = select.value;
 
-      activeQuizData = data;
-      document.getElementById('student-quizzes-list').classList.add('hidden');
-      var container = document.getElementById('active-quiz-container');
-      container.classList.remove('hidden');
-
-      document.getElementById('active-quiz-title').innerText = data.title;
-      document.getElementById('active-quiz-desc').innerText = data.description || '';
-
-      var questionsDiv = document.getElementById('active-quiz-questions');
-      var questions = data.questions_json || [];
-
-      questionsDiv.innerHTML = questions.map(function(q, qIdx) {
-        return '<div class="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-100">' +
-          '<p class="font-bold text-slate-800">' + (qIdx + 1) + '. ' + q.question + '</p>' +
-          '<div class="space-y-1.5">' +
-            q.options.map(function(opt, optIdx) {
-              return '<label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">' +
-                '<input type="radio" name="student-ans-' + qIdx + '" value="' + optIdx + '" class="text-green-600">' +
-                '<span class="text-slate-700">' + opt + '</span>' +
-              '</label>';
-            }).join('') +
-          '</div>' +
-        '</div>';
-      }).join('');
-
-      container.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.closeActiveQuiz = function() {
-      activeQuizData = null;
-      document.getElementById('active-quiz-container').classList.add('hidden');
-      document.getElementById('student-quizzes-list').classList.remove('hidden');
-    };
-
-    window.submitQuizAnswers = async function() {
-      if (!activeQuizData) return;
-      var questions = activeQuizData.questions_json || [];
-      var score = 0;
-      var total = questions.length;
-      var answersDetail = [];
-
-      for (var i = 0; i < total; i++) {
-        var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
-        if (!selected) return alert('Por favor responde la pregunta #' + (i + 1));
-        var userChoice = parseInt(selected.value);
-        var isCorrect = userChoice === questions[i].correct;
-        if (isCorrect) score++;
-
-        answersDetail.push({
-          question: questions[i].question,
-          user_choice: questions[i].options[userChoice],
-          correct_choice: questions[i].options[questions[i].correct],
-          is_correct: isCorrect
-        });
-      }
-
-      var percentage = Math.round((score / total) * 100);
-      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+      if (!lessonId) return alert('Por favor selecciona una lección para habilitar como prueba.');
 
       var sb = getSupabase();
-      await sb.from('quiz_submissions').insert([{
-        quiz_id: activeQuizData.id,
-        quiz_title: activeQuizData.title,
-        student_email: currentUser.email,
-        student_name: studentName,
-        score: score,
-        total_questions: total,
-        answers_detail: answersDetail
-      }]);
+      if (!sb) return;
 
-      alert('¡Evaluación finalizada!\nTu puntuación: ' + score + '/' + total + ' (' + percentage + '%)');
-      closeActiveQuiz();
-      loadStudentTasksAndQuizzes();
+      await sb.from('profiles').update({
+        has_course_access: false,
+        trial_lesson_id: lessonId
+      }).eq('id', studentId);
+
+      alert('¡Lección de prueba asignada al alumno!');
+      loadAdminStudents();
+    };
+
+    window.updateStudentLevel = async function(studentId, newLevel) {
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ student_level: newLevel }).eq('id', studentId);
+      alert('¡Nivel del alumno actualizado con éxito!');
     };
 
     // ====================================================
@@ -3269,7 +3211,6 @@
 
       await sb.from('bookings').insert(bookingsToInsert);
 
-      // Registrar também no histórico unificado de comprovantes
       await sb.from('student_receipts').insert([{
         student_id: currentUser.id,
         student_email: currentUser.email,
