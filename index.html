@@ -148,7 +148,7 @@
   <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 relative z-10">
     <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-sm w-full max-w-sm space-y-5">
       <div class="text-center space-y-2">
-        <div id="auth-logo-box" class="w-16 h-16 rounded-2xl bg-yellow-400 text-slate-900 text-2xl flex items-center justify-center mx-auto shadow-sm overflow-hidden">
+        <div id="auth-logo-box" class="w-16 h-16 rounded-2xl bg-yellow-400 text-slate-900 text-2xl flex items-center justify-center mx-auto shadow-sm overflow-hidden font-bold">
           🇧🇷
         </div>
         <h2 id="auth-title" class="text-xl font-bold text-slate-900">Iniciar sesión</h2>
@@ -500,6 +500,7 @@
               <button onclick="closeQuizReview()" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">Volver</button>
             </div>
 
+            <!-- Recomendação pedagógica dinâmica -->
             <div id="quiz-review-feedback-box" class="p-3 rounded-2xl text-xs leading-relaxed space-y-1"></div>
 
             <p class="text-xs text-slate-600">Revisá a continuación las respuestas correctas para aprender y reforzar tus conocimientos:</p>
@@ -1022,10 +1023,7 @@
 
         <div id="admin-sec-syllabus" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
-            <div>
-              <h3 class="font-bold text-sm text-slate-900">Configurar Contenido Programático</h3>
-              <p class="text-xs text-slate-500">Este texto lo verán los alumnos interesados antes de comprar el curso.</p>
-            </div>
+            <h3 class="font-bold text-sm text-slate-900">Configurar Contenido Programático</h3>
             <div class="space-y-2.5 pt-1">
               <textarea id="setting-syllabus-text" rows="7" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 bg-white font-sans mt-1 leading-relaxed"></textarea>
               <input id="setting-syllabus-pdf" type="text" placeholder="Link PDF Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 mt-1">
@@ -1155,7 +1153,7 @@
             </div>
           </div>
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual (Manual)</h3>
+            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual</h3>
             <div class="grid grid-cols-2 gap-2">
               <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
               <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
@@ -1194,9 +1192,101 @@
     </nav>
   </div>
 
+  <!-- SCRIPT DEFINITIVO DE AUTENTICAÇÃO E CARREGAMENTO -->
   <script>
-    // Inicialização da aplicação
-    window.addEventListener('DOMContentLoaded', function() {
+    // 1. Definições globais de autenticação
+    window.toggleAuthMode = function() {
+      isSignUp = !isSignUp;
+      document.getElementById('auth-title').innerText = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
+      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Registrate para acceder a las clases' : 'Ingresá a tu plataforma de portugués';
+      document.getElementById('auth-btn').innerText = isSignUp ? 'Registrarse' : 'Entrar';
+      document.getElementById('auth-toggle-text').innerText = isSignUp ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?';
+      document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Iniciar sesión' : 'Crear cuenta';
+      var nameField = document.getElementById('name-field');
+      if (isSignUp) {
+        nameField.classList.remove('hidden');
+      } else {
+        nameField.classList.add('hidden');
+      }
+    };
+
+    window.handleAuth = async function() {
+      var email = document.getElementById('auth-email').value.trim();
+      var password = document.getElementById('auth-password').value;
+      var name = document.getElementById('auth-name').value.trim();
+      var authBtn = document.getElementById('auth-btn');
+
+      if (!email || !password) {
+        alert('Por favor, ingresá email y contraseña');
+        return;
+      }
+
+      authBtn.innerText = isSignUp ? 'Creando cuenta...' : 'Iniciando sesión...';
+      authBtn.disabled = true;
+
+      try {
+        var sb = getSupabase();
+        if (!sb) throw new Error("No se pudo conectar a la base de datos.");
+
+        if (isSignUp) {
+          var res = await sb.auth.signUp({
+            email: email,
+            password: password,
+            options: { data: { full_name: name || 'Estudiante' } }
+          });
+          if (res.error) throw res.error;
+
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              full_name: name || 'Estudiante',
+              email: email,
+              status: 'Ativo',
+              student_level: 'iniciante',
+              has_course_access: false,
+              trial_lesson_id: null,
+              current_session_token: newSessionToken,
+              last_sign_in_at: new Date().toISOString(),
+              last_content_viewed: 'Registro'
+            }]);
+          }
+          alert('¡Cuenta creada con éxito!');
+          await checkSession();
+        } else {
+          var res = await sb.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+          if (res.error) throw res.error;
+
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              email: email,
+              full_name: (res.data.user.user_metadata && res.data.user.user_metadata.full_name) || email.split('@')[0],
+              status: 'Ativo',
+              current_session_token: newSessionToken,
+              last_sign_in_at: new Date().toISOString()
+            }]);
+          }
+          await checkSession();
+        }
+      } catch (err) {
+        alert('Error: ' + (err.message || err));
+      } finally {
+        authBtn.innerText = isSignUp ? 'Registrarse' : 'Entrar';
+        authBtn.disabled = false;
+      }
+    };
+
+    // 2. Inicialização segura no carregamento da página
+    window.addEventListener('load', function() {
       checkSession();
     });
   </script>
