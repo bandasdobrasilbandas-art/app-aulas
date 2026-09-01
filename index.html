@@ -294,10 +294,8 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO GRAVADO (COM SYLLABUS & AULA DE DEGUSTAÇÃO) -->
+      <!-- ABA 3: CURSO GRAVADO -->
       <section id="tab-course" class="space-y-4 hidden">
-        
-        <!-- TELA DE BLOQUEIO (COM BOTÃO DE SYLLABUS) -->
         <div id="course-locked-screen" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
           <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 text-2xl flex items-center justify-center mx-auto shadow-sm">
             <i class="fa-solid fa-lock"></i>
@@ -317,7 +315,6 @@
             <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
           </div>
 
-          <!-- BOTÃO VER CONTEÚDO PROGRAMÁTICO -->
           <button onclick="openSyllabusModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-list-check text-emerald-600"></i> Ver Contenido Programático (Qué vas a aprender)
           </button>
@@ -328,7 +325,6 @@
           </button>
         </div>
 
-        <!-- MODAL DO CONTEÚDO PROGRAMÁTICO (POPUP) -->
         <div id="syllabus-modal" class="hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-xl space-y-3.5">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
             <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
@@ -346,7 +342,6 @@
           </div>
         </div>
 
-        <!-- CONTEÚDO LIBERADO DO CURSO -->
         <div id="course-unlocked-content" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
           <div class="flex justify-between items-start">
             <div>
@@ -358,7 +353,6 @@
             </button>
           </div>
 
-          <!-- BANNER DE DEGUSTAÇÃO SE FOR APENAS AULA TESTE -->
           <div id="course-trial-banner" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-1">
             <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-gift text-amber-600"></i> Aula de Prueba Habilitada</div>
             <p class="text-[11px] text-amber-800">Tenés acceso libre a esta lección de prueba. Para desbloquear el curso completo y materiales, contactá a tu profesor.</p>
@@ -599,7 +593,7 @@
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
         </div>
 
-        <!-- Seção 1: Alunos & Liberação Granular -->
+        <!-- Seção 1: Alunos -->
         <div id="admin-sec-students" class="space-y-4">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
             <div class="flex justify-between items-center">
@@ -644,7 +638,7 @@
           </div>
         </div>
 
-        <!-- Seção 2: Conteúdo Programático (Admin) -->
+        <!-- Seção 2: Conteúdo Programático -->
         <div id="admin-sec-syllabus" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <div>
@@ -1665,31 +1659,30 @@
               
               '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
 
-              <!-- SELEÇÃO DE ACESSO GRANULAR -->
-              <div class="pt-1.5 border-t border-slate-100 space-y-1">
-                <label class="font-bold text-[10px] text-slate-700">Gestionar acceso al curso para este alumno:</label>
-                <div class="grid grid-cols-2 gap-1.5">
-                  <button onclick="setStudentCourseAccess(\'' + s.id + '\', \'full\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-green-600 hover:bg-green-700 text-white transition">
-                    <i class="fa-solid fa-lock-open"></i> Curso Completo
-                  </button>
-                  <button onclick="setStudentCourseAccess(\'' + s.id + '\', \'none\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-red-100 hover:bg-red-200 text-red-700 transition">
-                    <i class="fa-solid fa-lock"></i> Bloquear Todo
-                  </button>
-                </div>
+              '<div class="pt-1.5 border-t border-slate-100 space-y-1">' +
+                '<label class="font-bold text-[10px] text-slate-700">Gestionar acceso al curso para este alumno:</label>' +
+                '<div class="grid grid-cols-2 gap-1.5">' +
+                  '<button onclick="setStudentCourseAccess(\'' + s.id + '\', \'full\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-green-600 hover:bg-green-700 text-white transition">' +
+                    '<i class="fa-solid fa-lock-open"></i> Curso Completo' +
+                  '</button>' +
+                  '<button onclick="setStudentCourseAccess(\'' + s.id + '\', \'none\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-red-100 hover:bg-red-200 text-red-700 transition">' +
+                    '<i class="fa-solid fa-lock"></i> Bloquear Todo' +
+                  '</button>' +
+                '</div>' +
                 
-                <div class="flex items-center gap-1.5 pt-1">
-                  <select id="trial-select-' + s.id + '" class="flex-1 text-[10px] border border-slate-200 bg-slate-50 rounded-lg px-2 py-1 outline-none">
-                    <option value="">-- Seleccionar Aula de Prueba --</option>' +
+                '<div class="flex items-center gap-1.5 pt-1">' +
+                  '<select id="trial-select-' + s.id + '" class="flex-1 text-[10px] border border-slate-200 bg-slate-50 rounded-lg px-2 py-1 outline-none">' +
+                    '<option value="">-- Seleccionar Aula de Prueba --</option>' +
                     lessonOptions +
                   '</select>' +
-                  <button onclick="grantTrialLesson(\'' + s.id + '\')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition whitespace-nowrap">
-                    Liberar Prueba
-                  </button>
-                </div>
-              </div>
-            </div>
+                  '<button onclick="grantTrialLesson(\'' + s.id + '\')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition whitespace-nowrap">' +
+                    'Liberar Prueba' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
 
-            <div class="flex gap-2 pt-0.5">' +
+            '<div class="flex gap-2 pt-0.5">' +
               '<button onclick="openStudentDetailModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-1.5 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1.5">' +
                 '<i class="fa-solid fa-chart-line text-blue-300"></i> Ver Ficha & Progreso' +
               '</button>' +
@@ -2673,7 +2666,7 @@
       await sb.from('bookings').delete().eq('slot_id', slotId);
       var { error } = await sb.from('available_slots').delete().eq('id', slotId);
       if (error) {
-        alert('Erro: ' + error.message);
+        alert('Erro ao excluir: ' + error.message);
       } else {
         alert('Horário excluído com sucesso!');
         loadAdminSlots();
