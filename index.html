@@ -500,7 +500,6 @@
               <button onclick="closeQuizReview()" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">Volver</button>
             </div>
 
-            <!-- Recomendação pedagógica dinâmica -->
             <div id="quiz-review-feedback-box" class="p-3 rounded-2xl text-xs leading-relaxed space-y-1"></div>
 
             <p class="text-xs text-slate-600">Revisá a continuación las respuestas correctas para aprender y reforzar tus conocimientos:</p>
@@ -1153,7 +1152,7 @@
             </div>
           </div>
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual</h3>
+            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual (Manual)</h3>
             <div class="grid grid-cols-2 gap-2">
               <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
               <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
@@ -1192,9 +1191,10 @@
     </nav>
   </div>
 
-  <!-- SCRIPT DEFINITIVO DE AUTENTICAÇÃO E CARREGAMENTO -->
   <script>
-    // 1. Definições globais de autenticação
+    // ==========================================
+    // AUTENTICAÇÃO E SESSÃO SEGURA (100% DECLARADO)
+    // ==========================================
     window.toggleAuthMode = function() {
       isSignUp = !isSignUp;
       document.getElementById('auth-title').innerText = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
@@ -1217,11 +1217,11 @@
       var authBtn = document.getElementById('auth-btn');
 
       if (!email || !password) {
-        alert('Por favor, ingresá email y contraseña');
+        alert('Por favor, ingresá email y contraseña.');
         return;
       }
 
-      authBtn.innerText = isSignUp ? 'Creando cuenta...' : 'Iniciando sesión...';
+      authBtn.innerText = isSignUp ? 'Creando cuenta...' : 'Entrando...';
       authBtn.disabled = true;
 
       try {
@@ -1285,8 +1285,7 @@
       }
     };
 
-    // 2. Inicialização segura no carregamento da página
-    window.addEventListener('load', function() {
+    window.addEventListener('DOMContentLoaded', function() {
       checkSession();
     });
   </script>
