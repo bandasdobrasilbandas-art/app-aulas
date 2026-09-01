@@ -187,7 +187,6 @@
 
   <!-- APLICATIVO PRINCIPAL -->
   <div id="app-screen" class="hidden pb-24 relative z-10">
-    
     <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between">
       <button onclick="navigate('home')" class="p-1 text-slate-700 text-lg hover:text-green-600 transition">
         <i class="fa-solid fa-chevron-left"></i>
@@ -205,7 +204,6 @@
             <h2 id="home-greeting" class="text-2xl font-extrabold text-slate-900 tracking-tight">Olá! 👋</h2>
             <p class="text-xs text-slate-500 font-medium">¿Qué querés aprender hoy?</p>
           </div>
-          
           <div id="home-logo-container" class="w-12 h-12 rounded-2xl bg-yellow-400 flex items-center justify-center text-2xl shadow-sm border border-yellow-300/50 overflow-hidden shrink-0">
             <span id="home-logo-emoji">🇧🇷</span>
             <img id="home-logo-img" src="" class="hidden w-full h-full object-cover">
@@ -220,7 +218,6 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
-        <!-- Card Clases 1:1 -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-meet-bg-img" src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -236,7 +233,6 @@
           </div>
         </div>
 
-        <!-- Card Curso Grabado -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-course-bg-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -321,9 +317,7 @@
               <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
             </button>
 
-            <p class="text-[11px] text-emerald-900 leading-relaxed">
-              Podés <b>subir la foto del comprobante aquí</b> para confirmar o enviarla por WhatsApp:
-            </p>
+            <p class="text-[11px] text-emerald-900 leading-relaxed">Podés <b>subir la foto del comprobante aquí</b> o enviarla por WhatsApp:</p>
 
             <div class="space-y-2">
               <label class="text-[11px] font-bold text-slate-700">Opción 1: Subir comprobante aquí</label>
@@ -1223,14 +1217,1021 @@
     var currentCourseLevel = 'iniciante';
     var userCompletedLessons = new Set();
     var sessionCheckInterval = null;
-    var ytPlayersMap = {};
     
     var currentReceiptTargetStudent = null;
     var currentStudentsFilter = 'all';
 
+    async function loadAppSettings() {
+      try {
+        var sb = getSupabase();
+        if (!sb) return;
+        var { data } = await sb.from('app_settings').select('*');
+        if (data) {
+          data.forEach(item => {
+            if (item.key === 'price_meet') PRICE_PER_LESSON = parseInt(item.value) || 12500;
+            if (item.key === 'price_course') PRICE_COURSE = parseInt(item.value) || 30000;
+            if (item.key === 'card_course_bg' && item.value) {
+              var el = document.getElementById('card-course-bg-img');
+              if (el) el.src = item.value;
+            }
+            if (item.key === 'card_meet_bg' && item.value) {
+              var el = document.getElementById('card-meet-bg-img');
+              if (el) el.src = item.value;
+            }
+            if (item.key === 'app_theme') applyAppTheme(item.value || 'tropical');
+            if (item.key === 'app_logo_url') applyLogo(item.value);
+            if (item.key === 'course_syllabus_text') {
+              var el = document.getElementById('syllabus-content-display');
+              if (el) el.innerText = item.value;
+              var textInput = document.getElementById('setting-syllabus-text');
+              if (textInput) textInput.value = item.value;
+            }
+            if (item.key === 'course_syllabus_pdf_url') {
+              var pdfBox = document.getElementById('syllabus-pdf-link-box');
+              var pdfLink = document.getElementById('syllabus-pdf-link');
+              var pdfInput = document.getElementById('setting-syllabus-pdf');
+              if (pdfInput) pdfInput.value = item.value;
+              if (item.value && item.value.trim() !== '') {
+                if (pdfBox) pdfBox.classList.remove('hidden');
+                if (pdfLink) pdfLink.href = item.value;
+              } else {
+                if (pdfBox) pdfBox.classList.add('hidden');
+              }
+            }
+          });
+        }
+
+        var cardMeet = document.getElementById('card-meet-price');
+        var cardCourse = document.getElementById('card-course-price');
+        var lockedPrice = document.getElementById('locked-course-price-label');
+        var inputMeet = document.getElementById('setting-price-meet');
+        var inputCourse = document.getElementById('setting-price-course');
+
+        if (cardMeet) cardMeet.innerText = '$' + PRICE_PER_LESSON.toLocaleString('es-AR') + ' / 50 min';
+        if (cardCourse) cardCourse.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR');
+        if (lockedPrice) lockedPrice.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR') + ' ARS';
+        if (inputMeet) inputMeet.value = PRICE_PER_LESSON;
+        if (inputCourse) inputCourse.value = PRICE_COURSE;
+      } catch (err) {
+        console.error("Error cargando configuraciones:", err);
+      }
+    }
+
+    function applyAppTheme(themeName) {
+      document.body.classList.remove('theme-tropical', 'theme-brasil', 'theme-classic');
+      document.body.classList.add('theme-' + (themeName || 'tropical'));
+      var select = document.getElementById('setting-app-theme');
+      if (select) select.value = themeName || 'tropical';
+    }
+
+    function applyLogo(logoUrl) {
+      var homeLogoEmoji = document.getElementById('home-logo-emoji');
+      var homeLogoImg = document.getElementById('home-logo-img');
+      var inputLogo = document.getElementById('setting-app-logo');
+
+      if (inputLogo) inputLogo.value = logoUrl || '';
+
+      if (logoUrl && logoUrl.trim() !== '') {
+        if (homeLogoEmoji) homeLogoEmoji.classList.add('hidden');
+        if (homeLogoImg) {
+          homeLogoImg.src = logoUrl;
+          homeLogoImg.classList.remove('hidden');
+        }
+      } else {
+        if (homeLogoEmoji) homeLogoEmoji.classList.remove('hidden');
+        if (homeLogoImg) homeLogoImg.classList.add('hidden');
+      }
+    }
+
+    window.openSyllabusModal = function() {
+      document.getElementById('syllabus-modal').classList.remove('hidden');
+      document.getElementById('syllabus-modal').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeSyllabusModal = function() {
+      document.getElementById('syllabus-modal').classList.add('hidden');
+    };
+
+    window.saveSyllabusSettings = async function() {
+      var textVal = document.getElementById('setting-syllabus-text').value;
+      var pdfVal = document.getElementById('setting-syllabus-pdf').value.trim();
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('app_settings').upsert([
+        { key: 'course_syllabus_text', value: textVal },
+        { key: 'course_syllabus_pdf_url', value: pdfVal }
+      ]);
+
+      alert('¡Contenido programático actualizado con éxito!');
+      loadAppSettings();
+    };
+
+    window.saveDesignSettings = async function() {
+      var theme = document.getElementById('setting-app-theme').value;
+      var logo = document.getElementById('setting-app-logo').value.trim();
+      var courseBg = document.getElementById('setting-bg-course').value.trim();
+      var meetBg = document.getElementById('setting-bg-meet').value.trim();
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var updates = [
+        { key: 'app_theme', value: theme },
+        { key: 'app_logo_url', value: logo }
+      ];
+
+      if (courseBg) updates.push({ key: 'card_course_bg', value: courseBg });
+      if (meetBg) updates.push({ key: 'card_meet_bg', value: meetBg });
+
+      await sb.from('app_settings').upsert(updates);
+      alert('¡Diseño y temas actualizados con éxito!');
+      loadAppSettings();
+    };
+
+    window.saveAppSettings = async function() {
+      var meetVal = document.getElementById('setting-price-meet').value;
+      var courseVal = document.getElementById('setting-price-course').value;
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('app_settings').upsert([
+        { key: 'price_meet', value: meetVal },
+        { key: 'price_course', value: courseVal }
+      ]);
+
+      alert('¡Precios actualizados con éxito!');
+      loadAppSettings();
+    };
+
+    function toggleAuthMode() {
+      isSignUp = !isSignUp;
+      document.getElementById('auth-title').innerText = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
+      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Registrate para acceder a las clases' : 'Ingresá a tu plataforma de portugués';
+      document.getElementById('auth-btn').innerText = isSignUp ? 'Registrarse' : 'Entrar';
+      document.getElementById('auth-toggle-text').innerText = isSignUp ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?';
+      document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Iniciar sesión' : 'Crear cuenta';
+      var nameField = document.getElementById('name-field');
+      if (isSignUp) {
+        nameField.classList.remove('hidden');
+      } else {
+        nameField.classList.add('hidden');
+      }
+    }
+
+    async function handleAuth() {
+      var email = document.getElementById('auth-email').value;
+      var password = document.getElementById('auth-password').value;
+      var name = document.getElementById('auth-name').value;
+      var sb = getSupabase();
+
+      if (!email || !password) return alert('Por favor, ingresá email y contraseña');
+
+      if (isSignUp) {
+        var res = await sb.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { full_name: name || 'Estudiante' } }
+        });
+        if (res.error) {
+          alert('Error al registrarse: ' + res.error.message);
+        } else {
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              full_name: name || 'Estudiante',
+              email: email,
+              status: 'Ativo',
+              student_level: 'iniciante',
+              has_course_access: false,
+              trial_lesson_id: null,
+              current_session_token: newSessionToken,
+              last_sign_in_at: new Date().toISOString(),
+              last_content_viewed: 'Registro'
+            }]);
+          }
+          alert('Cuenta creada con éxito!');
+          checkSession();
+        }
+      } else {
+        var res = await sb.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        if (res.error) {
+          alert('Error al iniciar sesión: ' + res.error.message);
+        } else {
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
+          if (res.data.user) {
+            await sb.from('profiles').upsert([{
+              id: res.data.user.id,
+              email: email,
+              full_name: (res.data.user.user_metadata && res.data.user.user_metadata.full_name) || email.split('@')[0],
+              status: 'Ativo',
+              current_session_token: newSessionToken,
+              last_sign_in_at: new Date().toISOString()
+            }]);
+          }
+          checkSession();
+        }
+      }
+    }
+
+    async function handleLogout() {
+      var sb = getSupabase();
+      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+      localStorage.removeItem('user_session_token');
+      await sb.auth.signOut();
+      document.getElementById('app-screen').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+    }
+
+    function startSingleSessionGuard() {
+      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+      var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
+      if (isAdmin) return;
+
+      sessionCheckInterval = setInterval(async function() {
+        if (!currentUser) return;
+        var localToken = localStorage.getItem('user_session_token');
+        if (!localToken) return;
+
+        var sb = getSupabase();
+        var { data } = await sb.from('profiles').select('current_session_token').eq('id', currentUser.id).single();
+
+        if (data && data.current_session_token && data.current_session_token !== localToken) {
+          clearInterval(sessionCheckInterval);
+          alert('⚠️ Tu sesión se ha cerrado porque se inició sesión en otro dispositivo con esta misma cuenta.');
+          handleLogout();
+        }
+      }, 10000);
+    }
+
+    async function checkSession() {
+      var sb = getSupabase();
+      if (!sb) return;
+      var sessionRes = await sb.auth.getSession();
+      var session = sessionRes.data.session;
+
+      if (session) {
+        currentUser = session.user;
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+
+        await loadAppSettings();
+
+        var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+        userProfileData = prof || { has_course_access: false, student_level: 'iniciante', trial_lesson_id: null };
+
+        if (!localStorage.getItem('user_session_token') && prof && prof.current_session_token) {
+          localStorage.setItem('user_session_token', prof.current_session_token);
+        }
+
+        startSingleSessionGuard();
+
+        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
+        document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
+        document.getElementById('profile-name').innerText = fullName;
+        document.getElementById('profile-email').innerText = currentUser.email;
+        document.getElementById('profile-avatar').innerText = fullName.charAt(0).toUpperCase();
+
+        var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+        var homeAdminBtn = document.getElementById('home-admin-btn');
+        var profileAdminBtn = document.getElementById('profile-admin-btn');
+        var badge = document.getElementById('profile-badge');
+
+        if (isAdmin) {
+          homeAdminBtn.classList.remove('hidden');
+          profileAdminBtn.classList.remove('hidden');
+          badge.innerText = 'ADMIN';
+          badge.className = 'inline-block bg-[#0f2444] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
+        } else {
+          homeAdminBtn.classList.add('hidden');
+          profileAdminBtn.classList.add('hidden');
+          badge.innerText = 'ESTUDIANTE';
+          badge.className = 'inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
+          loadStudentInbox();
+        }
+
+        navigate('home');
+      } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('app-screen').classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // CONTROLES DE NAVEGAÇÃO
+    // ==========================================
+    var tabs = ['home', 'calendar', 'course', 'tasks', 'info', 'profile', 'admin', 'rules'];
+    var titles = {
+      calendar: 'Agendar clases',
+      course: 'Curso grabado',
+      tasks: 'Tareas y evaluaciones',
+      info: 'Central de Informaciones',
+      profile: 'Perfil',
+      admin: 'Panel admin',
+      rules: 'Manual del Alumno'
+    };
+
+    window.navigate = function(tabId) {
+      tabs.forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        if (el) el.classList.add('hidden');
+        var navBtn = document.getElementById('nav-' + t);
+        if (navBtn) {
+          navBtn.classList.remove('nav-active');
+          navBtn.classList.add('text-slate-400');
+        }
+      });
+
+      var currentTab = document.getElementById('tab-' + tabId);
+      if (currentTab) currentTab.classList.remove('hidden');
+
+      var currentNav = document.getElementById('nav-' + tabId);
+      if (currentNav) {
+        currentNav.classList.add('nav-active');
+        currentNav.classList.remove('text-slate-400');
+      }
+
+      var header = document.getElementById('top-header');
+      var headerTitle = document.getElementById('header-title');
+      if (tabId === 'home') {
+        header.classList.add('hidden');
+      } else {
+        header.classList.remove('hidden');
+        header.classList.add('flex');
+        headerTitle.innerText = titles[tabId] || '';
+      }
+
+      trackActivity(titles[tabId] || 'Inicio');
+
+      if (tabId === 'admin') showAdminTab('students');
+      if (tabId === 'calendar') loadStudentSlots();
+      if (tabId === 'course') checkAndLoadCourse();
+      if (tabId === 'tasks') loadStudentTasksAndQuizzes();
+      if (tabId === 'info') loadInfoCenter();
+    };
+
+    window.showAdminTab = function(type) {
+      document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
+      document.getElementById('admin-sec-finance').classList.toggle('hidden', type !== 'finance');
+      document.getElementById('admin-sec-broadcast').classList.toggle('hidden', type !== 'broadcast');
+      document.getElementById('admin-sec-syllabus').classList.toggle('hidden', type !== 'syllabus');
+      document.getElementById('admin-sec-design').classList.toggle('hidden', type !== 'design');
+      document.getElementById('admin-sec-prices').classList.toggle('hidden', type !== 'prices');
+      document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
+      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
+      document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
+      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
+      document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
+
+      ['students', 'finance', 'broadcast', 'syllabus', 'design', 'prices', 'assignments', 'videos', 'quizzes', 'bookings', 'slots'].forEach(t => {
+        var btn = document.getElementById('admin-btn-tab-' + t);
+        if (btn) {
+          if (t === type) {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';
+          } else {
+            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';
+          }
+        }
+      });
+
+      if (type === 'students') { loadAdminStudents(); }
+      if (type === 'finance') checkFinanceLockStatus();
+      if (type === 'broadcast') { loadAdminStudents(); populateBroadcastStudentOptions(); }
+      if (type === 'syllabus') loadAppSettings();
+      if (type === 'prices') loadAppSettings();
+      if (type === 'bookings') { loadAdminStudents(); loadAdminBookings(); loadAvailableSlotsForAdmin(); }
+      if (type === 'videos') loadAdminLessonsManagement();
+      if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
+      if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
+      if (type === 'slots') loadAdminSlots();
+    };
+
     // ====================================================
-    // GERADOR DO INFORME FINANCEIRO (SINTÉTICO E ANALÍTICO)
+    // CONTROLE DE ACESSO AO CURSO GRAVADO
     // ====================================================
+    window.checkAndLoadCourse = async function() {
+      var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
+      var sb = getSupabase();
+      
+      var { data: prof } = await sb.from('profiles').select('has_course_access, trial_lesson_id').eq('id', currentUser.id).single();
+      userProfileData = prof || { has_course_access: false, trial_lesson_id: null };
+
+      var hasFullAccess = isAdmin || (userProfileData.has_course_access === true);
+      var hasTrialAccess = !hasFullAccess && userProfileData.trial_lesson_id !== null;
+
+      var lockedScreen = document.getElementById('course-locked-screen');
+      var unlockedContent = document.getElementById('course-unlocked-content');
+      var trialBanner = document.getElementById('course-trial-banner');
+
+      if (hasFullAccess || hasTrialAccess) {
+        lockedScreen.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        if (hasTrialAccess) {
+          trialBanner.classList.remove('hidden');
+        } else {
+          trialBanner.classList.add('hidden');
+        }
+        loadLessons();
+      } else {
+        lockedScreen.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    };
+
+    window.switchCourseLevel = function(level) {
+      currentCourseLevel = level;
+      ['iniciante', 'medio', 'avancado', 'extras'].forEach(lvl => {
+        var btn = document.getElementById('lvl-btn-' + lvl);
+        if (btn) {
+          if (lvl === level) {
+            btn.className = 'px-3.5 py-2 rounded-xl bg-green-600 text-white whitespace-nowrap shadow-sm transition';
+          } else {
+            btn.className = 'px-3.5 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap transition';
+          }
+        }
+      });
+      loadLessons();
+    };
+
+    window.toggleSecureFullscreen = function(containerId) {
+      var el = document.getElementById(containerId);
+      if (!el) return;
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    };
+
+    window.loadLessons = async function() {
+      var container = document.getElementById('lessons-container');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data: lessons, error } = await sb.from('course_lessons')
+        .select('*')
+        .eq('level', currentCourseLevel)
+        .neq('is_active', false)
+        .order('created_at', { ascending: true });
+
+      if (currentUser) {
+        var { data: prog } = await sb.from('lesson_progress').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true);
+        userCompletedLessons = new Set((prog || []).map(p => p.lesson_id));
+      }
+
+      var { data: allLessons } = await sb.from('course_lessons').select('id').neq('is_active', false);
+      var totalLessonsCount = (allLessons || []).length;
+      var completedCount = userCompletedLessons.size;
+      var percentage = totalLessonsCount > 0 ? Math.round((completedCount / totalLessonsCount) * 100) : 0;
+
+      var progText = document.getElementById('course-progress-text');
+      var progBar = document.getElementById('course-progress-bar');
+      if (progText) progText.innerText = completedCount + ' / ' + totalLessonsCount + ' aulas (' + percentage + '%)';
+      if (progBar) progBar.style.width = percentage + '%';
+
+      if (error || !lessons || lessons.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm">Aún no hay videos cargados en este nivel</p></div>';
+        return;
+      }
+
+      var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
+      var hasFullAccess = isAdmin || (userProfileData && userProfileData.has_course_access === true);
+      var trialId = userProfileData ? userProfileData.trial_lesson_id : null;
+
+      container.innerHTML = lessons.map(function(lesson, idx) {
+        var isAllowed = hasFullAccess || (trialId === lesson.id);
+
+        if (!isAllowed) {
+          return '<div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 opacity-75">' +
+            '<div class="flex justify-between items-center">' +
+              '<h4 class="font-bold text-sm text-slate-700 flex items-center gap-2"><i class="fa-solid fa-lock text-amber-500"></i> ' + lesson.title + '</h4>' +
+              '<span class="text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">Bloqueada</span>' +
+            '</div>' +
+            '<p class="text-[11px] text-slate-500">Esta lección forma parte del curso completo.</p>' +
+          '</div>';
+        }
+
+        var isDone = userCompletedLessons.has(lesson.id);
+        var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+        var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
+
+        var videoContainerId = 'video-box-' + idx;
+        var videoContent = '';
+
+        if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
+          var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
+          if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
+          
+          videoContent = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
+            '<div class="video-top-left-shield"></div>' +
+            '<div class="video-bottom-left-shield"></div>' +
+            '<div class="video-bottom-right-shield"></div>' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+            '<button onclick="toggleSecureFullscreen(\'' + videoContainerId + '\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>' +
+          '</div>';
+        } else {
+          videoContent = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
+            '<video src="' + lesson.video_url + '" controls controlsList="nodownload" class="w-full h-full object-cover"></video>' +
+          '</div>';
+        }
+
+        var materialBtn = lesson.material_url 
+          ? '<a href="' + lesson.material_url + '" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm mt-2.5">' +
+              '<i class="fa-solid fa-file-arrow-down text-emerald-600 text-sm"></i> Baixar Apostila / Material da Aula (PDF)' +
+            '</a>'
+          : '';
+
+        return '<div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">' +
+          '<div class="flex justify-between items-center gap-2">' +
+            '<h4 class="font-bold text-sm text-slate-900 leading-snug flex-1">' + lesson.title + '</h4>' +
+            '<button onclick="toggleLessonProgress(\'' + lesson.id + '\')" class="text-[11px] font-bold px-2.5 py-1 rounded-full transition ' + doneBadgeClass + '">' +
+              doneBadgeText +
+            '</button>' +
+          '</div>' +
+          videoContent +
+          materialBtn +
+        '</div>';
+      }).join('');
+    };
+
+    window.toggleLessonProgress = async function(lessonId) {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var isCompleted = userCompletedLessons.has(lessonId);
+
+      if (isCompleted) {
+        await sb.from('lesson_progress').delete().eq('user_id', currentUser.id).eq('lesson_id', lessonId);
+      } else {
+        await sb.from('lesson_progress').upsert([{
+          user_id: currentUser.id,
+          lesson_id: lessonId,
+          completed: true
+        }]);
+      }
+
+      loadLessons();
+    };
+
+    // ====================================================
+    // GESTÃO DE ALUNOS (ROBUSTA)
+    // ====================================================
+    async function cacheAllLessons() {
+      try {
+        var sb = getSupabase();
+        if (!sb) return;
+        var { data } = await sb.from('course_lessons').select('id, title, level').order('created_at', { ascending: true });
+        allLessonsCache = data || [];
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    window.filterStudentsView = function(type) {
+      currentStudentsFilter = type;
+      ['all', 'course', 'meet', 'none'].forEach(t => {
+        var btn = document.getElementById('btn-filter-' + t);
+        if (btn) {
+          if (t === type) {
+            btn.className = 'px-3 py-1 rounded-xl bg-slate-900 text-white transition whitespace-nowrap';
+          } else {
+            btn.className = 'px-3 py-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition whitespace-nowrap';
+          }
+        }
+      });
+      renderStudentsList();
+    };
+
+    window.loadAdminStudents = async function() {
+      var container = document.getElementById('admin-students-list');
+      var assignSelect = document.getElementById('assign-target-student');
+      var manualStudentSelect = document.getElementById('admin-manual-student-select');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await cacheAllLessons();
+
+      var { data: profilesData } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+      var { data: bookingsData } = await sb.from('bookings').select('student_name, student_email, created_at');
+
+      var studentMap = new Map();
+
+      (profilesData || []).forEach(p => {
+        if (p.email) {
+          studentMap.set(p.email.toLowerCase(), {
+            id: p.id,
+            full_name: p.full_name || 'Estudiante',
+            email: p.email,
+            status: p.status || 'Ativo',
+            student_level: p.student_level || 'iniciante',
+            has_course_access: p.has_course_access === true,
+            trial_lesson_id: p.trial_lesson_id,
+            course_receipt_url: p.course_receipt_url,
+            meet_bookings_count: 0,
+            last_sign_in_at: p.last_sign_in_at,
+            last_content_viewed: p.last_content_viewed || 'Inicio'
+          });
+        }
+      });
+
+      (bookingsData || []).forEach(b => {
+        if (b.student_email) {
+          var em = b.student_email.toLowerCase();
+          if (!studentMap.has(em)) {
+            studentMap.set(em, {
+              id: b.student_email,
+              full_name: b.student_name || 'Estudiante',
+              email: b.student_email,
+              status: 'Ativo',
+              student_level: 'iniciante',
+              has_course_access: false,
+              trial_lesson_id: null,
+              course_receipt_url: null,
+              meet_bookings_count: 1,
+              last_sign_in_at: b.created_at,
+              last_content_viewed: 'Agendamento de aula'
+            });
+          } else {
+            studentMap.get(em).meet_bookings_count++;
+          }
+        }
+      });
+
+      loadedStudents = Array.from(studentMap.values());
+
+      if (assignSelect) {
+        assignSelect.innerHTML = '<option value="TODOS">📢 Para Todos los Alumnos</option>' +
+          '<option value="nivel_iniciante">🟢 Nivel Iniciante (A1-A2)</option>' +
+          '<option value="nivel_medio">🔵 Nivel Intermedio (B1-B2)</option>' +
+          '<option value="nivel_avancado">🟣 Nivel Avanzado (C1-C2)</option>' +
+          '<option value="nivel_extras">🟠 Clases Extras</option>' +
+          loadedStudents.map(s => '<option value="' + s.email + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
+      }
+
+      if (manualStudentSelect) {
+        manualStudentSelect.innerHTML = loadedStudents.map(s => '<option value="' + s.email + '" data-name="' + s.full_name + '" data-id="' + s.id + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
+      }
+
+      renderStudentsList();
+    };
+
+    function renderStudentsList() {
+      var container = document.getElementById('admin-students-list');
+      if (!container) return;
+
+      if (loadedStudents.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 py-4 text-center">Ningún alumno registrado todavía.</p>';
+        return;
+      }
+
+      var filtered = loadedStudents.filter(function(s) {
+        var hasCourse = s.has_course_access;
+        var hasMeet = s.meet_bookings_count > 0;
+        if (currentStudentsFilter === 'course') return hasCourse;
+        if (currentStudentsFilter === 'meet') return hasMeet;
+        if (currentStudentsFilter === 'none') return !hasCourse && !hasMeet;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 py-4 text-center">No hay alumnos en esta categoría.</p>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(function(s) {
+        var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente';
+        var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
+
+        var planBadges = [];
+        if (s.has_course_access) {
+          planBadges.push('<span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full">🟡 Curso Grabado</span>');
+        } else if (s.trial_lesson_id) {
+          planBadges.push('<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">🎁 Aula de Prueba</span>');
+        }
+
+        if (s.meet_bookings_count > 0) {
+          planBadges.push('<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">🟢 Clases 1:1 (' + s.meet_bookings_count + ')</span>');
+        }
+
+        if (planBadges.length === 0) {
+          planBadges.push('<span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">⚪ Sin Plan Activo</span>');
+        }
+
+        var lessonOptions = allLessonsCache.map(function(l) {
+          var selected = (s.trial_lesson_id === l.id) ? 'selected' : '';
+          return '<option value="' + l.id + '" ' + selected + '>' + l.title + '</option>';
+        }).join('');
+
+        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + s.full_name + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-1.5">' +
+              '<select onchange="updateStudentLevel(\'' + s.id + '\', this.value)" class="text-[10px] font-bold border border-slate-200 bg-white rounded-lg px-2 py-0.5 outline-none">' +
+                '<option value="iniciante" ' + (s.student_level === 'iniciante' ? 'selected' : '') + '>Iniciante</option>' +
+                '<option value="medio" ' + (s.student_level === 'medio' ? 'selected' : '') + '>Intermedio</option>' +
+                '<option value="avancado" ' + (s.student_level === 'avancado' ? 'selected' : '') + '>Avanzado</option>' +
+              '</select>' +
+              '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' transition">' +
+                s.status +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+          
+          '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-1.5">' +
+            '<div class="flex items-center gap-1.5 flex-wrap">' +
+              '<span class="font-bold text-slate-700">Planes:</span> ' + planBadges.join(' ') +
+            '</div>' +
+            '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
+
+            '<div class="pt-1.5 border-t border-slate-100 space-y-1">' +
+              '<label class="font-bold text-[10px] text-slate-700">Acceso al Curso Grabado:</label>' +
+              '<div class="grid grid-cols-2 gap-1.5">' +
+                '<button onclick="setStudentCourseAccess(\'' + s.id + '\', \'full\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-green-600 hover:bg-green-700 text-white transition">' +
+                  '<i class="fa-solid fa-lock-open"></i> Curso Completo' +
+                '</button>' +
+                '<button onclick="setStudentCourseAccess(\'' + s.id + '\', \'none\')" class="py-1 px-2 rounded-lg text-[10px] font-bold bg-red-100 hover:bg-red-200 text-red-700 transition">' +
+                  '<i class="fa-solid fa-lock"></i> Bloquear' +
+                '</button>' +
+              '</div>' +
+              
+              '<div class="flex items-center gap-1.5 pt-1">' +
+                '<select id="trial-select-' + s.id + '" class="flex-1 text-[10px] border border-slate-200 bg-slate-50 rounded-lg px-2 py-1 outline-none">' +
+                  '<option value="">-- Aula de Prueba --</option>' +
+                  lessonOptions +
+                '</select>' +
+                '<button onclick="grantTrialLesson(\'' + s.id + '\')" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition whitespace-nowrap">' +
+                  'Liberar Prueba' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="grid grid-cols-3 gap-1.5 pt-0.5">' +
+            '<button onclick="openReceiptUploadModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold py-1.5 px-2 rounded-xl text-[10px] transition flex items-center justify-center gap-1">' +
+              '<i class="fa-solid fa-upload"></i> Subir Pago' +
+            '</button>' +
+            '<button onclick="openChatWithStudent(\'' + s.email + '\', \'' + s.full_name + '\')" class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold py-1.5 px-2 rounded-xl text-[10px] transition flex items-center justify-center gap-1">' +
+              '<i class="fa-solid fa-comment-dots"></i> Abrir Chat' +
+            '</button>' +
+            '<button onclick="openStudentDetailModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-1.5 px-2 rounded-xl text-[10px] transition flex items-center justify-center gap-1">' +
+              '<i class="fa-solid fa-chart-line text-blue-300"></i> Ver Ficha' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ====================================================
+    // COMPROVANTES E PDFS
+    // ====================================================
+    window.openReceiptUploadModal = function(studentId, email, name) {
+      currentReceiptTargetStudent = { id: studentId, email: email, name: name };
+      document.getElementById('receipt-modal-student-name').innerText = name + ' (' + email + ')';
+      document.getElementById('receipt-modal-note').value = '';
+      document.getElementById('receipt-modal-file').value = '';
+      document.getElementById('receipt-upload-modal').classList.remove('hidden');
+      document.getElementById('receipt-upload-modal').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeReceiptUploadModal = function() {
+      currentReceiptTargetStudent = null;
+      document.getElementById('receipt-upload-modal').classList.add('hidden');
+    };
+
+    window.submitStudentReceiptWithJustification = async function() {
+      if (!currentReceiptTargetStudent) return;
+      var fileInput = document.getElementById('receipt-modal-file');
+      var file = fileInput.files[0];
+      if (!file) return alert('Por favor seleccioná el archivo del comprobante.');
+
+      var rType = document.getElementById('receipt-modal-type').value;
+      var note = document.getElementById('receipt-modal-note').value.trim();
+
+      var btn = document.getElementById('btn-save-receipt');
+      btn.innerText = 'Subiendo comprobante...';
+      btn.disabled = true;
+
+      var sb = getSupabase();
+      var fileName = 'receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
+
+      var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
+      if (uploadRes.error) {
+        btn.innerText = 'Guardar Comprobante';
+        btn.disabled = false;
+        return alert('Error al subir archivo: ' + uploadRes.error.message);
+      }
+
+      var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
+
+      await sb.from('student_receipts').insert([{
+        student_id: currentReceiptTargetStudent.id.includes('@') ? null : currentReceiptTargetStudent.id,
+        student_email: currentReceiptTargetStudent.email,
+        receipt_type: rType,
+        note: note || (rType === 'curso_completo' ? 'Pago Curso Grabado' : 'Pago Clase Meet'),
+        file_url: publicUrl
+      }]);
+
+      if (rType === 'curso_completo') {
+        await sb.from('profiles').update({
+          has_course_access: true,
+          course_receipt_url: publicUrl
+        }).eq('email', currentReceiptTargetStudent.email);
+      }
+
+      btn.innerText = 'Guardar Comprobante';
+      btn.disabled = false;
+
+      alert('¡Comprobante guardado con éxito!');
+      closeReceiptUploadModal();
+      loadAdminStudents();
+    };
+
+    window.exportStudentsToPDFWithFilter = function() {
+      if (!loadedStudents || loadedStudents.length === 0) return alert('No hay alumnos para exportar');
+      var filterVal = document.getElementById('pdf-filter-select').value;
+
+      var list = loadedStudents.filter(function(s) {
+        if (filterVal === 'course') return s.has_course_access;
+        if (filterVal === 'meet') return s.meet_bookings_count > 0;
+        if (filterVal === 'both') return s.has_course_access && s.meet_bookings_count > 0;
+        return true;
+      });
+
+      if (list.length === 0) return alert('No hay alumnos que coincidan con el filtro seleccionado');
+
+      var filterNames = {
+        all: 'Todos los Alumnos',
+        course: 'Alumnos Curso Grabado',
+        meet: 'Alumnos Clases Particulares vía Meet',
+        both: 'Alumnos con Ambos Planes'
+      };
+
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("Listado Oficial de Alumnos - Portugues con Renan", 14, 16);
+      doc.setFontSize(10);
+      doc.text("Filtro: " + filterNames[filterVal] + " | Fecha: " + new Date().toLocaleDateString('es-AR'), 14, 23);
+
+      var tableData = list.map(function(s) {
+        var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleDateString('es-AR') : 'Sin registro';
+        var cursoStatus = s.has_course_access ? 'Habilitado' : (s.trial_lesson_id ? 'Prueba' : 'No');
+        var meetStatus = s.meet_bookings_count > 0 ? (s.meet_bookings_count + ' clase(s)') : 'No';
+
+        return [
+          s.full_name || 'Estudiante',
+          s.email,
+          s.student_level || 'Iniciante',
+          cursoStatus,
+          meetStatus,
+          s.status || 'Ativo',
+          lastLogin
+        ];
+      });
+
+      doc.autoTable({
+        startY: 28,
+        head: [['Nombre', 'Email', 'Nivel', 'Curso Grabado', 'Clases Meet', 'Estado', 'Ult. Acceso']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 36, 68] },
+        styles: { fontSize: 8 }
+      });
+
+      doc.save('alumnos_' + filterVal + '.pdf');
+    };
+
+    // ====================================================
+    // FATURAMENTO & CAIXA
+    // ====================================================
+    var isFinanceUnlocked = false;
+
+    function checkFinanceLockStatus() {
+      var lockScreen = document.getElementById('finance-lock-screen');
+      var unlockedContent = document.getElementById('finance-unlocked-content');
+      if (isFinanceUnlocked) {
+        lockScreen.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        loadFinanceData();
+      } else {
+        lockScreen.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    }
+
+    window.unlockFinanceSection = async function() {
+      var pass = document.getElementById('finance-admin-pass').value;
+      if (!pass) return alert('Por favor ingresá tu contraseña.');
+
+      var sb = getSupabase();
+      var res = await sb.auth.signInWithPassword({
+        email: currentUser.email,
+        password: pass
+      });
+
+      if (res.error) {
+        alert('Contraseña incorrecta. Acceso denegado al faturamento.');
+      } else {
+        isFinanceUnlocked = true;
+        document.getElementById('finance-admin-pass').value = '';
+        checkFinanceLockStatus();
+      }
+    };
+
+    async function loadFinanceData() {
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data: bookings } = await sb.from('bookings').select('id, created_at, status');
+      var meetCount = (bookings || []).length;
+      var meetTotal = meetCount * PRICE_PER_LESSON;
+
+      var { data: courses } = await sb.from('profiles').select('id, email, created_at').eq('has_course_access', true);
+      var validCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()));
+      var courseCount = validCourses.length;
+      var courseTotal = courseCount * PRICE_COURSE;
+
+      var { data: cashFlow } = await sb.from('cash_flow').select('*').order('created_at', { ascending: false });
+      var totalExpenses = 0;
+      (cashFlow || []).forEach(cf => {
+        if (cf.type === 'expense') totalExpenses += parseFloat(cf.amount) || 0;
+      });
+
+      var grossIncome = meetTotal + courseTotal;
+      var netBalance = grossIncome - totalExpenses;
+
+      document.getElementById('fin-total-income').innerText = '$' + grossIncome.toLocaleString('es-AR');
+      document.getElementById('fin-net-balance').innerText = '$' + netBalance.toLocaleString('es-AR');
+      document.getElementById('fin-meet-income').innerText = '$' + meetTotal.toLocaleString('es-AR');
+      document.getElementById('fin-meet-count').innerText = meetCount + ' clase(s) contratada(s)';
+      document.getElementById('fin-course-income').innerText = '$' + courseTotal.toLocaleString('es-AR');
+      document.getElementById('fin-course-count').innerText = courseCount + ' curso(s) vendido(s)';
+
+      var listContainer = document.getElementById('fin-cashflow-list');
+      if (!cashFlow || cashFlow.length === 0) {
+        listContainer.innerHTML = '<p class="text-slate-400">No hay movimientos o retiros registrados aún.</p>';
+      } else {
+        listContainer.innerHTML = cashFlow.map(function(cf) {
+          var dateStr = new Date(cf.created_at).toLocaleDateString('es-AR', { dateStyle: 'short' });
+          var catLabels = { uso_proprio: 'Uso Propio', publicidade: 'Publicidad', equipamento: 'Equipamiento', outro: 'Otro' };
+          return '<div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center">' +
+            '<div>' +
+              '<span class="font-bold text-slate-800">' + cf.description + '</span>' +
+              '<div class="text-[10px] text-slate-400">' + dateStr + ' • ' + (catLabels[cf.category] || cf.category) + '</div>' +
+            '</div>' +
+            '<span class="font-extrabold text-red-600">-$' + parseFloat(cf.amount).toLocaleString('es-AR') + '</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
+
+    window.registerCashExpense = async function() {
+      var amount = parseFloat(document.getElementById('fin-expense-amount').value);
+      var cat = document.getElementById('fin-expense-cat').value;
+      var desc = document.getElementById('fin-expense-desc').value.trim();
+
+      if (!amount || amount <= 0) return alert('Por favor ingresá un monto válido.');
+      if (!desc) return alert('Por favor escribí la justificación del retiro.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('cash_flow').insert([{
+        type: 'expense',
+        amount: amount,
+        category: cat,
+        description: desc
+      }]);
+
+      if (error) {
+        alert('Error al registrar: ' + error.message);
+      } else {
+        alert('¡Salida de caja registrada con éxito!');
+        document.getElementById('fin-expense-amount').value = '';
+        document.getElementById('fin-expense-desc').value = '';
+        loadFinanceData();
+      }
+    };
+
+    window.toggleManualReportDates = function(val) {
+      document.getElementById('fin-custom-dates-row').classList.toggle('hidden', val !== 'custom');
+    };
+
     window.generateFinancePDFReport = async function() {
       var mode = document.getElementById('fin-report-mode').value;
       var period = document.getElementById('fin-report-period').value;
@@ -1381,113 +2382,1083 @@
       doc.save('informe_financiero_' + mode + '_' + period + '.pdf');
     };
 
-    window.unlockFinanceSection = async function() {
-      var pass = document.getElementById('finance-admin-pass').value;
-      if (!pass) return alert('Por favor ingresá tu contraseña.');
+    // ====================================================
+    // CHAT INDIVIDUAL
+    // ====================================================
+    function populateBroadcastStudentOptions() {
+      var group = document.getElementById('broadcast-students-group');
+      if (!group) return;
+      group.innerHTML = loadedStudents.map(s => '<option value="' + s.email + '">👤 ' + s.full_name + ' (' + s.email + ')</option>').join('');
+    }
 
-      var sb = getSupabase();
-      var res = await sb.auth.signInWithPassword({
-        email: currentUser.email,
-        password: pass
-      });
-
-      if (res.error) {
-        alert('Contraseña incorrecta. Acceso denegado al faturamento.');
-      } else {
-        isFinanceUnlocked = true;
-        document.getElementById('finance-admin-pass').value = '';
-        checkFinanceLockStatus();
+    window.openChatWithStudent = function(email, name) {
+      showAdminTab('broadcast');
+      var select = document.getElementById('broadcast-target');
+      if (select) {
+        select.value = email;
+        handleBroadcastTargetChange(email);
       }
     };
 
-    function checkFinanceLockStatus() {
-      var lockScreen = document.getElementById('finance-lock-screen');
-      var unlockedContent = document.getElementById('finance-unlocked-content');
-      if (isFinanceUnlocked) {
-        lockScreen.classList.add('hidden');
-        unlockedContent.classList.remove('hidden');
-        loadFinanceData();
+    window.handleBroadcastTargetChange = function(target) {
+      var chatBox = document.getElementById('admin-chat-history-box');
+      if (target && target.includes('@')) {
+        chatBox.classList.remove('hidden');
+        loadAdminChatHistory(target);
       } else {
-        lockScreen.classList.remove('hidden');
-        unlockedContent.classList.add('hidden');
+        chatBox.classList.add('hidden');
       }
-    }
+    };
 
-    async function loadFinanceData() {
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var { data: bookings } = await sb.from('bookings').select('id, created_at, status');
-      var meetCount = (bookings || []).length;
-      var meetTotal = meetCount * PRICE_PER_LESSON;
-
-      var { data: courses } = await sb.from('profiles').select('id, email, created_at').eq('has_course_access', true);
-      var validCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()));
-      var courseCount = validCourses.length;
-      var courseTotal = courseCount * PRICE_COURSE;
-
-      var { data: cashFlow } = await sb.from('cash_flow').select('*').order('created_at', { ascending: false });
-      var totalExpenses = 0;
-      (cashFlow || []).forEach(cf => {
-        if (cf.type === 'expense') totalExpenses += parseFloat(cf.amount) || 0;
-      });
-
-      var grossIncome = meetTotal + courseTotal;
-      var netBalance = grossIncome - totalExpenses;
-
-      document.getElementById('fin-total-income').innerText = '$' + grossIncome.toLocaleString('es-AR');
-      document.getElementById('fin-net-balance').innerText = '$' + netBalance.toLocaleString('es-AR');
-      document.getElementById('fin-meet-income').innerText = '$' + meetTotal.toLocaleString('es-AR');
-      document.getElementById('fin-meet-count').innerText = meetCount + ' clase(s) contratada(s)';
-      document.getElementById('fin-course-income').innerText = '$' + courseTotal.toLocaleString('es-AR');
-      document.getElementById('fin-course-count').innerText = courseCount + ' curso(s) vendido(s)';
-
-      var listContainer = document.getElementById('fin-cashflow-list');
-      if (!cashFlow || cashFlow.length === 0) {
-        listContainer.innerHTML = '<p class="text-slate-400">No hay movimientos o retiros registrados aún.</p>';
-      } else {
-        listContainer.innerHTML = cashFlow.map(function(cf) {
-          var dateStr = new Date(cf.created_at).toLocaleDateString('es-AR', { dateStyle: 'short' });
-          var catLabels = { uso_proprio: 'Uso Propio', publicidade: 'Publicidad', equipamento: 'Equipamiento', outro: 'Otro' };
-          return '<div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center">' +
-            '<div>' +
-              '<span class="font-bold text-slate-800">' + cf.description + '</span>' +
-              '<div class="text-[10px] text-slate-400">' + dateStr + ' • ' + (catLabels[cf.category] || cf.category) + '</div>' +
-            '</div>' +
-            '<span class="font-extrabold text-red-600">-$' + parseFloat(cf.amount).toLocaleString('es-AR') + '</span>' +
-          '</div>';
-        }).join('');
+    window.refreshCurrentAdminChat = function() {
+      var target = document.getElementById('broadcast-target').value;
+      if (target && target.includes('@')) {
+        loadAdminChatHistory(target);
       }
-    }
+    };
 
-    window.registerCashExpense = async function() {
-      var amount = parseFloat(document.getElementById('fin-expense-amount').value);
-      var cat = document.getElementById('fin-expense-cat').value;
-      var desc = document.getElementById('fin-expense-desc').value.trim();
-
-      if (!amount || amount <= 0) return alert('Por favor ingresá un monto válido.');
-      if (!desc) return alert('Por favor escribí la justificación del retiro.');
+    async function loadAdminChatHistory(studentEmail) {
+      var container = document.getElementById('admin-chat-messages-container');
+      container.innerHTML = '<p class="text-slate-400">Cargando mensajes...</p>';
 
       var sb = getSupabase();
-      var { error } = await sb.from('cash_flow').insert([{
-        type: 'expense',
-        amount: amount,
-        category: cat,
-        description: desc
+      var { data: messages } = await sb.from('student_messages')
+        .select('*')
+        .eq('student_email', studentEmail)
+        .order('created_at', { ascending: true });
+
+      if (!messages || messages.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">No hay mensajes previos con este alumno. Podés escribirle abajo.</p>';
+        return;
+      }
+
+      container.innerHTML = messages.map(function(m) {
+        var isFromStudent = m.sender_type === 'student';
+        var alignClass = isFromStudent ? 'bg-slate-200 text-slate-800 self-start mr-8' : 'bg-green-600 text-white self-end ml-8';
+        var senderLabel = isFromStudent ? 'Alumno' : 'Renan';
+        var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="block underline font-bold mt-1 text-[11px]"><i class="fa-solid fa-paperclip"></i> Ver adjunto</a>' : '';
+
+        return '<div class="p-2.5 rounded-xl ' + alignClass + ' space-y-0.5">' +
+          '<div class="flex justify-between items-center text-[10px] opacity-80 gap-2">' +
+            '<b>' + senderLabel + '</b>' +
+            '<span>' + new Date(m.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) + '</span>' +
+          '</div>' +
+          '<p class="text-xs leading-relaxed">' + m.message_text + '</p>' +
+          fileBtn +
+        '</div>';
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    window.sendBroadcastMessage = async function() {
+      var target = document.getElementById('broadcast-target').value;
+      var text = document.getElementById('broadcast-text').value.trim();
+      var fileUrl = document.getElementById('broadcast-file-url').value.trim();
+
+      if (!text) return alert('Por favor escribí el texto del aviso o mensaje.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('student_messages').insert([{
+        student_email: target,
+        sender: 'Profesor Renan Barbosa',
+        sender_type: 'teacher',
+        message_text: text,
+        file_url: fileUrl || null
       }]);
 
       if (error) {
-        alert('Error al registrar: ' + error.message);
+        alert('Error: ' + error.message);
       } else {
-        alert('¡Salida de caja registrada con éxito!');
-        document.getElementById('fin-expense-amount').value = '';
-        document.getElementById('fin-expense-desc').value = '';
-        loadFinanceData();
+        alert('¡Mensaje enviado con éxito!');
+        document.getElementById('broadcast-text').value = '';
+        document.getElementById('broadcast-file-url').value = '';
+        if (target.includes('@')) {
+          loadAdminChatHistory(target);
+        }
       }
     };
 
-    window.toggleManualReportDates = function(val) {
-      document.getElementById('fin-custom-dates-row').classList.toggle('hidden', val !== 'custom');
+    window.openStudentDetailModal = async function(studentId, email, name) {
+      var modal = document.getElementById('student-detail-modal');
+      modal.classList.remove('hidden');
+      document.getElementById('modal-student-name').innerText = name;
+      document.getElementById('modal-student-email').innerText = email;
+
+      var sb = getSupabase();
+
+      var { data: bookings } = await sb.from('bookings').select('*').eq('student_email', email);
+      var plansContainer = document.getElementById('modal-student-plans');
+      var bookingsCount = (bookings || []).length;
+      plansContainer.innerHTML = '• Clases 1:1 Meet agendadas: <b>' + bookingsCount + ' clase(s)</b><br>' +
+        (bookings || []).map(b => '  - 📅 ' + formatSpanishDate(b.slot_date) + ' a las ' + b.slot_time + ' hs').join('<br>');
+
+      var { data: receipts } = await sb.from('student_receipts').select('*').eq('student_email', email).order('created_at', { ascending: false });
+      var receiptsContainer = document.getElementById('modal-student-receipts-list');
+      if (receipts && receipts.length > 0) {
+        receiptsContainer.innerHTML = receipts.map(function(r) {
+          var typeLabel = r.receipt_type === 'curso_completo' ? 'Curso Grabado' : (r.receipt_type === 'clase_meet' ? 'Clase Meet' : 'Otro');
+          return '<div class="p-2 bg-white rounded-lg border border-slate-200 flex justify-between items-center text-xs">' +
+            '<div>' +
+              '<b>' + typeLabel + ':</b> ' + (r.note || 'Sin nota') +
+              '<div class="text-[10px] text-slate-400">' + new Date(r.created_at).toLocaleDateString('es-AR') + '</div>' +
+            '</div>' +
+            '<a href="' + r.file_url + '" target="_blank" class="text-blue-600 font-bold underline">Ver Archivo</a>' +
+          '</div>';
+        }).join('');
+      } else {
+        receiptsContainer.innerHTML = '<p class="text-slate-400">No hay comprobantes guardados para este alumno.</p>';
+      }
+
+      var { data: prog } = await sb.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', studentId);
+      var lessonsDoneContainer = document.getElementById('modal-student-lessons-done');
+      if (prog && prog.length > 0) {
+        lessonsDoneContainer.innerHTML = 'Total: <b>' + prog.length + ' lecciones completadas</b>';
+      } else {
+        lessonsDoneContainer.innerHTML = 'Aún no ha completado lecciones';
+      }
+
+      var { data: quizzes } = await sb.from('quiz_submissions').select('*').eq('student_email', email);
+      var quizzesContainer = document.getElementById('modal-student-quizzes-detail');
+
+      if (quizzes && quizzes.length > 0) {
+        quizzesContainer.innerHTML = quizzes.map(function(q) {
+          var feedback = q.feedback_text ? '<p class="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg mt-1"><b>Tu devolución:</b> ' + q.feedback_text + '</p>' : '';
+
+          return '<div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">' +
+            '<div class="flex justify-between font-bold text-slate-800">' +
+              '<span>' + q.quiz_title + '</span>' +
+              '<span class="text-emerald-700">' + q.score + '/' + q.total_questions + '</span>' +
+            '</div>' +
+            feedback +
+            '<button onclick="sendTeacherFeedback(\'' + q.id + '\')" class="text-[10px] text-blue-600 underline font-bold block mt-1">+ Enviar / Editar Devolución</button>' +
+          '</div>';
+        }).join('');
+      } else {
+        quizzesContainer.innerHTML = '<p class="text-slate-400">Sin exámenes completados</p>';
+      }
+
+      modal.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.sendTeacherFeedback = async function(submissionId) {
+      var feedback = prompt('Escribí tu devolución pedagógica para el alumno sobre esta prueba:');
+      if (!feedback) return;
+
+      var sb = getSupabase();
+      await sb.from('quiz_submissions').update({ feedback_text: feedback }).eq('id', submissionId);
+      alert('¡Devolución guardada con éxito!');
+    };
+
+    window.closeStudentDetailModal = function() {
+      document.getElementById('student-detail-modal').classList.add('hidden');
+    };
+
+    window.setStudentCourseAccess = async function(studentId, accessType) {
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var updates = {};
+      if (accessType === 'full') {
+        updates = { has_course_access: true, trial_lesson_id: null };
+      } else {
+        updates = { has_course_access: false, trial_lesson_id: null };
+      }
+
+      await sb.from('profiles').update(updates).eq('id', studentId);
+      alert('¡Acceso al curso actualizado!');
+      loadAdminStudents();
+    };
+
+    window.grantTrialLesson = async function(studentId) {
+      var select = document.getElementById('trial-select-' + studentId);
+      var lessonId = select.value;
+
+      if (!lessonId) return alert('Por favor selecciona una lección para habilitar como prueba.');
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('profiles').update({
+        has_course_access: false,
+        trial_lesson_id: lessonId
+      }).eq('id', studentId);
+
+      alert('¡Lección de prueba asignada al alumno!');
+      loadAdminStudents();
+    };
+
+    window.updateStudentLevel = async function(studentId, newLevel) {
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ student_level: newLevel }).eq('id', studentId);
+      alert('¡Nivel del alumno actualizado con éxito!');
+    };
+
+    window.toggleStudentStatus = async function(studentId, currentStatus) {
+      var newStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ status: newStatus }).eq('id', studentId);
+      loadAdminStudents();
+    };
+
+    // ====================================================
+    // CENTRAL DE INFORMAÇÕES
+    // ====================================================
+    window.loadInfoCenter = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
+      var { data: messages } = await sb.from('student_messages')
+        .select('*')
+        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false });
+
+      var container = document.getElementById('info-center-list');
+      if (!messages || messages.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-regular fa-bell text-3xl"></i><p class="text-sm font-medium">No tenés nuevos avisos por el momento.</p></div>';
+        return;
+      }
+
+      container.innerHTML = messages.map(function(m) {
+        var isFromStudent = m.sender_type === 'student';
+        var cardBg = isFromStudent ? 'bg-blue-50/70 border-blue-100' : 'bg-slate-50 border-slate-100';
+        var senderName = isFromStudent ? 'Vos (Consulta enviada)' : (m.sender || 'Profesor Renan');
+        var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 underline mt-2"><i class="fa-solid fa-paperclip"></i> Ver archivo o material</a>' : '';
+
+        return '<div class="p-3.5 ' + cardBg + ' border rounded-2xl space-y-1">' +
+          '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
+            '<span class="font-bold text-slate-800">' + senderName + '</span>' +
+            '<span>' + new Date(m.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) + '</span>' +
+          '</div>' +
+          '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
+          fileBtn +
+        '</div>';
+      }).join('');
+    };
+
+    window.studentSendMessage = async function() {
+      var input = document.getElementById('student-msg-input');
+      var text = input.value.trim();
+      if (!text) return alert('Por favor escribí un mensaje.');
+
+      var sb = getSupabase();
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+
+      await sb.from('student_messages').insert([{
+        student_id: currentUser.id,
+        student_email: currentUser.email,
+        sender: studentName,
+        sender_type: 'student',
+        message_text: text,
+        file_url: null
+      }]);
+
+      input.value = '';
+      alert('¡Tu consulta fue enviada a Renan con éxito!');
+      loadInfoCenter();
+    };
+
+    window.loadStudentInbox = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
+      var { data } = await sb.from('student_messages')
+        .select('*')
+        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      var container = document.getElementById('student-inbox-list');
+      var section = document.getElementById('student-inbox-section');
+
+      if (data && data.length > 0) {
+        section.classList.remove('hidden');
+        container.innerHTML = data.map(function(m) {
+          var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline mt-1.5"><i class="fa-solid fa-paperclip"></i> Ver archivo adjunto</a>' : '';
+
+          return '<div class="p-3 bg-white border border-green-200 rounded-2xl shadow-sm space-y-1">' +
+            '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
+              '<span class="font-bold text-slate-800">' + m.sender + '</span>' +
+              '<span>' + new Date(m.created_at).toLocaleDateString('es-AR') + '</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
+            fileBtn +
+          '</div>';
+        }).join('');
+      } else {
+        section.classList.add('hidden');
+      }
+    };
+
+    // ====================================================
+    // PROVAS E TAREFAS
+    // ====================================================
+    window.submitQuizAnswers = async function() {
+      if (!activeQuizData) return;
+      var questions = activeQuizData.questions_json || [];
+      var score = 0;
+      var total = questions.length;
+      var answersDetail = [];
+
+      for (var i = 0; i < total; i++) {
+        var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
+        if (!selected) return alert('Por favor responde la pregunta #' + (i + 1));
+        var userChoice = parseInt(selected.value);
+        var isCorrect = userChoice === questions[i].correct;
+        if (isCorrect) score++;
+
+        answersDetail.push({
+          question_number: i + 1,
+          question: questions[i].question,
+          options: questions[i].options,
+          user_choice_idx: userChoice,
+          user_choice: questions[i].options[userChoice],
+          correct_choice_idx: questions[i].correct,
+          correct_choice: questions[i].options[questions[i].correct],
+          is_correct: isCorrect
+        });
+      }
+
+      var percentage = Math.round((score / total) * 100);
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+
+      var sb = getSupabase();
+      await sb.from('quiz_submissions').insert([{
+        quiz_id: activeQuizData.id,
+        quiz_title: activeQuizData.title,
+        student_email: currentUser.email,
+        student_name: studentName,
+        score: score,
+        total_questions: total,
+        answers_detail: answersDetail
+      }]);
+
+      closeActiveQuiz();
+      showStudentQuizReview(activeQuizData.title, score, total, percentage, answersDetail);
+      loadStudentTasksAndQuizzes();
+    };
+
+    function showStudentQuizReview(title, score, total, percentage, details) {
+      document.getElementById('student-quizzes-list').classList.add('hidden');
+      var reviewBox = document.getElementById('quiz-review-container');
+      reviewBox.classList.remove('hidden');
+
+      var scoreBadge = document.getElementById('quiz-review-score-badge');
+      scoreBadge.innerText = 'Puntaje: ' + score + ' de ' + total + ' (' + percentage + '%)';
+      scoreBadge.className = percentage >= 60 ? 'text-xs font-bold text-green-700' : 'text-xs font-bold text-red-600';
+
+      var container = document.getElementById('quiz-review-questions-list');
+      container.innerHTML = details.map(function(item) {
+        var statusBadge = item.is_correct 
+          ? '<span class="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check"></i> Acertaste</span>'
+          : '<span class="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-xmark"></i> Erraste</span>';
+
+        return '<div class="p-3.5 ' + (item.is_correct ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200') + ' rounded-2xl border space-y-2">' +
+          '<div class="flex justify-between items-start">' +
+            '<p class="font-bold text-slate-900">' + item.question_number + '. ' + item.question + '</p>' +
+            statusBadge +
+          '</div>' +
+          '<div class="space-y-1 text-xs">' +
+            '<div>Tu respuesta: <b class="' + (item.is_correct ? 'text-green-700' : 'text-red-600') + '">' + item.user_choice + '</b></div>' +
+            (!item.is_correct ? '<div class="text-emerald-800 bg-white p-2 rounded-xl border border-emerald-200 mt-1">💡 <b>Respuesta correcta:</b> ' + item.correct_choice + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      reviewBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.closeQuizReview = function() {
+      document.getElementById('quiz-review-container').classList.add('hidden');
+      document.getElementById('student-quizzes-list').classList.remove('hidden');
+    };
+
+    window.startStudentQuiz = async function(quizId) {
+      var sb = getSupabase();
+      var { data } = await sb.from('online_quizzes').select('*').eq('id', quizId).single();
+      if (!data) return;
+
+      activeQuizData = data;
+      document.getElementById('student-quizzes-list').classList.add('hidden');
+      document.getElementById('quiz-review-container').classList.add('hidden');
+      var container = document.getElementById('active-quiz-container');
+      container.classList.remove('hidden');
+
+      document.getElementById('active-quiz-title').innerText = data.title;
+      document.getElementById('active-quiz-desc').innerText = data.description || '';
+
+      var questionsDiv = document.getElementById('active-quiz-questions');
+      var questions = data.questions_json || [];
+
+      questionsDiv.innerHTML = questions.map(function(q, qIdx) {
+        return '<div class="p-3 bg-slate-50 rounded-xl space-y-2 border border-slate-100">' +
+          '<p class="font-bold text-slate-800">' + (qIdx + 1) + '. ' + q.question + '</p>' +
+          '<div class="space-y-1.5">' +
+            q.options.map(function(opt, optIdx) {
+              return '<label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">' +
+                '<input type="radio" name="student-ans-' + qIdx + '" value="' + optIdx + '" class="text-green-600">' +
+                '<span class="text-slate-700">' + opt + '</span>' +
+              '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      container.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.closeActiveQuiz = function() {
+      activeQuizData = null;
+      document.getElementById('active-quiz-container').classList.add('hidden');
+      document.getElementById('student-quizzes-list').classList.remove('hidden');
+    };
+
+    window.switchTasksTab = function(type) {
+      document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
+      document.getElementById('tasks-sub-quizzes').classList.toggle('hidden', type !== 'quizzes');
+
+      var btnMat = document.getElementById('tab-btn-tasks-mat');
+      var btnQuiz = document.getElementById('tab-btn-tasks-quiz');
+
+      if (type === 'materials') {
+        btnMat.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnQuiz.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      } else {
+        btnQuiz.className = 'flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition';
+        btnMat.className = 'flex-1 py-2 rounded-lg text-slate-600 transition';
+      }
+    };
+
+    window.loadStudentTasksAndQuizzes = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
+      var { data: assignments } = await sb.from('student_assignments')
+        .select('*')
+        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email + ',target_student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false });
+
+      var matContainer = document.getElementById('student-assignments-list');
+      if (assignments && assignments.length > 0) {
+        matContainer.innerHTML = assignments.map(function(a) {
+          var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-xl font-bold text-xs mt-2 hover:bg-green-100 transition"><i class="fa-solid fa-file-pdf"></i> Abrir Apostila / Material</a>' : '';
+
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-1.5">' +
+            '<div class="flex justify-between items-start">' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + a.title + '</h4>' +
+              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Material</span>' +
+            '</div>' +
+            '<p class="text-xs text-slate-600 leading-relaxed">' + (a.description || '') + '</p>' +
+            linkBtn +
+          '</div>';
+        }).join('');
+      } else {
+        matContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-regular fa-clipboard text-3xl"></i><p class="text-sm">Sin tareas asignadas por el momento</p></div>';
+      }
+
+      var { data: quizzes } = await sb.from('online_quizzes').select('*').order('created_at', { ascending: false });
+      var quizContainer = document.getElementById('student-quizzes-list');
+
+      if (quizzes && quizzes.length > 0) {
+        quizContainer.innerHTML = quizzes.map(function(q) {
+          return '<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-2">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + q.title + '</h4>' +
+                '<p class="text-xs text-slate-500">' + (q.description || 'Evaluación con corrección automática') + '</p>' +
+              '</div>' +
+              '<span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Online</span>' +
+            '</div>' +
+            '<button onclick="startStudentQuiz(\'' + q.id + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition shadow-sm">' +
+              'Realizar Evaluación' +
+            '</button>' +
+          '</div>';
+        }).join('');
+      } else {
+        quizContainer.innerHTML = '<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center py-12 text-slate-400 space-y-2"><i class="fa-solid fa-graduation-cap text-3xl"></i><p class="text-sm">Sin evaluaciones disponibles</p></div>';
+      }
+    };
+
+    var quizQuestions = [];
+
+    window.initQuizBuilder = function() {
+      if (quizQuestions.length === 0) {
+        quizQuestions = [
+          { question: '', options: ['', '', '', ''], correct: 0 }
+        ];
+      }
+      renderQuizBuilder();
+    };
+
+    window.addQuizQuestionField = function() {
+      quizQuestions.push({ question: '', options: ['', '', '', ''], correct: 0 });
+      renderQuizBuilder();
+    };
+
+    window.renderQuizBuilder = function() {
+      var container = document.getElementById('quiz-questions-builder');
+      container.innerHTML = quizQuestions.map(function(q, qIndex) {
+        return '<div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">' +
+          '<div class="flex justify-between items-center">' +
+            '<span class="font-bold text-xs text-slate-800">Pregunta #' + (qIndex + 1) + '</span>' +
+            (quizQuestions.length > 1 ? '<button onclick="removeQuizQuestion(' + qIndex + ')" class="text-[10px] text-red-500 font-bold">Eliminar</button>' : '') +
+          '</div>' +
+          '<input type="text" placeholder="Enunciado de la pregunta" value="' + q.question + '" onchange="quizQuestions[' + qIndex + '].question = this.value" class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none bg-white">' +
+          '<div class="space-y-1.5 pt-1">' +
+            q.options.map(function(opt, optIndex) {
+              return '<div class="flex items-center gap-2">' +
+                '<input type="radio" name="correct-' + qIndex + '" ' + (q.correct === optIndex ? 'checked' : '') + ' onchange="quizQuestions[' + qIndex + '].correct = ' + optIndex + '">' +
+                '<input type="text" placeholder="Opción ' + (optIndex + 1) + '" value="' + opt + '" onchange="quizQuestions[' + qIndex + '].options[' + optIndex + '] = this.value" class="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-xs outline-none bg-white">' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          '<p class="text-[10px] text-slate-400">Marca el círculo de la opción correcta.</p>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.removeQuizQuestion = function(index) {
+      quizQuestions.splice(index, 1);
+      renderQuizBuilder();
+    };
+
+    window.saveNewQuiz = async function() {
+      var title = document.getElementById('quiz-title').value;
+      var desc = document.getElementById('quiz-desc').value;
+
+      if (!title) return alert('Ingresá el título del examen');
+
+      var valid = quizQuestions.every(q => q.question.trim() !== '' && q.options.every(o => o.trim() !== ''));
+      if (!valid) return alert('Por favor, completá todas las perguntas y opciones');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('online_quizzes').insert([{
+        title: title,
+        description: desc,
+        questions_json: quizQuestions
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        alert('¡Evaluación online creada con éxito!');
+        document.getElementById('quiz-title').value = '';
+        document.getElementById('quiz-desc').value = '';
+        quizQuestions = [];
+        initQuizBuilder();
+        loadAdminQuizScores();
+      }
+    };
+
+    window.loadAdminQuizScores = async function() {
+      var container = document.getElementById('admin-quiz-scores-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data } = await sb.from('quiz_submissions').select('*').order('created_at', { ascending: false });
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Aún ningún alumno ha completado evaluaciones.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(function(sub) {
+        var percentage = Math.round((sub.score / sub.total_questions) * 100);
+        var badgeColor = percentage >= 60 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+        return '<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1">' +
+          '<div class="flex justify-between items-center">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-800 text-xs">' + sub.quiz_title + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + sub.student_name + ' (' + sub.student_email + ')</p>' +
+            '</div>' +
+            '<span class="px-2 py-0.5 rounded-full text-xs font-bold ' + badgeColor + '">' +
+              sub.score + ' / ' + sub.total_questions + ' (' + percentage + '%)' +
+            '</span>' +
+          '</div>' +
+          '<span class="text-[10px] text-slate-400">Completado el: ' + new Date(sub.created_at).toLocaleDateString('es-AR') + '</span>' +
+        '</div>';
+      }).join('');
+    };
+
+    // ====================================================
+    // HORÁRIOS & AGENDAMENTOS
+    // ====================================================
+    window.loadAvailableSlotsForAdmin = async function() {
+      var select = document.getElementById('admin-manual-slot-select');
+      var sb = getSupabase();
+      if (!sb || !select) return;
+
+      var { data } = await sb.from('available_slots').select('*').eq('is_booked', false).order('date', { ascending: true }).order('time', { ascending: true });
+      availableSlotsCache = data || [];
+
+      if (availableSlotsCache.length === 0) {
+        select.innerHTML = '<option value="">No hay horarios libres disponibles</option>';
+      } else {
+        select.innerHTML = availableSlotsCache.map(s => '<option value="' + s.id + '" data-date="' + s.date + '" data-time="' + s.time + '">' + formatSpanishDate(s.date) + ' - ' + s.time + ' hs</option>').join('');
+      }
+    };
+
+    window.adminBookStudentManually = async function() {
+      var studentSelect = document.getElementById('admin-manual-student-select');
+      var slotSelect = document.getElementById('admin-manual-slot-select');
+
+      var studentEmail = studentSelect.value;
+      var selectedOption = studentSelect.options[studentSelect.selectedIndex];
+      var studentName = selectedOption.getAttribute('data-name');
+      var studentId = selectedOption.getAttribute('data-id');
+
+      var slotId = slotSelect.value;
+      if (!slotId) return alert('Selecciona un horario disponible');
+      var selectedSlotOpt = slotSelect.options[slotSelect.selectedIndex];
+      var slotDate = selectedSlotOpt.getAttribute('data-date');
+      var slotTime = selectedSlotOpt.getAttribute('data-time');
+
+      var sb = getSupabase();
+      
+      await sb.from('bookings').insert([{
+        user_id: studentId.includes('@') ? null : studentId,
+        slot_id: slotId,
+        slot_date: slotDate,
+        slot_time: slotTime,
+        student_name: studentName,
+        student_email: studentEmail,
+        receipt_url: null,
+        status: 'confirmed'
+      }]);
+
+      await sb.from('available_slots').update({ is_booked: true }).eq('id', slotId);
+
+      alert('¡Clase agendada con éxito para ' + studentName + '!');
+      loadAdminBookings();
+      loadAvailableSlotsForAdmin();
+      loadAdminStudents();
+    };
+
+    window.loadAdminBookings = async function() {
+      var container = document.getElementById('admin-bookings-list');
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('bookings').select('*').order('created_at', { ascending: false });
+      if (res.error || !res.data || res.data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhuma reserva realizada ainda.</p>';
+        return;
+      }
+      container.innerHTML = res.data.map(function(b) {
+        var receiptSection = b.receipt_url 
+          ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
+          : '<div class="mt-2 flex items-center gap-2">' +
+              '<span class="text-[11px] text-amber-600 font-semibold">Sin comprobante subido</span>' +
+              '<button onclick="uploadReceiptManuallyForBooking(\'' + b.id + '\')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-2 py-1 rounded-lg text-[10px] transition"><i class="fa-solid fa-upload"></i> Subir Ahora</button>' +
+            '</div>';
+
+        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + (b.student_name || 'Aluno') + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + (b.student_email || 'Email não informado') + '</p>' +
+            '</div>' +
+            '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
+          '</div>' +
+          '<div class="text-xs text-slate-700 pt-1">' +
+            '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
+          '</div>' +
+          receiptSection +
+        '</div>';
+      }).join('');
+    };
+
+    window.uploadReceiptManuallyForBooking = async function(bookingId) {
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*,.pdf';
+
+      fileInput.onchange = async function() {
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        var sb = getSupabase();
+        var fileName = 'receipt_admin_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
+
+        var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
+        if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
+
+        var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
+        await sb.from('bookings').update({ receipt_url: publicUrl }).eq('id', bookingId);
+
+        alert('¡Comprobante adjuntado con éxito a la reserva!');
+        loadAdminBookings();
+      };
+
+      fileInput.click();
+    };
+
+    window.addVideo = async function() {
+      var title = document.getElementById('admin-video-title').value;
+      var url = document.getElementById('admin-video-url').value;
+      var level = document.getElementById('admin-video-level').value;
+      var material = document.getElementById('admin-video-material').value;
+      var shouldNotify = document.getElementById('admin-video-notify').checked;
+
+      if (!title || !url) return alert('Preencha título e link do vídeo!');
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var res = await sb.from('course_lessons').insert([{
+        title: title,
+        video_url: url,
+        level: level,
+        material_url: material || null,
+        is_active: true
+      }]);
+
+      if (res.error) {
+        alert('Erro ao cadastrar: ' + res.error.message);
+      } else {
+        if (shouldNotify) {
+          await sb.from('student_messages').insert([{
+            student_email: 'nivel_' + level,
+            sender: 'Profesor Renan Barbosa',
+            sender_type: 'teacher',
+            message_text: 'Nova aula publicada no seu módulo: "' + title + '". Já disponível no Curso Gravado!',
+            file_url: material || null
+          }]);
+        }
+
+        alert('Aula cadastrada com sucesso!');
+        document.getElementById('admin-video-title').value = '';
+        document.getElementById('admin-video-url').value = '';
+        document.getElementById('admin-video-material').value = '';
+        document.getElementById('admin-video-notify').checked = false;
+        loadAdminLessonsManagement();
+      }
+    };
+
+    window.loadAdminLessonsManagement = async function() {
+      var container = document.getElementById('admin-lessons-management-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data, error } = await sb.from('course_lessons').select('*').order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhuma aula cadastrada ainda.</p>';
+        return;
+      }
+
+      var levelLabels = { iniciante: 'Iniciante (A1-A2)', medio: 'Intermedio (B1-B2)', avancado: 'Avanzado (C1-C2)', extras: 'Clases Extras' };
+
+      container.innerHTML = data.map(function(lesson) {
+        var activeStatus = lesson.is_active !== false;
+        var toggleBtnClass = activeStatus ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-green-600 hover:bg-green-700 text-white';
+        var toggleBtnText = activeStatus ? '<i class="fa-solid fa-eye-slash"></i> Pausar / Ocultar' : '<i class="fa-solid fa-eye"></i> Tornar Disponível';
+
+        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">' +
+          '<div class="flex justify-between items-start gap-2">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-xs">' + lesson.title + '</h4>' +
+              '<span class="text-[10px] font-semibold text-slate-500">Módulo: ' + (levelLabels[lesson.level] || lesson.level) + '</span>' +
+            '</div>' +
+            '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ' + (activeStatus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600') + '">' +
+              (activeStatus ? 'Visível' : 'Indisponível') +
+            '</span>' +
+          '</div>' +
+          '<div class="flex gap-2 pt-1">' +
+            '<button onclick="toggleLessonVisibility(\'' + lesson.id + '\', ' + activeStatus + ')" class="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition shadow-sm ' + toggleBtnClass + '">' +
+              toggleBtnText +
+            '</button>' +
+            '<button onclick="deleteLessonPermanently(\'' + lesson.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-xl text-[11px] transition">' +
+              '<i class="fa-solid fa-trash"></i> Excluir' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.toggleLessonVisibility = async function(lessonId, currentStatus) {
+      var sb = getSupabase();
+      if (!sb) return;
+      var { error } = await sb.from('course_lessons').update({ is_active: !currentStatus }).eq('id', lessonId);
+      if (error) {
+        alert('Erro: ' + error.message);
+      } else {
+        loadAdminLessonsManagement();
+      }
+    };
+
+    window.deleteLessonPermanently = async function(lessonId) {
+      if (!confirm('Tem certeza que deseja excluir esta aula permanentemente?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+      
+      await sb.from('lesson_progress').delete().eq('lesson_id', lessonId);
+      var { error } = await sb.from('course_lessons').delete().eq('id', lessonId);
+      
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Aula excluída com sucesso!');
+        loadAdminLessonsManagement();
+      }
+    };
+
+    window.createAssignment = async function() {
+      var title = document.getElementById('assign-title').value;
+      var desc = document.getElementById('assign-desc').value;
+      var url = document.getElementById('assign-url').value;
+      var target = document.getElementById('assign-target-student').value;
+
+      if (!title) return alert('Por favor, ingresá un título.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('student_assignments').insert([{
+        title: title,
+        description: desc,
+        material_url: url,
+        target_student_email: target
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        await sb.from('student_messages').insert([{
+          student_email: target,
+          sender: 'Profesor Renan Barbosa',
+          sender_type: 'teacher',
+          message_text: 'Nueva tarea asignada: "' + title + '". Podés revisarla en la sección de Tareas & Evaluaciones.',
+          file_url: url || null
+        }]);
+
+        alert('¡Tarea publicada y notificada con éxito!');
+        document.getElementById('assign-title').value = '';
+        document.getElementById('assign-desc').value = '';
+        document.getElementById('assign-url').value = '';
+        loadAdminAssignments();
+      }
+    };
+
+    window.loadAdminAssignments = async function() {
+      var container = document.getElementById('admin-assignments-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data } = await sb.from('student_assignments').select('*').order('created_at', { ascending: false });
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">No hay tareas o materiales publicados aún.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(function(a) {
+        var linkBtn = a.material_url ? '<a href="' + a.material_url + '" target="_blank" class="text-blue-600 underline font-bold text-[11px] block mt-1"><i class="fa-solid fa-link"></i> Abrir Material / PDF</a>' : '';
+
+        return '<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1">' +
+          '<div class="flex justify-between items-start">' +
+            '<h4 class="font-bold text-slate-800 text-xs">' + a.title + '</h4>' +
+            '<span class="bg-slate-200 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">' + a.target_student_email + '</span>' +
+          '</div>' +
+          '<p class="text-[11px] text-slate-600">' + (a.description || 'Sin descripción') + '</p>' +
+          linkBtn +
+        '</div>';
+      }).join('');
+    };
+
+    window.generateBulkSlots = async function() {
+      var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
+      var startTime = document.getElementById('bulk-start-time').value;
+      var endTime = document.getElementById('bulk-end-time').value;
+      var duration = parseInt(document.getElementById('bulk-duration').value);
+      var totalWeeks = parseInt(document.getElementById('bulk-weeks').value);
+
+      if (!startTime || !endTime) return alert('Por favor, ingresá hora de inicio y fin.');
+
+      var startHour = parseInt(startTime.split(':')[0]);
+      var startMin = parseInt(startTime.split(':')[1]);
+      var endHour = parseInt(endTime.split(':')[0]);
+      var endMin = parseInt(endTime.split(':')[1]);
+
+      var startTotalMinutes = startHour * 60 + startMin;
+      var endTotalMinutes = endHour * 60 + endMin;
+
+      if (endTotalMinutes <= startTotalMinutes) return alert('La hora de fin debe ser posterior a la de inicio.');
+
+      var btn = document.getElementById('bulk-btn');
+      btn.innerText = 'Generando horarios...';
+      btn.disabled = true;
+
+      var slotsToInsert = [];
+      var today = new Date();
+
+      for (var w = 0; w < totalWeeks; w++) {
+        var loopDate = new Date();
+        loopDate.setDate(today.getDate() + ((targetDay - today.getDay() + 7) % 7) + (w * 7));
+
+        var yyyy = loopDate.getFullYear();
+        var mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+        var dd = String(loopDate.getDate()).padStart(2, '0');
+        var dateString = yyyy + '-' + mm + '-' + dd;
+
+        var currentMinutes = startTotalMinutes;
+        while (currentMinutes + duration <= endTotalMinutes) {
+          var h = String(Math.floor(currentMinutes / 60)).padStart(2, '0');
+          var m = String(currentMinutes % 60).padStart(2, '0');
+          var timeString = h + ':' + m;
+
+          slotsToInsert.push({
+            date: dateString,
+            time: timeString,
+            is_booked: false
+          });
+
+          currentMinutes += duration;
+        }
+      }
+
+      var sb = getSupabase();
+      var { error } = await sb.from('available_slots').insert(slotsToInsert);
+
+      btn.innerText = 'Generar Franja del Mes';
+      btn.disabled = false;
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        alert('¡Se generaron con éxito ' + slotsToInsert.length + ' horarios disponibles!');
+        loadAdminSlots();
+      }
+    };
+
+    window.addSlot = async function() {
+      var date = document.getElementById('admin-slot-date').value;
+      var time = document.getElementById('admin-slot-time').value;
+      if (!date || !time) return alert('Selecione data e hora!');
+
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('available_slots').insert([{ date: date, time: time, is_booked: false }]);
+      if (res.error) {
+        alert('Erro ao cadastrar: ' + res.error.message);
+      } else {
+        alert('Horário adicionado!');
+        loadAdminSlots();
+      }
+    };
+
+    window.loadAdminSlots = async function() {
+      var container = document.getElementById('admin-slots-list');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var slotsRes = await sb.from('available_slots').select('*').order('date', { ascending: true }).order('time', { ascending: true });
+      var bookingsRes = await sb.from('bookings').select('*');
+
+      var slots = slotsRes.data || [];
+      var bookings = bookingsRes.data || [];
+
+      if (slots.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhum horário cadastrado ainda.</p>';
+        return;
+      }
+
+      container.innerHTML = slots.map(function(slot) {
+        var booking = bookings.find(b => b.slot_id === slot.id);
+        var studentInfo = '';
+        var actionButtons = '';
+        var formattedDate = formatSpanishDate(slot.date);
+
+        if (slot.is_booked) {
+          var name = booking ? booking.student_name : 'Aluno';
+          var email = booking ? booking.student_email : '';
+          var receiptLink = booking && booking.receipt_url ? '<a href="' + booking.receipt_url + '" target="_blank" class="text-blue-600 underline font-bold ml-1">Ver comprovante</a>' : '';
+
+          studentInfo = '<div class="mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-600">' +
+            '👤 <b>Reservado por:</b> ' + name + ' (' + email + ') ' + receiptLink +
+          '</div>';
+
+          actionButtons = '<div class="flex gap-2 mt-2 pt-1">' +
+            '<button onclick="releaseSlot(\'' + slot.id + '\')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-2 rounded-lg text-[11px] flex items-center justify-center gap-1 transition">' +
+              '<i class="fa-solid fa-rotate-left"></i> Liberar Horário' +
+            '</button>' +
+            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">' +
+              '<i class="fa-solid fa-trash"></i>' +
+            '</button>' +
+          '</div>';
+        } else {
+          actionButtons = '<div class="flex justify-end mt-2">' +
+            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="text-red-500 hover:text-red-700 text-[11px] font-bold flex items-center gap-1 transition">' +
+              '<i class="fa-solid fa-trash"></i> Excluir Horário' +
+            '</button>' +
+          '</div>';
+        }
+
+        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">' +
+          '<div class="flex justify-between items-center">' +
+            '<div>' +
+              '<div class="font-bold text-slate-900 text-xs capitalize">' + formattedDate + '</div>' +
+              '<div class="text-[11px] text-green-700 font-bold">⏰ ' + slot.time + ' hs</div>' +
+            '</div>' +
+            '<span class="px-2.5 py-0.5 text-[10px] rounded-full ' + (slot.is_booked ? 'bg-red-100 text-red-600 font-bold' : 'bg-green-100 text-green-700 font-semibold') + '">' +
+              (slot.is_booked ? 'Reservado' : 'Disponível') +
+            '</span>' +
+          '</div>' +
+          studentInfo +
+          actionButtons +
+        '</div>';
+      }).join('');
+    };
+
+    window.releaseSlot = async function(slotId) {
+      if (!confirm('Deseja cancelar esta reserva e tornar o horário disponível novamente para outros alunos?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('bookings').delete().eq('slot_id', slotId);
+      var { error } = await sb.from('available_slots').update({ is_booked: false }).eq('id', slotId);
+      if (error) {
+        alert('Erro ao liberar horário: ' + error.message);
+      } else {
+        alert('Horário liberado com sucesso!');
+        loadAdminSlots();
+        loadAdminStudents();
+      }
+    };
+
+    window.deleteSlot = async function(slotId) {
+      if (!confirm('Tem certeza que deseja excluir permanentemente este horário?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('bookings').delete().eq('slot_id', slotId);
+      var { error } = await sb.from('available_slots').delete().eq('id', slotId);
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Horário excluído com sucesso!');
+        loadAdminSlots();
+      }
+    };
+
+    window.deleteAllAvailableSlots = async function() {
+      if (!confirm('Deseja excluir TODOS os horários que estão vagos/disponíveis?')) return;
+      var sb = getSupabase();
+      if (!sb) return;
+      var { error } = await sb.from('available_slots').delete().eq('is_booked', false);
+      if (error) {
+        alert('Erro: ' + error.message);
+      } else {
+        alert('Horários vagos excluídos!');
+        loadAdminSlots();
+      }
     };
 
     // Inicialização da aplicação
