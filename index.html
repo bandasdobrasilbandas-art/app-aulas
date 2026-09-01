@@ -28,8 +28,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="https://www.youtube.com/iframe_api"></script>
-  
   <style>
     body { 
       -webkit-tap-highlight-color: transparent; 
@@ -69,8 +67,7 @@
       overflow: hidden;
       background: #000;
     }
-    .video-secure-container iframe,
-    .video-secure-container div[id^="yt-player-"] {
+    .video-secure-container iframe {
       width: 100% !important;
       height: 100% !important;
       border: 0;
@@ -223,6 +220,7 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
+        <!-- Card Clases 1:1 -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-meet-bg-img" src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -238,6 +236,7 @@
           </div>
         </div>
 
+        <!-- Card Curso Grabado -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-course-bg-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -705,6 +704,7 @@
             </div>
           </div>
 
+          <!-- MODAL DE UPLOAD DE COMPROVANTE COM JUSTIFICATIVA -->
           <div id="receipt-upload-modal" class="hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-xl space-y-3">
             <div class="flex justify-between items-start border-b border-slate-100 pb-2">
               <div>
@@ -740,6 +740,7 @@
             </div>
           </div>
 
+          <!-- MODAL DE PROGRESSO DO ALUNO -->
           <div id="student-detail-modal" class="hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-lg space-y-4">
             <div class="flex justify-between items-start border-b border-slate-100 pb-2">
               <div>
@@ -940,7 +941,6 @@
           </div>
         </div>
 
-        <!-- Demais seções administrativas -->
         <div id="admin-sec-syllabus" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
             <div>
@@ -1228,763 +1228,266 @@
     var currentReceiptTargetStudent = null;
     var currentStudentsFilter = 'all';
 
-    async function loadAppSettings() {
+    // ====================================================
+    // GERADOR DO INFORME FINANCEIRO (SINTÉTICO E ANALÍTICO)
+    // ====================================================
+    window.generateFinancePDFReport = async function() {
+      var mode = document.getElementById('fin-report-mode').value;
+      var period = document.getElementById('fin-report-period').value;
       var sb = getSupabase();
       if (!sb) return;
-      var { data } = await sb.from('app_settings').select('*');
-      if (data) {
-        data.forEach(item => {
-          if (item.key === 'price_meet') PRICE_PER_LESSON = parseInt(item.value) || 12500;
-          if (item.key === 'price_course') PRICE_COURSE = parseInt(item.value) || 30000;
-          if (item.key === 'card_course_bg' && item.value) document.getElementById('card-course-bg-img').src = item.value;
-          if (item.key === 'card_meet_bg' && item.value) document.getElementById('card-meet-bg-img').src = item.value;
-          if (item.key === 'app_theme') applyAppTheme(item.value || 'tropical');
-          if (item.key === 'app_logo_url') applyLogo(item.value);
-          if (item.key === 'course_syllabus_text') {
-            document.getElementById('syllabus-content-display').innerText = item.value;
-            var textInput = document.getElementById('setting-syllabus-text');
-            if (textInput) textInput.value = item.value;
-          }
-          if (item.key === 'course_syllabus_pdf_url') {
-            var pdfBox = document.getElementById('syllabus-pdf-link-box');
-            var pdfLink = document.getElementById('syllabus-pdf-link');
-            var pdfInput = document.getElementById('setting-syllabus-pdf');
-            if (pdfInput) pdfInput.value = item.value;
-            if (item.value && item.value.trim() !== '') {
-              pdfBox.classList.remove('hidden');
-              pdfLink.href = item.value;
-            } else {
-              pdfBox.classList.add('hidden');
-            }
-          }
+
+      var now = new Date();
+      var startDate = null;
+      var endDate = null;
+      var periodTitle = 'Todo el Historial';
+
+      if (period === 'current_month') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        periodTitle = 'Mes Actual (' + (now.getMonth() + 1) + '/' + now.getFullYear() + ')';
+      } else if (period === 'last_month') {
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        periodTitle = 'Mes Anterior';
+      } else if (period === 'custom') {
+        var startInput = document.getElementById('fin-report-start').value;
+        var endInput = document.getElementById('fin-report-end').value;
+        if (!startInput || !endInput) return alert('Por favor seleccioná fecha de inicio y fin.');
+        startDate = new Date(startInput);
+        endDate = new Date(endInput + 'T23:59:59');
+        periodTitle = 'Del ' + startInput + ' al ' + endInput;
+      }
+
+      var { data: bookings } = await sb.from('bookings').select('*').order('created_at', { ascending: true });
+      var { data: courses } = await sb.from('profiles').select('*').eq('has_course_access', true).order('created_at', { ascending: true });
+      var { data: expenses } = await sb.from('cash_flow').select('*').order('created_at', { ascending: true });
+
+      var filterByDate = function(itemDate) {
+        if (!startDate || !endDate) return true;
+        var d = new Date(itemDate);
+        return d >= startDate && d <= endDate;
+      };
+
+      var filteredBookings = (bookings || []).filter(b => filterByDate(b.created_at));
+      var filteredCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()) && filterByDate(c.created_at));
+      var filteredExpenses = (expenses || []).filter(e => filterByDate(e.created_at));
+
+      var meetIncome = filteredBookings.length * PRICE_PER_LESSON;
+      var courseIncome = filteredCourses.length * PRICE_COURSE;
+      var totalIncome = meetIncome + courseIncome;
+      var totalExpenses = filteredExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      var netProfit = totalIncome - totalExpenses;
+
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF();
+
+      doc.setFontSize(15);
+      doc.text("Informe Financiero Oficial - Portugues con Renan", 14, 16);
+      doc.setFontSize(9);
+      doc.text("Profesor: Renan Barbosa | Periodo: " + periodTitle + " | Emision: " + new Date().toLocaleDateString('es-AR'), 14, 23);
+
+      var nextY = 28;
+
+      if (mode === 'detailed') {
+        doc.setFontSize(11);
+        doc.text("Detalle Analitico de Ventas e Ingresos por Alumno:", 14, nextY);
+
+        var salesRows = [];
+
+        filteredBookings.forEach(function(b) {
+          var dateStr = b.created_at ? new Date(b.created_at).toLocaleDateString('es-AR') : '-';
+          var classDateStr = b.slot_date ? (b.slot_date + ' ' + (b.slot_time || '')) : '';
+          salesRows.push([
+            dateStr,
+            b.student_name || 'Estudiante',
+            b.student_email || '',
+            'Clase 1:1 Meet (' + classDateStr + ')',
+            '$' + PRICE_PER_LESSON.toLocaleString('es-AR')
+          ]);
         });
-      }
 
-      var cardMeet = document.getElementById('card-meet-price');
-      var cardCourse = document.getElementById('card-course-price');
-      var lockedPrice = document.getElementById('locked-course-price-label');
-      var inputMeet = document.getElementById('setting-price-meet');
-      var inputCourse = document.getElementById('setting-price-course');
+        filteredCourses.forEach(function(c) {
+          var dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('es-AR') : '-';
+          salesRows.push([
+            dateStr,
+            c.full_name || 'Estudiante',
+            c.email,
+            'Curso Grabado Completo',
+            '$' + PRICE_COURSE.toLocaleString('es-AR')
+          ]);
+        });
 
-      if (cardMeet) cardMeet.innerText = '$' + PRICE_PER_LESSON.toLocaleString('es-AR') + ' / 50 min';
-      if (cardCourse) cardCourse.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR');
-      if (lockedPrice) lockedPrice.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR') + ' ARS';
-      if (inputMeet) inputMeet.value = PRICE_PER_LESSON;
-      if (inputCourse) inputCourse.value = PRICE_COURSE;
-    }
-
-    function applyAppTheme(themeName) {
-      document.body.classList.remove('theme-tropical', 'theme-brasil', 'theme-classic');
-      document.body.classList.add('theme-' + (themeName || 'tropical'));
-      var select = document.getElementById('setting-app-theme');
-      if (select) select.value = themeName || 'tropical';
-    }
-
-    function applyLogo(logoUrl) {
-      var homeLogoEmoji = document.getElementById('home-logo-emoji');
-      var homeLogoImg = document.getElementById('home-logo-img');
-      var inputLogo = document.getElementById('setting-app-logo');
-
-      if (inputLogo) inputLogo.value = logoUrl || '';
-
-      if (logoUrl && logoUrl.trim() !== '') {
-        if (homeLogoEmoji) homeLogoEmoji.classList.add('hidden');
-        if (homeLogoImg) {
-          homeLogoImg.src = logoUrl;
-          homeLogoImg.classList.remove('hidden');
+        if (salesRows.length === 0) {
+          salesRows.push(['-', 'Sin ventas en este periodo', '-', '-', '$0']);
         }
-      } else {
-        if (homeLogoEmoji) homeLogoEmoji.classList.remove('hidden');
-        if (homeLogoImg) homeLogoImg.classList.add('hidden');
+
+        doc.autoTable({
+          startY: nextY + 3,
+          head: [['Fecha', 'Alumno', 'Email', 'Concepto / Servicio', 'Monto']],
+          body: salesRows,
+          theme: 'striped',
+          headStyles: { fillColor: [15, 36, 68] },
+          styles: { fontSize: 8 }
+        });
+
+        nextY = doc.lastAutoTable.finalY + 10;
       }
-    }
 
-    window.openSyllabusModal = function() {
-      document.getElementById('syllabus-modal').classList.remove('hidden');
-      document.getElementById('syllabus-modal').scrollIntoView({ behavior: 'smooth' });
-    };
+      doc.setFontSize(11);
+      doc.text("Resumen Consolidado del Periodo:", 14, nextY);
 
-    window.closeSyllabusModal = function() {
-      document.getElementById('syllabus-modal').classList.add('hidden');
-    };
-
-    window.saveSyllabusSettings = async function() {
-      var textVal = document.getElementById('setting-syllabus-text').value;
-      var pdfVal = document.getElementById('setting-syllabus-pdf').value.trim();
-
-      var sb = getSupabase();
-      if (!sb) return;
-
-      await sb.from('app_settings').upsert([
-        { key: 'course_syllabus_text', value: textVal },
-        { key: 'course_syllabus_pdf_url', value: pdfVal }
-      ]);
-
-      alert('¡Contenido programático actualizado con éxito!');
-      loadAppSettings();
-    };
-
-    window.saveDesignSettings = async function() {
-      var theme = document.getElementById('setting-app-theme').value;
-      var logo = document.getElementById('setting-app-logo').value.trim();
-      var courseBg = document.getElementById('setting-bg-course').value.trim();
-      var meetBg = document.getElementById('setting-bg-meet').value.trim();
-
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var updates = [
-        { key: 'app_theme', value: theme },
-        { key: 'app_logo_url', value: logo }
+      var summaryRows = [
+        ['Ingresos Clases Particulares Meet (' + filteredBookings.length + ' clases)', '$' + meetIncome.toLocaleString('es-AR')],
+        ['Ingresos Cursos Grabados Vendidos (' + filteredCourses.length + ' cursos)', '$' + courseIncome.toLocaleString('es-AR')],
+        ['TOTAL INGRESOS BRUTOS', '$' + totalIncome.toLocaleString('es-AR')],
+        ['TOTAL SALIDAS Y RETIROS DE CAJA', '-$' + totalExpenses.toLocaleString('es-AR')],
+        ['SALDO LIQUIDO FINAL EN CAJA', '$' + netProfit.toLocaleString('es-AR')]
       ];
 
-      if (courseBg) updates.push({ key: 'card_course_bg', value: courseBg });
-      if (meetBg) updates.push({ key: 'card_meet_bg', value: meetBg });
+      doc.autoTable({
+        startY: nextY + 3,
+        head: [['Concepto Resumen', 'Monto ($ ARS)']],
+        body: summaryRows,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 36, 68] },
+        styles: { fontSize: 9 }
+      });
 
-      await sb.from('app_settings').upsert(updates);
-      alert('¡Diseño y temas actualizados con éxito!');
-      loadAppSettings();
+      nextY = doc.lastAutoTable.finalY + 10;
+
+      var expenseRows = filteredExpenses.map(function(e) {
+        return [
+          new Date(e.created_at).toLocaleDateString('es-AR'),
+          e.category,
+          e.description,
+          '-$' + parseFloat(e.amount).toLocaleString('es-AR')
+        ];
+      });
+
+      if (expenseRows.length > 0) {
+        doc.setFontSize(11);
+        doc.text("Detalle de Salidas y Retiros de Caja:", 14, nextY);
+        doc.autoTable({
+          startY: nextY + 3,
+          head: [['Fecha', 'Categoria', 'Justificacion', 'Monto']],
+          body: expenseRows,
+          theme: 'grid',
+          headStyles: { fillColor: [180, 40, 40] },
+          styles: { fontSize: 8 }
+        });
+      }
+
+      doc.save('informe_financiero_' + mode + '_' + period + '.pdf');
     };
 
-    window.saveAppSettings = async function() {
-      var meetVal = document.getElementById('setting-price-meet').value;
-      var courseVal = document.getElementById('setting-price-course').value;
+    window.unlockFinanceSection = async function() {
+      var pass = document.getElementById('finance-admin-pass').value;
+      if (!pass) return alert('Por favor ingresá tu contraseña.');
 
+      var sb = getSupabase();
+      var res = await sb.auth.signInWithPassword({
+        email: currentUser.email,
+        password: pass
+      });
+
+      if (res.error) {
+        alert('Contraseña incorrecta. Acceso denegado al faturamento.');
+      } else {
+        isFinanceUnlocked = true;
+        document.getElementById('finance-admin-pass').value = '';
+        checkFinanceLockStatus();
+      }
+    };
+
+    function checkFinanceLockStatus() {
+      var lockScreen = document.getElementById('finance-lock-screen');
+      var unlockedContent = document.getElementById('finance-unlocked-content');
+      if (isFinanceUnlocked) {
+        lockScreen.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        loadFinanceData();
+      } else {
+        lockScreen.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    }
+
+    async function loadFinanceData() {
       var sb = getSupabase();
       if (!sb) return;
 
-      await sb.from('app_settings').upsert([
-        { key: 'price_meet', value: meetVal },
-        { key: 'price_course', value: courseVal }
-      ]);
+      var { data: bookings } = await sb.from('bookings').select('id, created_at, status');
+      var meetCount = (bookings || []).length;
+      var meetTotal = meetCount * PRICE_PER_LESSON;
 
-      alert('¡Precios actualizados con éxito!');
-      loadAppSettings();
-    };
+      var { data: courses } = await sb.from('profiles').select('id, email, created_at').eq('has_course_access', true);
+      var validCourses = (courses || []).filter(c => !ADMIN_EMAILS.includes((c.email || '').toLowerCase()));
+      var courseCount = validCourses.length;
+      var courseTotal = courseCount * PRICE_COURSE;
 
-    function toggleAuthMode() {
-      isSignUp = !isSignUp;
-      document.getElementById('auth-title').innerText = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
-      document.getElementById('auth-subtitle').innerText = isSignUp ? 'Registrate para acceder a las clases' : 'Ingresá a tu plataforma de portugués';
-      document.getElementById('auth-btn').innerText = isSignUp ? 'Registrarse' : 'Entrar';
-      document.getElementById('auth-toggle-text').innerText = isSignUp ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?';
-      document.getElementById('auth-toggle-btn').innerText = isSignUp ? 'Iniciar sesión' : 'Crear cuenta';
-      var nameField = document.getElementById('name-field');
-      if (isSignUp) {
-        nameField.classList.remove('hidden');
-      } else {
-        nameField.classList.add('hidden');
-      }
-    }
-
-    async function handleAuth() {
-      var email = document.getElementById('auth-email').value;
-      var password = document.getElementById('auth-password').value;
-      var name = document.getElementById('auth-name').value;
-      var sb = getSupabase();
-
-      if (!email || !password) return alert('Por favor, ingresá email y contraseña');
-
-      if (isSignUp) {
-        var res = await sb.auth.signUp({
-          email: email,
-          password: password,
-          options: { data: { full_name: name || 'Estudiante' } }
-        });
-        if (res.error) {
-          alert('Error al registrarse: ' + res.error.message);
-        } else {
-          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-          localStorage.setItem('user_session_token', newSessionToken);
-
-          if (res.data.user) {
-            await sb.from('profiles').upsert([{
-              id: res.data.user.id,
-              full_name: name || 'Estudiante',
-              email: email,
-              status: 'Ativo',
-              student_level: 'iniciante',
-              has_course_access: false,
-              trial_lesson_id: null,
-              current_session_token: newSessionToken,
-              last_sign_in_at: new Date().toISOString(),
-              last_content_viewed: 'Registro'
-            }]);
-          }
-          alert('Cuenta creada con éxito!');
-          checkSession();
-        }
-      } else {
-        var res = await sb.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-        if (res.error) {
-          alert('Error al iniciar sesión: ' + res.error.message);
-        } else {
-          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-          localStorage.setItem('user_session_token', newSessionToken);
-
-          if (res.data.user) {
-            await sb.from('profiles').upsert([{
-              id: res.data.user.id,
-              email: email,
-              full_name: (res.data.user.user_metadata && res.data.user.user_metadata.full_name) || email.split('@')[0],
-              status: 'Ativo',
-              current_session_token: newSessionToken,
-              last_sign_in_at: new Date().toISOString()
-            }]);
-          }
-          checkSession();
-        }
-      }
-    }
-
-    async function handleLogout() {
-      var sb = getSupabase();
-      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
-      localStorage.removeItem('user_session_token');
-      await sb.auth.signOut();
-      document.getElementById('app-screen').classList.add('hidden');
-      document.getElementById('auth-screen').classList.remove('hidden');
-    }
-
-    function startSingleSessionGuard() {
-      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
-      var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
-      if (isAdmin) return;
-
-      sessionCheckInterval = setInterval(async function() {
-        if (!currentUser) return;
-        var localToken = localStorage.getItem('user_session_token');
-        if (!localToken) return;
-
-        var sb = getSupabase();
-        var { data } = await sb.from('profiles').select('current_session_token').eq('id', currentUser.id).single();
-
-        if (data && data.current_session_token && data.current_session_token !== localToken) {
-          clearInterval(sessionCheckInterval);
-          alert('⚠️ Tu sesión se ha cerrado porque se inició sesión en otro dispositivo con esta misma cuenta.');
-          handleLogout();
-        }
-      }, 10000);
-    }
-
-    async function checkSession() {
-      var sb = getSupabase();
-      var sessionRes = await sb.auth.getSession();
-      var session = sessionRes.data.session;
-
-      if (session) {
-        currentUser = session.user;
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('app-screen').classList.remove('hidden');
-
-        await loadAppSettings();
-
-        var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-        userProfileData = prof || { has_course_access: false, student_level: 'iniciante', trial_lesson_id: null };
-
-        if (!localStorage.getItem('user_session_token') && prof && prof.current_session_token) {
-          localStorage.setItem('user_session_token', prof.current_session_token);
-        }
-
-        startSingleSessionGuard();
-
-        var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
-        document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
-        document.getElementById('profile-name').innerText = fullName;
-        document.getElementById('profile-email').innerText = currentUser.email;
-        document.getElementById('profile-avatar').innerText = fullName.charAt(0).toUpperCase();
-
-        var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
-        var homeAdminBtn = document.getElementById('home-admin-btn');
-        var profileAdminBtn = document.getElementById('profile-admin-btn');
-        var badge = document.getElementById('profile-badge');
-
-        if (isAdmin) {
-          homeAdminBtn.classList.remove('hidden');
-          profileAdminBtn.classList.remove('hidden');
-          badge.innerText = 'ADMIN';
-          badge.className = 'inline-block bg-[#0f2444] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
-        } else {
-          homeAdminBtn.classList.add('hidden');
-          profileAdminBtn.classList.add('hidden');
-          badge.innerText = 'ESTUDIANTE';
-          badge.className = 'inline-block bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider';
-          loadStudentInbox();
-        }
-
-        navigate('home');
-      } else {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('app-screen').classList.add('hidden');
-      }
-    }
-
-    // ==========================================
-    // CONTROLES DE NAVEGAÇÃO E ROTAS
-    // ==========================================
-    var tabs = ['home', 'calendar', 'course', 'tasks', 'info', 'profile', 'admin', 'rules'];
-    var titles = {
-      calendar: 'Agendar clases',
-      course: 'Curso grabado',
-      tasks: 'Tareas y evaluaciones',
-      info: 'Central de Informaciones',
-      profile: 'Perfil',
-      admin: 'Panel admin',
-      rules: 'Manual del Alumno'
-    };
-
-    window.navigate = function(tabId) {
-      tabs.forEach(function(t) {
-        var el = document.getElementById('tab-' + t);
-        if (el) el.classList.add('hidden');
-        var navBtn = document.getElementById('nav-' + t);
-        if (navBtn) {
-          navBtn.classList.remove('nav-active');
-          navBtn.classList.add('text-slate-400');
-        }
+      var { data: cashFlow } = await sb.from('cash_flow').select('*').order('created_at', { ascending: false });
+      var totalExpenses = 0;
+      (cashFlow || []).forEach(cf => {
+        if (cf.type === 'expense') totalExpenses += parseFloat(cf.amount) || 0;
       });
 
-      var currentTab = document.getElementById('tab-' + tabId);
-      if (currentTab) currentTab.classList.remove('hidden');
+      var grossIncome = meetTotal + courseTotal;
+      var netBalance = grossIncome - totalExpenses;
 
-      var currentNav = document.getElementById('nav-' + tabId);
-      if (currentNav) {
-        currentNav.classList.add('nav-active');
-        currentNav.classList.remove('text-slate-400');
-      }
+      document.getElementById('fin-total-income').innerText = '$' + grossIncome.toLocaleString('es-AR');
+      document.getElementById('fin-net-balance').innerText = '$' + netBalance.toLocaleString('es-AR');
+      document.getElementById('fin-meet-income').innerText = '$' + meetTotal.toLocaleString('es-AR');
+      document.getElementById('fin-meet-count').innerText = meetCount + ' clase(s) contratada(s)';
+      document.getElementById('fin-course-income').innerText = '$' + courseTotal.toLocaleString('es-AR');
+      document.getElementById('fin-course-count').innerText = courseCount + ' curso(s) vendido(s)';
 
-      var header = document.getElementById('top-header');
-      var headerTitle = document.getElementById('header-title');
-      if (tabId === 'home') {
-        header.classList.add('hidden');
+      var listContainer = document.getElementById('fin-cashflow-list');
+      if (!cashFlow || cashFlow.length === 0) {
+        listContainer.innerHTML = '<p class="text-slate-400">No hay movimientos o retiros registrados aún.</p>';
       } else {
-        header.classList.remove('hidden');
-        header.classList.add('flex');
-        headerTitle.innerText = titles[tabId] || '';
+        listContainer.innerHTML = cashFlow.map(function(cf) {
+          var dateStr = new Date(cf.created_at).toLocaleDateString('es-AR', { dateStyle: 'short' });
+          var catLabels = { uso_proprio: 'Uso Propio', publicidade: 'Publicidad', equipamento: 'Equipamiento', outro: 'Otro' };
+          return '<div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center">' +
+            '<div>' +
+              '<span class="font-bold text-slate-800">' + cf.description + '</span>' +
+              '<div class="text-[10px] text-slate-400">' + dateStr + ' • ' + (catLabels[cf.category] || cf.category) + '</div>' +
+            '</div>' +
+            '<span class="font-extrabold text-red-600">-$' + parseFloat(cf.amount).toLocaleString('es-AR') + '</span>' +
+          '</div>';
+        }).join('');
       }
+    }
 
-      trackActivity(titles[tabId] || 'Inicio');
+    window.registerCashExpense = async function() {
+      var amount = parseFloat(document.getElementById('fin-expense-amount').value);
+      var cat = document.getElementById('fin-expense-cat').value;
+      var desc = document.getElementById('fin-expense-desc').value.trim();
 
-      if (tabId === 'admin') showAdminTab('students');
-      if (tabId === 'calendar') loadStudentSlots();
-      if (tabId === 'course') checkAndLoadCourse();
-      if (tabId === 'tasks') loadStudentTasksAndQuizzes();
-      if (tabId === 'info') loadInfoCenter();
-    };
-
-    window.showAdminTab = function(type) {
-      document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
-      document.getElementById('admin-sec-finance').classList.toggle('hidden', type !== 'finance');
-      document.getElementById('admin-sec-broadcast').classList.toggle('hidden', type !== 'broadcast');
-      document.getElementById('admin-sec-syllabus').classList.toggle('hidden', type !== 'syllabus');
-      document.getElementById('admin-sec-design').classList.toggle('hidden', type !== 'design');
-      document.getElementById('admin-sec-prices').classList.toggle('hidden', type !== 'prices');
-      document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
-      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
-      document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
-      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
-      document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
-
-      ['students', 'finance', 'broadcast', 'syllabus', 'design', 'prices', 'assignments', 'videos', 'quizzes', 'bookings', 'slots'].forEach(t => {
-        var btn = document.getElementById('admin-btn-tab-' + t);
-        if (btn) {
-          if (t === type) {
-            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';
-          } else {
-            btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';
-          }
-        }
-      });
-
-      if (type === 'students') { loadAdminStudents(); cacheAllLessons(); }
-      if (type === 'finance') checkFinanceLockStatus();
-      if (type === 'broadcast') { loadAdminStudents(); populateBroadcastStudentOptions(); }
-      if (type === 'syllabus') loadAppSettings();
-      if (type === 'prices') loadAppSettings();
-      if (type === 'bookings') { loadAdminStudents(); loadAdminBookings(); loadAvailableSlotsForAdmin(); }
-      if (type === 'videos') loadAdminLessonsManagement();
-      if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
-      if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
-      if (type === 'slots') loadAdminSlots();
-    };
-
-    // ====================================================
-    // AGENDAMENTO E RESERVAS
-    // ====================================================
-    window.loadStudentSlots = async function() {
-      var container = document.getElementById('slots-container');
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('available_slots').select('*').eq('is_booked', false).order('date', { ascending: true }).order('time', { ascending: true });
-      
-      if (res.error || !res.data || res.data.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-regular fa-calendar text-3xl"></i><p class="text-sm font-medium">Aún no hay horarios disponibles.</p><p class="text-xs">Se agregarán fechas pronto ✨</p></div>';
-        return;
-      }
-
-      container.innerHTML = res.data.map(function(slot) {
-        var isSelected = selectedSlots.some(s => s.id === slot.id);
-        var borderClass = isSelected ? 'border-green-600 bg-green-50/50 ring-1 ring-green-600' : 'border-slate-100 bg-slate-50';
-        var btnClass = isSelected ? 'bg-green-700 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100';
-        var btnText = isSelected ? '<i class="fa-solid fa-check"></i> Seleccionado' : '+ Seleccionar';
-        var formattedDate = formatSpanishDate(slot.date);
-
-        return '<div class="flex justify-between items-center p-3.5 ' + borderClass + ' border rounded-2xl transition">' +
-          '<div>' +
-            '<div class="font-bold text-slate-900 text-xs capitalize">' + formattedDate + '</div>' +
-            '<div class="text-[11px] text-green-700 font-bold mt-0.5">⏰ ' + slot.time + ' hs</div>' +
-          '</div>' +
-          '<button onclick="toggleSlotSelection(\'' + slot.id + '\', \'' + slot.date + '\', \'' + slot.time + '\')" class="' + btnClass + ' text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm">' +
-            btnText +
-          '</button>' +
-        '</div>';
-      }).join('');
-
-      updateSelectionBar();
-    };
-
-    window.toggleSlotSelection = function(slotId, date, time) {
-      var index = selectedSlots.findIndex(s => s.id === slotId);
-      if (index > -1) {
-        selectedSlots.splice(index, 1);
-      } else {
-        selectedSlots.push({ id: slotId, date: date, time: time });
-      }
-      loadStudentSlots();
-    };
-
-    window.clearSelectedSlots = function() {
-      selectedSlots = [];
-      closePaymentSection();
-      loadStudentSlots();
-    };
-
-    window.updateSelectionBar = function() {
-      var bar = document.getElementById('booking-selection-bar');
-      var clearBtn = document.getElementById('clear-selection-btn');
-      var countLabel = document.getElementById('selected-count-label');
-      var priceLabel = document.getElementById('selected-total-price');
-
-      if (selectedSlots.length > 0) {
-        bar.classList.remove('hidden');
-        clearBtn.classList.remove('hidden');
-        countLabel.innerText = selectedSlots.length + (selectedSlots.length === 1 ? ' clase seleccionada' : ' clases seleccionadas');
-        var total = selectedSlots.length * PRICE_PER_LESSON;
-        priceLabel.innerText = '$' + total.toLocaleString('es-AR') + ' ARS';
-      } else {
-        bar.classList.add('hidden');
-        clearBtn.classList.add('hidden');
-      }
-    };
-
-    window.openPaymentSection = function() {
-      if (selectedSlots.length === 0) return alert('Seleccioná al menos un horario.');
-
-      var paySec = document.getElementById('booking-step-payment');
-      paySec.classList.remove('hidden');
-
-      var total = selectedSlots.length * PRICE_PER_LESSON;
-      document.getElementById('payment-summary-total').innerText = '$' + total.toLocaleString('es-AR') + ' ARS (' + selectedSlots.length + ' clases)';
-
-      var summaryContainer = document.getElementById('payment-slots-summary');
-      summaryContainer.innerHTML = '<p class="font-bold text-slate-800 mb-1">Horarios a reservar:</p>' + selectedSlots.map(s => '<div>🗓️ <b>' + formatSpanishDate(s.date) + '</b> a las <b>' + s.time + ' hs</b></div>').join('');
-
-      paySec.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.closePaymentSection = function() {
-      document.getElementById('booking-step-payment').classList.add('hidden');
-      document.getElementById('payment-receipt-file').value = '';
-    };
-
-    window.submitMultipleBookingsWithReceipt = async function() {
-      if (selectedSlots.length === 0) return alert('Seleccioná al menos un horario.');
-      var fileInput = document.getElementById('payment-receipt-file');
-      var file = fileInput.files[0];
-      if (!file) return alert('Por favor, adjuntá el comprobante de pago o usá la opción de enviar por WhatsApp');
-
-      var btn = document.getElementById('confirm-booking-btn');
-      btn.innerText = 'Subiendo comprobante...';
-      btn.disabled = true;
+      if (!amount || amount <= 0) return alert('Por favor ingresá un monto válido.');
+      if (!desc) return alert('Por favor escribí la justificación del retiro.');
 
       var sb = getSupabase();
-      var fileName = 'receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
-      
-      var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
-      if (uploadRes.error) {
-        btn.innerText = 'Confirmar y Guardar Reserva';
-        btn.disabled = false;
-        return alert('Error al subir archivo: ' + uploadRes.error.message);
-      }
-
-      var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
-      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
-
-      var bookingsToInsert = selectedSlots.map(s => ({
-        user_id: currentUser.id,
-        slot_id: s.id,
-        slot_date: s.date,
-        slot_time: s.time,
-        student_name: studentName,
-        student_email: currentUser.email,
-        receipt_url: publicUrl,
-        status: 'confirmed'
-      }));
-
-      await sb.from('bookings').insert(bookingsToInsert);
-
-      await sb.from('student_receipts').insert([{
-        student_id: currentUser.id,
-        student_email: currentUser.email,
-        receipt_type: 'clase_meet',
-        note: 'Pago de paquete de ' + selectedSlots.length + ' clase(s) vía web',
-        file_url: publicUrl
+      var { error } = await sb.from('cash_flow').insert([{
+        type: 'expense',
+        amount: amount,
+        category: cat,
+        description: desc
       }]);
 
-      var slotIds = selectedSlots.map(s => s.id);
-      await sb.from('available_slots').update({ is_booked: true }).in('id', slotIds);
-
-      btn.innerText = 'Confirmar y Guardar Reserva';
-      btn.disabled = false;
-
-      var datesSummary = selectedSlots.map(s => formatSpanishDate(s.date) + ' a las ' + s.time + ' hs').join(', ');
-      var total = selectedSlots.length * PRICE_PER_LESSON;
-
-      selectedSlots = [];
-      closePaymentSection();
-      loadStudentSlots();
-
-      alert('¡Clases agendadas con éxito! Te estamos redirigiendo a WhatsApp para confirmar con Renan.');
-
-      var msg = "¡Hola Renan! Acabo de agendar un paquete de " + bookingsToInsert.length + " clases de portugués por un total de $" + total.toLocaleString('es-AR') + " ARS.\nFechas: " + datesSummary + "\n(Email: " + currentUser.email + ")\n\nAcá está mi comprobante: " + publicUrl;
-      window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
-    };
-
-    window.sendMultipleReceiptViaWhatsApp = async function() {
-      if (selectedSlots.length === 0) return alert('Seleccioná al menos un horario.');
-
-      var sb = getSupabase();
-      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
-
-      var bookingsToInsert = selectedSlots.map(s => ({
-        user_id: currentUser.id,
-        slot_id: s.id,
-        slot_date: s.date,
-        slot_time: s.time,
-        student_name: studentName,
-        student_email: currentUser.email,
-        receipt_url: null,
-        status: 'pending_receipt'
-      }));
-
-      await sb.from('bookings').insert(bookingsToInsert);
-
-      var slotIds = selectedSlots.map(s => s.id);
-      await sb.from('available_slots').update({ is_booked: true }).in('id', slotIds);
-
-      var datesSummary = selectedSlots.map(s => formatSpanishDate(s.date) + ' a las ' + s.time + ' hs').join('\n• ');
-      var total = selectedSlots.length * PRICE_PER_LESSON;
-
-      selectedSlots = [];
-      closePaymentSection();
-      loadStudentSlots();
-
-      var msg = "¡Hola Renan! Quiero agendar este paquete de clases de portugués (Total: $" + total.toLocaleString('es-AR') + " ARS):\n• " + datesSummary + "\n\nMi email es: " + currentUser.email + "\nTe adjunto a continuación la captura del comprobante transferido a tu Alias renan.barbosa:";
-      window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
-    };
-
-    // ====================================================
-    // GERENCIAMENTO DE HORÁRIOS ADMIN
-    // ====================================================
-    window.generateBulkSlots = async function() {
-      var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
-      var startTime = document.getElementById('bulk-start-time').value;
-      var endTime = document.getElementById('bulk-end-time').value;
-      var duration = parseInt(document.getElementById('bulk-duration').value);
-      var totalWeeks = parseInt(document.getElementById('bulk-weeks').value);
-
-      if (!startTime || !endTime) return alert('Por favor, ingresá hora de inicio y fin.');
-
-      var startHour = parseInt(startTime.split(':')[0]);
-      var startMin = parseInt(startTime.split(':')[1]);
-      var endHour = parseInt(endTime.split(':')[0]);
-      var endMin = parseInt(endTime.split(':')[1]);
-
-      var startTotalMinutes = startHour * 60 + startMin;
-      var endTotalMinutes = endHour * 60 + endMin;
-
-      if (endTotalMinutes <= startTotalMinutes) return alert('La hora de fin debe ser posterior a la de inicio.');
-
-      var btn = document.getElementById('bulk-btn');
-      btn.innerText = 'Generando horarios...';
-      btn.disabled = true;
-
-      var slotsToInsert = [];
-      var today = new Date();
-
-      for (var w = 0; w < totalWeeks; w++) {
-        var loopDate = new Date();
-        loopDate.setDate(today.getDate() + ((targetDay - today.getDay() + 7) % 7) + (w * 7));
-
-        var yyyy = loopDate.getFullYear();
-        var mm = String(loopDate.getMonth() + 1).padStart(2, '0');
-        var dd = String(loopDate.getDate()).padStart(2, '0');
-        var dateString = yyyy + '-' + mm + '-' + dd;
-
-        var currentMinutes = startTotalMinutes;
-        while (currentMinutes + duration <= endTotalMinutes) {
-          var h = String(Math.floor(currentMinutes / 60)).padStart(2, '0');
-          var m = String(currentMinutes % 60).padStart(2, '0');
-          var timeString = h + ':' + m;
-
-          slotsToInsert.push({
-            date: dateString,
-            time: timeString,
-            is_booked: false
-          });
-
-          currentMinutes += duration;
-        }
-      }
-
-      var sb = getSupabase();
-      var { error } = await sb.from('available_slots').insert(slotsToInsert);
-
-      btn.innerText = 'Generar Franja del Mes';
-      btn.disabled = false;
-
       if (error) {
-        alert('Error: ' + error.message);
+        alert('Error al registrar: ' + error.message);
       } else {
-        alert('¡Se generaron con éxito ' + slotsToInsert.length + ' horarios disponibles!');
-        loadAdminSlots();
+        alert('¡Salida de caja registrada con éxito!');
+        document.getElementById('fin-expense-amount').value = '';
+        document.getElementById('fin-expense-desc').value = '';
+        loadFinanceData();
       }
     };
 
-    window.addSlot = async function() {
-      var date = document.getElementById('admin-slot-date').value;
-      var time = document.getElementById('admin-slot-time').value;
-      if (!date || !time) return alert('Selecione data e hora!');
-
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('available_slots').insert([{ date: date, time: time, is_booked: false }]);
-      if (res.error) {
-        alert('Erro ao cadastrar: ' + res.error.message);
-      } else {
-        alert('Horário adicionado!');
-        loadAdminSlots();
-      }
-    };
-
-    window.loadAdminSlots = async function() {
-      var container = document.getElementById('admin-slots-list');
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var slotsRes = await sb.from('available_slots').select('*').order('date', { ascending: true }).order('time', { ascending: true });
-      var bookingsRes = await sb.from('bookings').select('*');
-
-      var slots = slotsRes.data || [];
-      var bookings = bookingsRes.data || [];
-
-      if (slots.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">Nenhum horário cadastrado ainda.</p>';
-        return;
-      }
-
-      container.innerHTML = slots.map(function(slot) {
-        var booking = bookings.find(b => b.slot_id === slot.id);
-        var studentInfo = '';
-        var actionButtons = '';
-        var formattedDate = formatSpanishDate(slot.date);
-
-        if (slot.is_booked) {
-          var name = booking ? booking.student_name : 'Aluno';
-          var email = booking ? booking.student_email : '';
-          var receiptLink = booking && booking.receipt_url ? '<a href="' + booking.receipt_url + '" target="_blank" class="text-blue-600 underline font-bold ml-1">Ver comprovante</a>' : '';
-
-          studentInfo = '<div class="mt-2 pt-2 border-t border-slate-200/60 text-[11px] text-slate-600">' +
-            '👤 <b>Reservado por:</b> ' + name + ' (' + email + ') ' + receiptLink +
-          '</div>';
-
-          actionButtons = '<div class="flex gap-2 mt-2 pt-1">' +
-            '<button onclick="releaseSlot(\'' + slot.id + '\')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-2 rounded-lg text-[11px] flex items-center justify-center gap-1 transition">' +
-              '<i class="fa-solid fa-rotate-left"></i> Liberar Horário' +
-            '</button>' +
-            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">' +
-              '<i class="fa-solid fa-trash"></i>' +
-            '</button>' +
-          '</div>';
-        } else {
-          actionButtons = '<div class="flex justify-end mt-2">' +
-            '<button onclick="deleteSlot(\'' + slot.id + '\')" class="text-red-500 hover:text-red-700 text-[11px] font-bold flex items-center gap-1 transition">' +
-              '<i class="fa-solid fa-trash"></i> Excluir Horário' +
-            '</button>' +
-          '</div>';
-        }
-
-        return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">' +
-          '<div class="flex justify-between items-center">' +
-            '<div>' +
-              '<div class="font-bold text-slate-900 text-xs capitalize">' + formattedDate + '</div>' +
-              '<div class="text-[11px] text-green-700 font-bold">⏰ ' + slot.time + ' hs</div>' +
-            '</div>' +
-            '<span class="px-2.5 py-0.5 text-[10px] rounded-full ' + (slot.is_booked ? 'bg-red-100 text-red-600 font-bold' : 'bg-green-100 text-green-700 font-semibold') + '">' +
-              (slot.is_booked ? 'Reservado' : 'Disponível') +
-            '</span>' +
-          '</div>' +
-          studentInfo +
-          actionButtons +
-        '</div>';
-      }).join('');
-    };
-
-    window.releaseSlot = async function(slotId) {
-      if (!confirm('Deseja cancelar esta reserva e tornar o horário disponível novamente para outros alunos?')) return;
-      var sb = getSupabase();
-      if (!sb) return;
-
-      await sb.from('bookings').delete().eq('slot_id', slotId);
-      var { error } = await sb.from('available_slots').update({ is_booked: false }).eq('id', slotId);
-      if (error) {
-        alert('Erro ao liberar horário: ' + error.message);
-      } else {
-        alert('Horário liberado com sucesso!');
-        loadAdminSlots();
-        loadAdminStudents();
-      }
-    };
-
-    window.deleteSlot = async function(slotId) {
-      if (!confirm('Tem certeza que deseja excluir permanentemente este horário?')) return;
-      var sb = getSupabase();
-      if (!sb) return;
-
-      await sb.from('bookings').delete().eq('slot_id', slotId);
-      var { error } = await sb.from('available_slots').delete().eq('id', slotId);
-      if (error) {
-        alert('Erro ao excluir: ' + error.message);
-      } else {
-        alert('Horário excluído com sucesso!');
-        loadAdminSlots();
-      }
-    };
-
-    window.deleteAllAvailableSlots = async function() {
-      if (!confirm('Deseja excluir TODOS os horários que estão vagos/disponíveis?')) return;
-      var sb = getSupabase();
-      if (!sb) return;
-      var { error } = await sb.from('available_slots').delete().eq('is_booked', false);
-      if (error) {
-        alert('Erro: ' + error.message);
-      } else {
-        alert('Horários vagos excluídos!');
-        loadAdminSlots();
-      }
+    window.toggleManualReportDates = function(val) {
+      document.getElementById('fin-custom-dates-row').classList.toggle('hidden', val !== 'custom');
     };
 
     // Inicialização da aplicação
