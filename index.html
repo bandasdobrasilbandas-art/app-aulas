@@ -25,7 +25,6 @@
       height: 100%;
       border: 0;
     }
-    /* Bloqueia cliques no título superior e logotipo para impedir navegação externa */
     .video-top-shield {
       position: absolute;
       top: 0;
@@ -259,9 +258,33 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO GRAVADO (COM BLOQUEIO DE LINKS EXTERNOS) -->
+      <!-- ABA 3: CURSO GRAVADO (COM BLOQUEIO SE NÃO PAGO) -->
       <section id="tab-course" class="space-y-4 hidden">
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+        
+        <!-- BLOQUEIO PARA ALUNOS SEM ACESSO -->
+        <div id="course-locked-screen" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
+          <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 text-2xl flex items-center justify-center mx-auto shadow-sm">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-bold text-base text-slate-900">Curso Grabado Bloqueado</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">Para acceder a todas las lecciones por niveles y materiales, confirma tu inscripción:</p>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left space-y-2 text-xs">
+            <p class="font-bold text-slate-800">Datos para transferencia:</p>
+            <p>🔹 <b>Alias Mercado Pago:</b> <code class="bg-white px-2 py-0.5 rounded font-mono text-emerald-800 font-bold border border-slate-200">renan.barbosa</code></p>
+            <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
+          </div>
+
+          <button onclick="requestCourseAccessWhatsApp()" class="w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm">
+            <i class="fa-brands fa-whatsapp text-base"></i>
+            Enviar comprobante por WhatsApp para liberar
+          </button>
+        </div>
+
+        <!-- CONTEÚDO DO CURSO (LIBERADO) -->
+        <div id="course-unlocked-content" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
             <p class="text-xs text-slate-500">Aprendé portugués a tu propio ritmo</p>
@@ -402,27 +425,21 @@
         </div>
       </section>
 
-      <!-- ABA 6: MANUAL DO ALUNO & REGRAS -->
+      <!-- ABA 6: MANUAL DO ALUNO -->
       <section id="tab-rules" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div class="space-y-3">
             <div class="flex items-center gap-2 border-l-4 border-emerald-600 pl-2.5">
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Asistencia y Cambios</h3>
             </div>
-            
             <div class="space-y-2.5 text-xs text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <div class="flex items-start gap-2.5">
                 <span class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-[11px] font-bold mt-0.5">✕</span>
-                <div>
-                  <b class="text-slate-900">Faltas:</b> Injustificadas no se recuperan (salvo certificado médico).
-                </div>
+                <div><b class="text-slate-900">Faltas:</b> Injustificadas no se recuperan (salvo certificado médico).</div>
               </div>
-
               <div class="flex items-start gap-2.5">
                 <span class="w-5 h-5 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 text-[11px] font-bold mt-0.5">↻</span>
-                <div>
-                  <b class="text-slate-900">Cambios:</b> Solicitar con un mínimo de <b>48 horas</b> previo a la clase.
-                </div>
+                <div><b class="text-slate-900">Cambios:</b> Solicitar con un mínimo de <b>48 horas</b> previo a la clase.</div>
               </div>
             </div>
           </div>
@@ -431,7 +448,6 @@
             <div class="flex items-center gap-2 border-l-4 border-blue-900 pl-2.5">
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Reglas de Puntualidad</h3>
             </div>
-
             <div class="rounded-2xl border border-slate-200 overflow-hidden text-xs">
               <div class="bg-[#0f2444] text-white p-3 flex justify-between font-bold text-[11px]">
                 <span class="w-1/2">Tiempo de Espera</span>
@@ -465,20 +481,20 @@
       <section id="tab-admin" class="space-y-4 hidden">
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos & Actividad</button>
+          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas & Comprobantes</button>
           <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos & Apostilas</button>
           <button onclick="showAdminTab('assignments')" id="admin-btn-tab-assignments" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Tareas</button>
           <button onclick="showAdminTab('quizzes')" id="admin-btn-tab-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Provas Online</button>
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
-          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas</button>
         </div>
 
-        <!-- Seção 1: Alunos Registrados -->
+        <!-- Seção 1: Alunos Registrados & Gestão de Acesso ao Curso -->
         <div id="admin-sec-students" class="space-y-4">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <div class="flex justify-between items-center">
               <div>
                 <h3 class="font-bold text-sm text-slate-900">Listado de Alumnos</h3>
-                <p class="text-[11px] text-slate-500">Rastreo de accesos, estados y envíos</p>
+                <p class="text-[11px] text-slate-500">Gestión de accesos a cursos y comprobantes</p>
               </div>
               <button onclick="exportStudentsToPDF()" class="bg-[#0f2444] text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-800 transition shadow-sm">
                 <i class="fa-solid fa-file-pdf text-red-400"></i> Descargar PDF
@@ -490,13 +506,43 @@
           </div>
         </div>
 
-        <!-- Seção 2: Gerenciamento de Vídeos e Aulas (Com Excluir e Pausar) -->
+        <!-- Seção 2: Reservas & Agendamento Manual do Admin -->
+        <div id="admin-sec-bookings" class="space-y-4 hidden">
+          
+          <!-- AGENDAR ALUNO MANUALMENTE -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Agendar Alumno Manualmente</h3>
+            <div class="space-y-2">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Alumno:</label>
+                <select id="admin-manual-student-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Horario Disponible:</label>
+                <select id="admin-manual-slot-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+              </div>
+              <button onclick="adminBookStudentManually()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm mt-1">
+                Confirmar Agendamento Manual
+              </button>
+            </div>
+          </div>
+
+          <!-- LISTA DE RESERVAS E UPLOAD MANUAL DE COMPROVANTE -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
+            <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
+              Carregando reservas...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 3: Vídeos e Aulas -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
             <div class="space-y-2">
-              <input id="admin-video-title" type="text" placeholder="Título da aula (ex: Aula 1 - Pronúncia do R e L)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <input id="admin-video-url" type="text" placeholder="Link do YouTube (ex: https://youtube.com/watch?v=...)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-video-url" type="text" placeholder="Link do YouTube" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
               
               <div>
                 <label class="text-[11px] font-semibold text-slate-600">Nível / Módulo:</label>
@@ -518,7 +564,6 @@
             </button>
           </div>
 
-          <!-- LISTA DE AULAS CADASTRADAS (ADMIN) -->
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Aulas Cadastradas no Curso</h3>
             <div id="admin-lessons-management-list" class="space-y-3 text-xs text-slate-500">
@@ -527,7 +572,7 @@
           </div>
         </div>
 
-        <!-- Seção 3: Tarefas & Apostilas -->
+        <!-- Seção 4: Tarefas & Apostilas -->
         <div id="admin-sec-assignments" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material Individual</h3>
@@ -556,7 +601,7 @@
           </div>
         </div>
 
-        <!-- Seção 4: Provas Online -->
+        <!-- Seção 5: Provas Online -->
         <div id="admin-sec-quizzes" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <h3 class="font-bold text-sm text-slate-900">Crear Nueva Evaluación Online</h3>
@@ -585,7 +630,7 @@
           </div>
         </div>
 
-        <!-- Seção 5: Horários -->
+        <!-- Seção 6: Horários -->
         <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
@@ -663,16 +708,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Seção 6: Reservas -->
-        <div id="admin-sec-bookings" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
-            <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
-              Carregando reservas...
-            </div>
-          </div>
-        </div>
       </section>
 
     </main>
@@ -720,6 +755,11 @@
       window.open(url, '_blank');
     }
 
+    function requestCourseAccessWhatsApp() {
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola Renan! Acabo de hacer la transferencia para acceder al Curso Grabado de Portugués (Email: " + currentUser.email + "). Te adjunto la foto del comprobante:");
+      window.open(url, '_blank');
+    }
+
     var SUPABASE_URL = "https://wukagpszsmlbvcwxhfsw.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a2FncHN6c21sYnZjd3hoZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNDIxMzksImV4cCI6MjEwMzcxODEzOX0.rIRZ9hb5rjeW3-0YepVezCuiDyEkvq36h7CsUwDWXqE";
     var supabaseClient = null;
@@ -733,8 +773,10 @@
 
     var isSignUp = false;
     var currentUser = null;
+    var userProfileData = null;
     var selectedSlots = [];
     var loadedStudents = [];
+    var availableSlotsCache = [];
     var activeQuizData = null;
     var currentCourseLevel = 'iniciante';
     var userCompletedLessons = new Set();
@@ -777,6 +819,7 @@
               full_name: name || 'Estudiante',
               email: email,
               status: 'Ativo',
+              has_course_access: false,
               last_sign_in_at: new Date().toISOString(),
               last_content_viewed: 'Registro'
             }]);
@@ -822,6 +865,10 @@
         currentUser = session.user;
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
+
+        // Carregar dados atualizados do perfil
+        var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+        userProfileData = prof || { has_course_access: false };
 
         var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
@@ -912,19 +959,19 @@
 
       if (tabId === 'admin') showAdminTab('students');
       if (tabId === 'calendar') loadStudentSlots();
-      if (tabId === 'course') loadLessons();
+      if (tabId === 'course') checkAndLoadCourse();
       if (tabId === 'tasks') loadStudentTasksAndQuizzes();
     };
 
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
+      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
       document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
       document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
       document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
-      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
 
-      ['students', 'videos', 'assignments', 'quizzes', 'slots', 'bookings'].forEach(t => {
+      ['students', 'bookings', 'videos', 'assignments', 'quizzes', 'slots'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
         if (btn) {
           if (t === type) {
@@ -936,16 +983,37 @@
       });
 
       if (type === 'students') loadAdminStudents();
+      if (type === 'bookings') { loadAdminStudents(); loadAdminBookings(); loadAvailableSlotsForAdmin(); }
       if (type === 'videos') loadAdminLessonsManagement();
       if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
       if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
       if (type === 'slots') loadAdminSlots();
-      if (type === 'bookings') loadAdminBookings();
     };
 
     // ====================================================
-    // MÓDULO DO CURSO GRAVADO (PROTEÇÃO ANTI-LINK EXTERNO)
+    // CONTROLE DE ACESSO AO CURSO GRAVADO
     // ====================================================
+    window.checkAndLoadCourse = async function() {
+      var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+      var sb = getSupabase();
+      
+      // Buscar status mais recente de permissão do curso
+      var { data: prof } = await sb.from('profiles').select('has_course_access').eq('id', currentUser.id).single();
+      var hasAccess = isAdmin || (prof && prof.has_course_access === true);
+
+      var lockedScreen = document.getElementById('course-locked-screen');
+      var unlockedContent = document.getElementById('course-unlocked-content');
+
+      if (hasAccess) {
+        lockedScreen.classList.add('hidden');
+        unlockedContent.classList.remove('hidden');
+        loadLessons();
+      } else {
+        lockedScreen.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+      }
+    };
+
     window.switchCourseLevel = function(level) {
       currentCourseLevel = level;
       ['iniciante', 'medio', 'avancado', 'extras'].forEach(lvl => {
@@ -969,7 +1037,7 @@
       var { data: lessons, error } = await sb.from('course_lessons')
         .select('*')
         .eq('level', currentCourseLevel)
-        .neq('is_active', false) // Carrega apenas as ativas/visíveis
+        .neq('is_active', false)
         .order('created_at', { ascending: true });
 
       if (currentUser) {
@@ -997,7 +1065,6 @@
         var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
         var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
 
-        // Embed Protegido sem vazamento de link e com camada superior anti-clique
         var videoEmbed = '';
         if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
           var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
@@ -1050,6 +1117,266 @@
       loadLessons();
     };
 
+    // ====================================================
+    // GESTÃO DE ALUNOS & LIBERAÇÃO DO CURSO (ADMIN)
+    // ====================================================
+    window.loadAdminStudents = async function() {
+      var container = document.getElementById('admin-students-list');
+      var assignSelect = document.getElementById('assign-target-student');
+      var manualStudentSelect = document.getElementById('admin-manual-student-select');
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var { data: profilesData } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+      var { data: bookingsData } = await sb.from('bookings').select('student_name, student_email, created_at');
+
+      var studentMap = new Map();
+
+      (profilesData || []).forEach(p => {
+        if (p.email) {
+          studentMap.set(p.email.toLowerCase(), {
+            id: p.id,
+            full_name: p.full_name || 'Estudiante',
+            email: p.email,
+            status: p.status || 'Ativo',
+            has_course_access: p.has_course_access === true,
+            course_receipt_url: p.course_receipt_url,
+            last_sign_in_at: p.last_sign_in_at,
+            last_content_viewed: p.last_content_viewed || 'Inicio'
+          });
+        }
+      });
+
+      (bookingsData || []).forEach(b => {
+        if (b.student_email && !studentMap.has(b.student_email.toLowerCase())) {
+          studentMap.set(b.student_email.toLowerCase(), {
+            id: b.student_email,
+            full_name: b.student_name || 'Estudiante',
+            email: b.student_email,
+            status: 'Ativo',
+            has_course_access: false,
+            course_receipt_url: null,
+            last_sign_in_at: b.created_at,
+            last_content_viewed: 'Agendamento de aula'
+          });
+        }
+      });
+
+      loadedStudents = Array.from(studentMap.values());
+
+      if (assignSelect) {
+        assignSelect.innerHTML = '<option value="TODOS">Para Todos los Alumnos</option>' +
+          loadedStudents.map(s => '<option value="' + s.email + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
+      }
+
+      if (manualStudentSelect) {
+        manualStudentSelect.innerHTML = loadedStudents.map(s => '<option value="' + s.email + '" data-name="' + s.full_name + '" data-id="' + s.id + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
+      }
+
+      if (container) {
+        if (loadedStudents.length === 0) {
+          container.innerHTML = '<p class="text-slate-400">Ningún alumno registrado todavía.</p>';
+          return;
+        }
+
+        container.innerHTML = loadedStudents.map(function(s) {
+          var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente';
+          var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
+
+          var courseAccessBtn = s.has_course_access 
+            ? '<button onclick="toggleCourseAccess(\'' + s.id + '\', true)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-1.5 px-2 rounded-xl font-bold text-[11px] transition"><i class="fa-solid fa-lock"></i> Bloquear Curso</button>'
+            : '<button onclick="toggleCourseAccess(\'' + s.id + '\', false)" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-1.5 px-2 rounded-xl font-bold text-[11px] transition shadow-sm"><i class="fa-solid fa-lock-open"></i> Liberar Acceso Curso</button>';
+
+          var receiptInfo = s.course_receipt_url 
+            ? '<a href="' + s.course_receipt_url + '" target="_blank" class="text-blue-600 underline font-bold text-[11px] inline-flex items-center gap-1"><i class="fa-solid fa-file-invoice"></i> Comprobante Curso</a>'
+            : '<button onclick="uploadCourseReceiptForStudent(\'' + s.id + '\')" class="text-emerald-700 underline font-bold text-[11px] inline-flex items-center gap-1"><i class="fa-solid fa-upload"></i> Subir Comprobante Curso</button>';
+
+          return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h4 class="font-bold text-slate-900 text-sm">' + s.full_name + '</h4>' +
+                '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
+              '</div>' +
+              '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
+                s.status +
+              '</button>' +
+            '</div>' +
+            
+            '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-1">' +
+              '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
+              '<div>👁️ <b>Último contenido:</b> <span class="font-semibold text-emerald-800">' + s.last_content_viewed + '</span></div>' +
+              '<div>🎓 <b>Curso Grabado:</b> ' + (s.has_course_access ? '<span class="text-green-700 font-bold">Habilitado</span>' : '<span class="text-red-500 font-bold">Bloqueado</span>') + ' | ' + receiptInfo + '</div>' +
+            '</div>' +
+
+            '<div class="flex gap-2 pt-0.5">' +
+              courseAccessBtn +
+              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] transition">' +
+                '<i class="fa-solid fa-paper-plane text-blue-300"></i>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    };
+
+    window.toggleCourseAccess = async function(studentId, currentlyHasAccess) {
+      var sb = getSupabase();
+      if (!sb) return;
+      var newAccess = !currentlyHasAccess;
+      var { error } = await sb.from('profiles').update({ has_course_access: newAccess }).eq('id', studentId);
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        alert(newAccess ? '¡Acceso al curso grabado habilitado!' : 'Acceso al curso bloqueado.');
+        loadAdminStudents();
+      }
+    };
+
+    window.uploadCourseReceiptForStudent = async function(studentId) {
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*,.pdf';
+
+      fileInput.onchange = async function() {
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        var sb = getSupabase();
+        var fileName = 'course_receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
+
+        var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
+        if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
+
+        var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
+
+        await sb.from('profiles').update({ 
+          course_receipt_url: publicUrl,
+          has_course_access: true // Libera o curso automaticamente ao subir o comprovante
+        }).eq('id', studentId);
+
+        alert('¡Comprobante subido y curso habilitado!');
+        loadAdminStudents();
+      };
+
+      fileInput.click();
+    };
+
+    // ====================================================
+    // GESTÃO DE RESERVAS, AGENDAMENTO MANUAL & COMPROVANTES
+    // ====================================================
+    window.loadAvailableSlotsForAdmin = async function() {
+      var select = document.getElementById('admin-manual-slot-select');
+      var sb = getSupabase();
+      if (!sb || !select) return;
+
+      var { data } = await sb.from('available_slots').select('*').eq('is_booked', false).order('date', { ascending: true }).order('time', { ascending: true });
+      availableSlotsCache = data || [];
+
+      if (availableSlotsCache.length === 0) {
+        select.innerHTML = '<option value="">No hay horarios libres disponibles</option>';
+      } else {
+        select.innerHTML = availableSlotsCache.map(s => '<option value="' + s.id + '" data-date="' + s.date + '" data-time="' + s.time + '">' + formatSpanishDate(s.date) + ' - ' + s.time + ' hs</option>').join('');
+      }
+    };
+
+    window.adminBookStudentManually = async function() {
+      var studentSelect = document.getElementById('admin-manual-student-select');
+      var slotSelect = document.getElementById('admin-manual-slot-select');
+
+      var studentEmail = studentSelect.value;
+      var selectedOption = studentSelect.options[studentSelect.selectedIndex];
+      var studentName = selectedOption.getAttribute('data-name');
+      var studentId = selectedOption.getAttribute('data-id');
+
+      var slotId = slotSelect.value;
+      if (!slotId) return alert('Selecciona un horario disponible');
+      var selectedSlotOpt = slotSelect.options[slotSelect.selectedIndex];
+      var slotDate = selectedSlotOpt.getAttribute('data-date');
+      var slotTime = selectedSlotOpt.getAttribute('data-time');
+
+      var sb = getSupabase();
+      
+      // Inserir reserva manual
+      await sb.from('bookings').insert([{
+        user_id: studentId.includes('@') ? null : studentId,
+        slot_id: slotId,
+        slot_date: slotDate,
+        slot_time: slotTime,
+        student_name: studentName,
+        student_email: studentEmail,
+        receipt_url: null,
+        status: 'confirmed'
+      }]);
+
+      await sb.from('available_slots').update({ is_booked: true }).eq('id', slotId);
+
+      alert('¡Clase agendada con éxito para ' + studentName + '!');
+      loadAdminBookings();
+      loadAvailableSlotsForAdmin();
+    };
+
+    window.loadAdminBookings = async function() {
+      var container = document.getElementById('admin-bookings-list');
+      var sb = getSupabase();
+      if (!sb) return;
+      var res = await sb.from('bookings').select('*').order('created_at', { ascending: false });
+      if (res.error || !res.data || res.data.length === 0) {
+        container.innerHTML = '<p class="text-slate-400">Nenhuma reserva realizada ainda.</p>';
+        return;
+      }
+      container.innerHTML = res.data.map(function(b) {
+        var receiptSection = b.receipt_url 
+          ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
+          : '<div class="mt-2 flex items-center gap-2">' +
+              '<span class="text-[11px] text-amber-600 font-semibold">Sin comprobante subido</span>' +
+              '<button onclick="uploadReceiptManuallyForBooking(\'' + b.id + '\')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-2 py-1 rounded-lg text-[10px] transition"><i class="fa-solid fa-upload"></i> Subir Ahora</button>' +
+            '</div>';
+
+        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
+          '<div class="flex justify-between items-start">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-900 text-sm">' + (b.student_name || 'Aluno') + '</h4>' +
+              '<p class="text-[11px] text-slate-500">' + (b.student_email || 'Email não informado') + '</p>' +
+            '</div>' +
+            '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
+          '</div>' +
+          '<div class="text-xs text-slate-700 pt-1">' +
+            '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
+          '</div>' +
+          receiptSection +
+        '</div>';
+      }).join('');
+    };
+
+    window.uploadReceiptManuallyForBooking = async function(bookingId) {
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*,.pdf';
+
+      fileInput.onchange = async function() {
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        var sb = getSupabase();
+        var fileName = 'receipt_admin_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
+
+        var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
+        if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
+
+        var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
+
+        await sb.from('bookings').update({ receipt_url: publicUrl }).eq('id', bookingId);
+
+        alert('¡Comprobante adjuntado con éxito a la reserva!');
+        loadAdminBookings();
+      };
+
+      fileInput.click();
+    };
+
+    // ====================================================
+    // VÍDEOS, TAREFAS, PROVAS E DEMAIS FUNÇÕES
+    // ====================================================
     window.addVideo = async function() {
       var title = document.getElementById('admin-video-title').value;
       var url = document.getElementById('admin-video-url').value;
@@ -1080,7 +1407,6 @@
       }
     };
 
-    // Gerenciamento de Aulas no Admin (Pausar e Deletar)
     window.loadAdminLessonsManagement = async function() {
       var container = document.getElementById('admin-lessons-management-list');
       var sb = getSupabase();
@@ -1149,9 +1475,6 @@
       }
     };
 
-    // ====================================================
-    // MÓDULO PEDAGÓGICO: TAREFAS, APOSTILAS & PROVAS
-    // ====================================================
     window.createAssignment = async function() {
       var title = document.getElementById('assign-title').value;
       var desc = document.getElementById('assign-desc').value;
@@ -1441,87 +1764,6 @@
       loadStudentTasksAndQuizzes();
     };
 
-    // ====================================================
-    // GESTÃO DE ALUNOS & RASTREAMENTO
-    // ====================================================
-    window.loadAdminStudents = async function() {
-      var container = document.getElementById('admin-students-list');
-      var select = document.getElementById('assign-target-student');
-      var sb = getSupabase();
-      if (!sb) return;
-
-      var { data: profilesData } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-      var { data: bookingsData } = await sb.from('bookings').select('student_name, student_email, created_at');
-
-      var studentMap = new Map();
-
-      (profilesData || []).forEach(p => {
-        if (p.email) {
-          studentMap.set(p.email.toLowerCase(), {
-            id: p.id,
-            full_name: p.full_name || 'Estudiante',
-            email: p.email,
-            status: p.status || 'Ativo',
-            last_sign_in_at: p.last_sign_in_at,
-            last_content_viewed: p.last_content_viewed || 'Inicio'
-          });
-        }
-      });
-
-      (bookingsData || []).forEach(b => {
-        if (b.student_email && !studentMap.has(b.student_email.toLowerCase())) {
-          studentMap.set(b.student_email.toLowerCase(), {
-            id: b.student_email,
-            full_name: b.student_name || 'Estudiante',
-            email: b.student_email,
-            status: 'Ativo',
-            last_sign_in_at: b.created_at,
-            last_content_viewed: 'Agendamento de aula'
-          });
-        }
-      });
-
-      loadedStudents = Array.from(studentMap.values());
-
-      if (select) {
-        select.innerHTML = '<option value="TODOS">Para Todos los Alumnos</option>' +
-          loadedStudents.map(s => '<option value="' + s.email + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
-      }
-
-      if (container) {
-        if (loadedStudents.length === 0) {
-          container.innerHTML = '<p class="text-slate-400">Ningún alumno registrado todavía.</p>';
-          return;
-        }
-
-        container.innerHTML = loadedStudents.map(function(s) {
-          var lastLogin = s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : 'Reciente';
-          var statusColor = s.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600';
-
-          return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
-            '<div class="flex justify-between items-start">' +
-              '<div>' +
-                '<h4 class="font-bold text-slate-900 text-sm">' + s.full_name + '</h4>' +
-                '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
-              '</div>' +
-              '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
-                s.status +
-              '</button>' +
-            '</div>' +
-            '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-0.5">' +
-              '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
-              '<div>👁️ <b>Último contenido visto:</b> <span class="font-semibold text-emerald-800">' + s.last_content_viewed + '</span></div>' +
-            '</div>' +
-            '<div class="pt-1">' +
-              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">' +
-                '<i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Mensaje / Archivo' +
-              '</button>' +
-            '</div>' +
-          '</div>';
-        }).join('');
-      }
-    };
-
     window.toggleStudentStatus = async function(studentId, currentStatus) {
       var newStatus = currentStatus === 'Ativo' ? 'Inativo' : 'Ativo';
       var sb = getSupabase();
@@ -1547,6 +1789,7 @@
           s.full_name || 'Estudiante',
           s.email,
           s.status || 'Ativo',
+          s.has_course_access ? 'Habilitado' : 'Bloqueado',
           lastLogin,
           s.last_content_viewed || 'Inicio'
         ];
@@ -1554,7 +1797,7 @@
 
       doc.autoTable({
         startY: 30,
-        head: [['Nombre', 'Email', 'Estado', 'Ultimo Acceso', 'Contenido Visto']],
+        head: [['Nombre', 'Email', 'Estado', 'Curso Grabado', 'Ultimo Acceso', 'Contenido Visto']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [15, 36, 68] },
@@ -1614,9 +1857,6 @@
       }
     };
 
-    // ====================================================
-    // HORÁRIOS & AGENDAMENTOS
-    // ====================================================
     window.generateBulkSlots = async function() {
       var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
       var startTime = document.getElementById('bulk-start-time').value;
@@ -1976,36 +2216,6 @@
 
       var msg = "¡Hola Renan! Quiero agendar este paquete de clases de portugués (Total: $" + total.toLocaleString('es-AR') + " ARS):\n• " + datesSummary + "\n\nMi email es: " + currentUser.email + "\nTe adjunto a continuación la captura del comprobante transferido a tu Alias renan.barbosa:";
       window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
-    };
-
-    window.loadAdminBookings = async function() {
-      var container = document.getElementById('admin-bookings-list');
-      var sb = getSupabase();
-      if (!sb) return;
-      var res = await sb.from('bookings').select('*').order('created_at', { ascending: false });
-      if (res.error || !res.data || res.data.length === 0) {
-        container.innerHTML = '<p class="text-slate-400">Nenhuma reserva realizada ainda.</p>';
-        return;
-      }
-      container.innerHTML = res.data.map(function(b) {
-        var receiptButton = b.receipt_url 
-          ? '<a href="' + b.receipt_url + '" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg text-[11px] font-bold mt-2"><i class="fa-solid fa-file-invoice"></i> Ver Comprovante</a>'
-          : '<span class="text-[11px] text-slate-400 mt-2 block">Comprobante enviado por WhatsApp</span>';
-
-        return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-1">' +
-          '<div class="flex justify-between items-start">' +
-            '<div>' +
-              '<h4 class="font-bold text-slate-900 text-sm">' + (b.student_name || 'Aluno') + '</h4>' +
-              '<p class="text-[11px] text-slate-500">' + (b.student_email || 'Email não informado') + '</p>' +
-            '</div>' +
-            '<span class="bg-green-100 text-green-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Confirmada</span>' +
-          '</div>' +
-          '<div class="text-xs text-slate-700 pt-1">' +
-            '📅 <b>' + formatSpanishDate(b.slot_date) + '</b> às ⏰ <b>' + (b.slot_time || '-') + ' hs</b>' +
-          '</div>' +
-          receiptButton +
-        '</div>';
-      }).join('');
     };
   </script>
 </body>
