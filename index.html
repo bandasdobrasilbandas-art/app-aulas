@@ -72,39 +72,59 @@
       height: 100%;
       border: 0;
     }
+
+    /* Escudo superior: impede clique no título e logo do YouTube */
     .video-top-shield {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      height: 65px;
       z-index: 20;
       background: transparent;
       pointer-events: auto;
     }
-    /* Tela cheia personalizada do container */
+
+    /* Escudo inferior: bloqueia o botão de cópia de link */
+    .video-bottom-shield {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 95px;
+      height: 48px;
+      z-index: 20;
+      background: transparent;
+      pointer-events: auto;
+    }
+
     .video-secure-container:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
       border-radius: 0 !important;
     }
     .video-secure-container:fullscreen .video-top-shield {
-      height: 90px !important;
+      height: 95px !important;
     }
+    .video-secure-container:fullscreen .video-bottom-shield {
+      width: 140px !important;
+      height: 65px !important;
+    }
+
     .fs-custom-btn {
       position: absolute;
-      bottom: 10px;
-      right: 12px;
+      bottom: 8px;
+      right: 10px;
       z-index: 25;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 23, 42, 0.85);
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 5px 9px;
       border-radius: 8px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(4px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -155,7 +175,6 @@
   <!-- APLICATIVO PRINCIPAL -->
   <div id="app-screen" class="hidden pb-24 relative z-10">
     
-    <!-- TOP BAR -->
     <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between">
       <button onclick="navigate('home')" class="p-1 text-slate-700 text-lg hover:text-green-600 transition">
         <i class="fa-solid fa-chevron-left"></i>
@@ -164,10 +183,9 @@
       <div class="w-6"></div>
     </header>
 
-    <!-- CONTAINER PRINCIPAL -->
     <main class="max-w-md mx-auto px-4 pt-4">
 
-      <!-- ABA 1: INÍCIO (HOME) -->
+      <!-- ABA 1: INÍCIO -->
       <section id="tab-home" class="space-y-4">
         <div class="flex items-center justify-between pt-2">
           <div>
@@ -189,7 +207,7 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
-        <!-- CARD 1: CLASES 1:1 -->
+        <!-- Card Clases 1:1 -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-meet-bg-img" src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -205,7 +223,7 @@
           </div>
         </div>
 
-        <!-- CARD 2: CURSO A TU RITMO -->
+        <!-- Card Curso Grabado -->
         <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
           <img id="card-course-bg-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
           <div class="relative z-10 space-y-2">
@@ -817,7 +835,7 @@
             <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
             <div class="space-y-2">
               <input id="admin-video-title" type="text" placeholder="Título da aula" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <input id="admin-video-url" type="text" placeholder="Link do YouTube" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <input id="admin-video-url" type="text" placeholder="Link do YouTube ou link direto MP4" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
               
               <div>
                 <label class="text-[11px] font-semibold text-slate-600">Nível / Módulo:</label>
@@ -990,7 +1008,6 @@
 
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-6 py-2.5 flex justify-around items-center z-50 max-w-md mx-auto">
       <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[10px] font-bold nav-active">
         <i class="fa-solid fa-house text-lg"></i>
@@ -1062,9 +1079,6 @@
     var userCompletedLessons = new Set();
     var sessionCheckInterval = null;
 
-    // ==========================================
-    // CONFIGURAÇÕES VISUAIS & CONTEÚDO PROGRAMÁTICO
-    // ==========================================
     async function loadAppSettings() {
       var sb = getSupabase();
       if (!sb) return;
@@ -1259,7 +1273,6 @@
         if (res.error) {
           alert('Error al iniciar sesión: ' + res.error.message);
         } else {
-          // Gerar token de sessão única
           var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
           localStorage.setItem('user_session_token', newSessionToken);
 
@@ -1287,11 +1300,10 @@
       document.getElementById('auth-screen').classList.remove('hidden');
     }
 
-    // Validação contínua de Sessão Única (Desloga se outro dispositivo entrar)
     function startSingleSessionGuard() {
       if (sessionCheckInterval) clearInterval(sessionCheckInterval);
       var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
-      if (isAdmin) return; // Não bloqueia admin
+      if (isAdmin) return;
 
       sessionCheckInterval = setInterval(async function() {
         if (!currentUser) return;
@@ -1324,7 +1336,6 @@
         var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
         userProfileData = prof || { has_course_access: false, student_level: 'iniciante', trial_lesson_id: null };
 
-        // Sincronizar token local se não existir
         if (!localStorage.getItem('user_session_token') && prof && prof.current_session_token) {
           localStorage.setItem('user_session_token', prof.current_session_token);
         }
@@ -1506,7 +1517,6 @@
       loadLessons();
     };
 
-    // Tela cheia no container seguro (bloqueando clique no título e logo)
     window.toggleSecureFullscreen = function(containerId) {
       var el = document.getElementById(containerId);
       if (!el) return;
@@ -1580,6 +1590,7 @@
           
           videoEmbed = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
             '<div class="video-top-shield"></div>' +
+            '<div class="video-bottom-shield"></div>' +
             '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
             '<button onclick="toggleSecureFullscreen(\'' + videoContainerId + '\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>' +
           '</div>';
@@ -2306,7 +2317,7 @@
       if (!title) return alert('Ingresá el título del examen');
 
       var valid = quizQuestions.every(q => q.question.trim() !== '' && q.options.every(o => o.trim() !== ''));
-      if (!valid) return alert('Por favor, completá todas las preguntas y opciones');
+      if (!valid) return alert('Por favor, completá todas las perguntas y opciones');
 
       var sb = getSupabase();
       var { error } = await sb.from('online_quizzes').insert([{
