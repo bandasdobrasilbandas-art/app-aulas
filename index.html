@@ -1022,7 +1022,10 @@
 
         <div id="admin-sec-syllabus" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3.5">
-            <h3 class="font-bold text-sm text-slate-900">Configurar Contenido Programático</h3>
+            <div>
+              <h3 class="font-bold text-sm text-slate-900">Configurar Contenido Programático</h3>
+              <p class="text-xs text-slate-500">Este texto lo verán los alumnos interesados antes de comprar el curso.</p>
+            </div>
             <div class="space-y-2.5 pt-1">
               <textarea id="setting-syllabus-text" rows="7" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 bg-white font-sans mt-1 leading-relaxed"></textarea>
               <input id="setting-syllabus-pdf" type="text" placeholder="Link PDF Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 mt-1">
@@ -1152,7 +1155,7 @@
             </div>
           </div>
           <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual</h3>
+            <h3 class="font-bold text-sm text-slate-900">Agregar horario individual (Manual)</h3>
             <div class="grid grid-cols-2 gap-2">
               <input id="admin-slot-date" type="date" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
               <input id="admin-slot-time" type="time" class="border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
@@ -1192,7 +1195,7 @@
   </div>
 
   <script>
-    // Inicialização direta do app
+    // Inicialização da aplicação
     window.addEventListener('DOMContentLoaded', function() {
       checkSession();
     });
