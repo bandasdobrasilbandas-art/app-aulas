@@ -114,25 +114,16 @@
           <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
         </button>
 
-        <!-- Mensagens do Professor -->
-        <div id="student-inbox-section" class="hidden space-y-2">
-          <div class="flex items-center justify-between px-1">
-            <h4 class="font-bold text-xs text-slate-900">Mensajes de tu profesor</h4>
-            <span class="text-[10px] text-green-700 bg-green-50 font-bold px-2 py-0.5 rounded-full">Nuevos avisos</span>
-          </div>
-          <div id="student-inbox-list" class="space-y-2"></div>
-        </div>
-
         <!-- Card Clases 1:1 -->
         <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
           <img src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
           <div class="relative z-10 space-y-2">
             <div class="flex items-center gap-2">
               <span class="bg-[#16a34a] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Aulas particulares</span>
-              <span class="bg-white/20 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-full">$12.500 / 50 min</span>
+              <span id="card-meet-price" class="bg-white/20 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-full">$12.500 / 50 min</span>
             </div>
             <h3 class="text-xl font-bold leading-tight">Clases 1:1 vía Meet</h3>
-            <p class="text-xs text-slate-200">Agendá una o varias clases durante el mes</p>
+            <p class="text-xs text-slate-200">Agendá tu horario personalizado</p>
             <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
               Agendar ahora <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
@@ -143,7 +134,10 @@
         <div class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[190px] flex flex-col justify-end p-5">
           <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
           <div class="relative z-10 space-y-2">
-            <span class="bg-yellow-400 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Curso grabado</span>
+            <div class="flex items-center gap-2">
+              <span class="bg-yellow-400 text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Curso grabado</span>
+              <span id="card-course-price" class="bg-white/20 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-full">$25.000</span>
+            </div>
             <h3 class="text-xl font-bold leading-tight">Curso a tu ritmo</h3>
             <p class="text-xs text-slate-200">Videos por niveles + apostilas + tareas</p>
             <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition">
@@ -153,12 +147,12 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3 pt-1">
-          <div onclick="navigate('tasks')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm mb-3">
-              <i class="fa-solid fa-clipboard-list"></i>
+          <div onclick="navigate('info')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm mb-3">
+              <i class="fa-solid fa-bell"></i>
             </div>
             <div>
-              <h4 class="font-bold text-xs text-slate-900 leading-snug">Tareas y evaluaciones</h4>
+              <h4 class="font-bold text-xs text-slate-900 leading-snug">Central de Informaciones</h4>
             </div>
           </div>
 
@@ -199,7 +193,7 @@
 
           <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3.5">
             <div class="flex justify-between items-center">
-              <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paso final de confirmación</span>
+              <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paso final</span>
               <button onclick="closePaymentSection()" class="text-xs text-slate-400 hover:text-slate-600">Volver</button>
             </div>
 
@@ -222,7 +216,7 @@
             </button>
 
             <p class="text-[11px] text-emerald-900 leading-relaxed">
-              Podés <b>subir la foto del comprobante aquí</b> para confirmar todas las fechas juntas, o enviarla por WhatsApp:
+              Podés <b>subir la foto del comprobante aquí</b> para confirmar o enviarla por WhatsApp:
             </p>
 
             <div class="space-y-2">
@@ -258,10 +252,8 @@
         </div>
       </section>
 
-      <!-- ABA 3: CURSO GRAVADO (COM BLOQUEIO SE NÃO PAGO) -->
+      <!-- ABA 3: CURSO GRAVADO -->
       <section id="tab-course" class="space-y-4 hidden">
-        
-        <!-- BLOQUEIO PARA ALUNOS SEM ACESSO -->
         <div id="course-locked-screen" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
           <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 text-2xl flex items-center justify-center mx-auto shadow-sm">
             <i class="fa-solid fa-lock"></i>
@@ -272,6 +264,10 @@
           </div>
 
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left space-y-2 text-xs">
+            <div class="flex justify-between font-bold text-slate-900 border-b border-slate-200 pb-1">
+              <span>Valor del Curso:</span>
+              <span id="locked-course-price-label" class="text-emerald-700">$25.000 ARS</span>
+            </div>
             <p class="font-bold text-slate-800">Datos para transferencia:</p>
             <p>🔹 <b>Alias Mercado Pago:</b> <code class="bg-white px-2 py-0.5 rounded font-mono text-emerald-800 font-bold border border-slate-200">renan.barbosa</code></p>
             <p>🔹 <b>Nombre:</b> Renan Barbosa</p>
@@ -283,7 +279,6 @@
           </button>
         </div>
 
-        <!-- CONTEÚDO DO CURSO (LIBERADO) -->
         <div id="course-unlocked-content" class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Curso grabado</h2>
@@ -363,7 +358,33 @@
         </div>
       </section>
 
-      <!-- ABA 5: PERFIL -->
+      <!-- ABA 5: CENTRAL DE INFORMACIONES (NOTIFICAÇÕES & MENSAGENS DO ALUNO) -->
+      <section id="tab-info" class="space-y-4 hidden">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Central de Informaciones</h2>
+            <p class="text-xs text-slate-500">Avisos, tareas recibidas y mensajes de tu profesor</p>
+          </div>
+
+          <!-- Mensagem rápida para o professor -->
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-2">
+            <label class="text-[11px] font-bold text-slate-700">Enviar duda o mensaje a Renan:</label>
+            <textarea id="student-msg-input" rows="2" placeholder="Escribí tu consulta o mensaje acá..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 bg-white"></textarea>
+            <button onclick="studentSendMessage()" class="w-full bg-[#0f2444] text-white py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-paper-plane text-[10px] text-blue-300"></i> Enviar Consulta
+            </button>
+          </div>
+
+          <div id="info-center-list" class="space-y-2.5 pt-1">
+            <div class="text-center py-8 text-slate-400 space-y-2">
+              <i class="fa-regular fa-bell text-3xl"></i>
+              <p class="text-sm font-medium">No tenés nuevos avisos por el momento.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 6: PERFIL -->
       <section id="tab-profile" class="space-y-4 hidden">
         <div class="text-center py-4 space-y-2">
           <div id="profile-avatar" class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm">
@@ -387,6 +408,14 @@
             <div class="flex items-center gap-3">
               <i class="fa-solid fa-clipboard-list text-slate-500 w-5"></i>
               <span class="font-medium text-slate-800">Tareas y evaluaciones</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+          </button>
+
+          <button onclick="navigate('info')" class="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-slate-50">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-bell text-emerald-600 w-5"></i>
+              <span class="font-medium text-slate-800">Central de Informaciones</span>
             </div>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
           </button>
@@ -425,7 +454,7 @@
         </div>
       </section>
 
-      <!-- ABA 6: MANUAL DO ALUNO -->
+      <!-- ABA 7: MANUAL DO ALUNO -->
       <section id="tab-rules" class="space-y-4 hidden">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
           <div class="space-y-3">
@@ -480,21 +509,23 @@
       <!-- ABA ADMIN -->
       <section id="tab-admin" class="space-y-4 hidden">
         <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-          <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos & Actividad</button>
-          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas & Comprobantes</button>
-          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos & Apostilas</button>
+          <button onclick="showAdminTab('students')" id="admin-btn-tab-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap">Alumnos</button>
+          <button onclick="showAdminTab('broadcast')" id="admin-btn-tab-broadcast" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Avisos & Notificaciones</button>
+          <button onclick="showAdminTab('prices')" id="admin-btn-tab-prices" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Precios</button>
           <button onclick="showAdminTab('assignments')" id="admin-btn-tab-assignments" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Tareas</button>
+          <button onclick="showAdminTab('videos')" id="admin-btn-tab-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Videos & Apostilas</button>
           <button onclick="showAdminTab('quizzes')" id="admin-btn-tab-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Provas Online</button>
+          <button onclick="showAdminTab('bookings')" id="admin-btn-tab-bookings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Reservas</button>
           <button onclick="showAdminTab('slots')" id="admin-btn-tab-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap">Horarios</button>
         </div>
 
-        <!-- Seção 1: Alunos Registrados & Gestão de Acesso ao Curso -->
+        <!-- Seção 1: Alunos Registrados & Ficha Individual de Progresso -->
         <div id="admin-sec-students" class="space-y-4">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <div class="flex justify-between items-center">
               <div>
                 <h3 class="font-bold text-sm text-slate-900">Listado de Alumnos</h3>
-                <p class="text-[11px] text-slate-500">Gestión de accesos a cursos y comprobantes</p>
+                <p class="text-[11px] text-slate-500">Progreso, planes y niveles</p>
               </div>
               <button onclick="exportStudentsToPDF()" class="bg-[#0f2444] text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-800 transition shadow-sm">
                 <i class="fa-solid fa-file-pdf text-red-400"></i> Descargar PDF
@@ -504,39 +535,120 @@
               Cargando alumnos...
             </div>
           </div>
+
+          <!-- MODAL / PAINEL DE DETALHES DO ALUNO (PROGRESSO & PROVAS) -->
+          <div id="student-detail-modal" class="hidden bg-white p-5 rounded-2xl border border-slate-200 shadow-lg space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+              <div>
+                <h3 id="modal-student-name" class="font-bold text-sm text-slate-900"></h3>
+                <p id="modal-student-email" class="text-xs text-slate-500"></p>
+              </div>
+              <button onclick="closeStudentDetailModal()" class="text-xs text-slate-400 hover:text-slate-600">✕ Cerrar</button>
+            </div>
+
+            <!-- Ficha Pedagógica -->
+            <div class="space-y-2 text-xs">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                <h4 class="font-bold text-slate-800">Planes Contratados:</h4>
+                <p id="modal-student-plans" class="text-slate-600"></p>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                <h4 class="font-bold text-slate-800">Aulas Concluidas del Curso:</h4>
+                <div id="modal-student-lessons-done" class="text-slate-600 space-y-0.5"></div>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                <h4 class="font-bold text-slate-800">Exámenes Realizados & Devoluciones:</h4>
+                <div id="modal-student-quizzes-detail" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Seção 2: Reservas & Agendamento Manual do Admin -->
-        <div id="admin-sec-bookings" class="space-y-4 hidden">
-          
-          <!-- AGENDAR ALUNO MANUALMENTE -->
+        <!-- Seção 2: Avisos & Notificações em Massa ou por Nível -->
+        <div id="admin-sec-broadcast" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Agendar Alumno Manualmente</h3>
+            <h3 class="font-bold text-sm text-slate-900">Enviar Aviso / Notificación Masiva</h3>
             <div class="space-y-2">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Alumno:</label>
-                <select id="admin-manual-student-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+                <label class="text-[11px] font-semibold text-slate-600">Destinatarios:</label>
+                <select id="broadcast-target" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5">
+                  <option value="TODOS">📢 Todos los Alumnos</option>
+                  <option value="nivel_iniciante">🟢 Nivel Iniciante (A1-A2)</option>
+                  <option value="nivel_medio">🔵 Nivel Intermedio (B1-B2)</option>
+                  <option value="nivel_avancado">🟣 Nivel Avanzado (C1-C2)</option>
+                  <option value="nivel_extras">🟠 Clases Extras</option>
+                </select>
               </div>
+
+              <textarea id="broadcast-text" rows="3" placeholder="Escribí el aviso o novedad para los alumnos..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 bg-white"></textarea>
+              <input id="broadcast-file-url" type="text" placeholder="Link de archivo adjunto (Opcional)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+            </div>
+            <button onclick="sendBroadcastMessage()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm">
+              Publicar Aviso a la Central de Informaciones
+            </button>
+          </div>
+        </div>
+
+        <!-- Seção 3: Configurador de Preços (Admin) -->
+        <div id="admin-sec-prices" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Configurar Precios de la Plataforma</h3>
+            <p class="text-xs text-slate-500">Cambiá los valores y se actualizarán en toda la app automáticamente.</p>
+
+            <div class="space-y-2.5 pt-2">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Horario Disponible:</label>
-                <select id="admin-manual-slot-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+                <label class="text-[11px] font-bold text-slate-700">Precio Clase 1:1 vía Meet ($ ARS):</label>
+                <input id="setting-price-meet" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 mt-0.5">
               </div>
-              <button onclick="adminBookStudentManually()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm mt-1">
-                Confirmar Agendamento Manual
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">Precio Curso Grabado Completo ($ ARS):</label>
+                <input id="setting-price-course" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 outline-none focus:border-green-600 mt-0.5">
+              </div>
+
+              <button onclick="saveAppSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition mt-1">
+                Guardar Nuevos Precios
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- LISTA DE RESERVAS E UPLOAD MANUAL DE COMPROVANTE -->
+        <!-- Seção 4: Tarefas & Materiais por Nível ou Aluno -->
+        <div id="admin-sec-assignments" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
-            <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
-              Carregando reservas...
+            <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material</h3>
+            <div class="space-y-2">
+              <input id="assign-title" type="text" placeholder="Título de la tarea o material" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              <textarea id="assign-desc" rows="2" placeholder="Instrucciones o descripción..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600"></textarea>
+              <input id="assign-url" type="text" placeholder="Link del PDF o Google Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
+              
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Destinatario:</label>
+                <select id="assign-target-student" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-1">
+                  <option value="TODOS">📢 Para Todos los Alumnos</option>
+                  <option value="nivel_iniciante">🟢 Nivel Iniciante (A1-A2)</option>
+                  <option value="nivel_medio">🔵 Nivel Intermedio (B1-B2)</option>
+                  <option value="nivel_avancado">🟣 Nivel Avanzado (C1-C2)</option>
+                  <option value="nivel_extras">🟠 Clases Extras</option>
+                </select>
+              </div>
+            </div>
+            <button onclick="createAssignment()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
+              Publicar Tarea
+            </button>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Tareas Publicadas</h3>
+            <div id="admin-assignments-list" class="space-y-2 text-xs text-slate-500">
+              Cargando tareas...
             </div>
           </div>
         </div>
 
-        <!-- Seção 3: Vídeos e Aulas -->
+        <!-- Seção 5: Vídeos & Notificação Opcional -->
         <div id="admin-sec-videos" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
             <h3 class="font-bold text-sm text-slate-900">Adicionar Aula / Vídeo com Apostila</h3>
@@ -558,6 +670,11 @@
                 <label class="text-[11px] font-semibold text-slate-600">Link da Apostila / PDF (Opcional):</label>
                 <input id="admin-video-material" type="text" placeholder="Link do Google Drive ou PDF para download" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 mt-0.5">
               </div>
+
+              <div class="flex items-center gap-2 pt-1">
+                <input type="checkbox" id="admin-video-notify" class="rounded text-green-600">
+                <label for="admin-video-notify" class="text-xs text-slate-700 font-medium">Notificar automáticamente a los alumnos de este nivel en su Central de Información</label>
+              </div>
             </div>
             <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 active:scale-95 transition">
               Salvar Aula no Módulo
@@ -572,36 +689,7 @@
           </div>
         </div>
 
-        <!-- Seção 4: Tarefas & Apostilas -->
-        <div id="admin-sec-assignments" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Asignar Tarea o Material Individual</h3>
-            <div class="space-y-2">
-              <input id="assign-title" type="text" placeholder="Título de la tarea o material" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              <textarea id="assign-desc" rows="2" placeholder="Instrucciones o descripción..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600"></textarea>
-              <input id="assign-url" type="text" placeholder="Link del PDF o Google Drive" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600">
-              
-              <div>
-                <label class="text-[11px] font-semibold text-slate-600">Destinatario:</label>
-                <select id="assign-target-student" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-1">
-                  <option value="TODOS">Para Todos los Alumnos</option>
-                </select>
-              </div>
-            </div>
-            <button onclick="createAssignment()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm">
-              Publicar Tarea
-            </button>
-          </div>
-
-          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <h3 class="font-bold text-sm text-slate-900">Tareas Publicadas</h3>
-            <div id="admin-assignments-list" class="space-y-2 text-xs text-slate-500">
-              Cargando tareas...
-            </div>
-          </div>
-        </div>
-
-        <!-- Seção 5: Provas Online -->
+        <!-- Seção 6: Provas Online -->
         <div id="admin-sec-quizzes" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <h3 class="font-bold text-sm text-slate-900">Crear Nueva Evaluación Online</h3>
@@ -630,7 +718,34 @@
           </div>
         </div>
 
-        <!-- Seção 6: Horários -->
+        <!-- Seção 7: Reservas & Comprovantes -->
+        <div id="admin-sec-bookings" class="space-y-4 hidden">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Agendar Alumno Manualmente</h3>
+            <div class="space-y-2">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Alumno:</label>
+                <select id="admin-manual-student-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600">Seleccionar Horario Disponible:</label>
+                <select id="admin-manual-slot-select" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none focus:border-green-600 bg-white mt-0.5"></select>
+              </div>
+              <button onclick="adminBookStudentManually()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-green-700 active:scale-95 transition shadow-sm mt-1">
+                Confirmar Agendamento Manual
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-900">Reservas Realizadas</h3>
+            <div id="admin-bookings-list" class="space-y-3 text-xs text-slate-500">
+              Carregando reservas...
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 8: Horários -->
         <div id="admin-sec-slots" class="space-y-4 hidden">
           <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3.5">
             <div class="flex items-center gap-2">
@@ -735,6 +850,7 @@
 
   <script>
     var PRICE_PER_LESSON = 12500;
+    var PRICE_COURSE = 25000;
     var WHATSAPP_NUMBER = "541122515098";
     var ADMIN_EMAILS = [
       "bandasdobrasil.bandas@gmail.com",
@@ -756,7 +872,7 @@
     }
 
     function requestCourseAccessWhatsApp() {
-      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola Renan! Acabo de hacer la transferencia para acceder al Curso Grabado de Portugués (Email: " + currentUser.email + "). Te adjunto la foto del comprobante:");
+      var url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("¡Hola Renan! Acabo de hacer la transferencia de $" + PRICE_COURSE.toLocaleString('es-AR') + " para acceder al Curso Grabado de Portugués (Email: " + currentUser.email + "). Te adjunto la foto del comprobante:");
       window.open(url, '_blank');
     }
 
@@ -780,6 +896,49 @@
     var activeQuizData = null;
     var currentCourseLevel = 'iniciante';
     var userCompletedLessons = new Set();
+
+    // ==========================================
+    // CARREGAR PREÇOS DINÂMICOS DA PLATAFORMA
+    // ==========================================
+    async function loadAppSettings() {
+      var sb = getSupabase();
+      if (!sb) return;
+      var { data } = await sb.from('app_settings').select('*');
+      if (data) {
+        data.forEach(item => {
+          if (item.key === 'price_meet') PRICE_PER_LESSON = parseInt(item.value) || 12500;
+          if (item.key === 'price_course') PRICE_COURSE = parseInt(item.value) || 25000;
+        });
+      }
+
+      var cardMeet = document.getElementById('card-meet-price');
+      var cardCourse = document.getElementById('card-course-price');
+      var lockedPrice = document.getElementById('locked-course-price-label');
+      var inputMeet = document.getElementById('setting-price-meet');
+      var inputCourse = document.getElementById('setting-price-course');
+
+      if (cardMeet) cardMeet.innerText = '$' + PRICE_PER_LESSON.toLocaleString('es-AR') + ' / 50 min';
+      if (cardCourse) cardCourse.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR');
+      if (lockedPrice) lockedPrice.innerText = '$' + PRICE_COURSE.toLocaleString('es-AR') + ' ARS';
+      if (inputMeet) inputMeet.value = PRICE_PER_LESSON;
+      if (inputCourse) inputCourse.value = PRICE_COURSE;
+    }
+
+    window.saveAppSettings = async function() {
+      var meetVal = document.getElementById('setting-price-meet').value;
+      var courseVal = document.getElementById('setting-price-course').value;
+
+      var sb = getSupabase();
+      if (!sb) return;
+
+      await sb.from('app_settings').upsert([
+        { key: 'price_meet', value: meetVal },
+        { key: 'price_course', value: courseVal }
+      ]);
+
+      alert('¡Precios actualizados con éxito!');
+      loadAppSettings();
+    };
 
     function toggleAuthMode() {
       isSignUp = !isSignUp;
@@ -819,6 +978,7 @@
               full_name: name || 'Estudiante',
               email: email,
               status: 'Ativo',
+              student_level: 'iniciante',
               has_course_access: false,
               last_sign_in_at: new Date().toISOString(),
               last_content_viewed: 'Registro'
@@ -866,9 +1026,10 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
 
-        // Carregar dados atualizados do perfil
+        await loadAppSettings();
+
         var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-        userProfileData = prof || { has_course_access: false };
+        userProfileData = prof || { has_course_access: false, student_level: 'iniciante' };
 
         var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
@@ -915,11 +1076,12 @@
       }).eq('id', currentUser.id);
     }
 
-    var tabs = ['home', 'calendar', 'course', 'tasks', 'profile', 'admin', 'rules'];
+    var tabs = ['home', 'calendar', 'course', 'tasks', 'info', 'profile', 'admin', 'rules'];
     var titles = {
       calendar: 'Agendar clases',
       course: 'Curso grabado',
       tasks: 'Tareas y evaluaciones',
+      info: 'Central de Informaciones',
       profile: 'Perfil',
       admin: 'Panel admin',
       rules: 'Manual del Alumno'
@@ -961,17 +1123,20 @@
       if (tabId === 'calendar') loadStudentSlots();
       if (tabId === 'course') checkAndLoadCourse();
       if (tabId === 'tasks') loadStudentTasksAndQuizzes();
+      if (tabId === 'info') loadInfoCenter();
     };
 
     window.showAdminTab = function(type) {
       document.getElementById('admin-sec-students').classList.toggle('hidden', type !== 'students');
-      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
-      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
+      document.getElementById('admin-sec-broadcast').classList.toggle('hidden', type !== 'broadcast');
+      document.getElementById('admin-sec-prices').classList.toggle('hidden', type !== 'prices');
       document.getElementById('admin-sec-assignments').classList.toggle('hidden', type !== 'assignments');
+      document.getElementById('admin-sec-videos').classList.toggle('hidden', type !== 'videos');
       document.getElementById('admin-sec-quizzes').classList.toggle('hidden', type !== 'quizzes');
+      document.getElementById('admin-sec-bookings').classList.toggle('hidden', type !== 'bookings');
       document.getElementById('admin-sec-slots').classList.toggle('hidden', type !== 'slots');
 
-      ['students', 'bookings', 'videos', 'assignments', 'quizzes', 'slots'].forEach(t => {
+      ['students', 'broadcast', 'prices', 'assignments', 'videos', 'quizzes', 'bookings', 'slots'].forEach(t => {
         var btn = document.getElementById('admin-btn-tab-' + t);
         if (btn) {
           if (t === type) {
@@ -983,11 +1148,101 @@
       });
 
       if (type === 'students') loadAdminStudents();
+      if (type === 'prices') loadAppSettings();
       if (type === 'bookings') { loadAdminStudents(); loadAdminBookings(); loadAvailableSlotsForAdmin(); }
       if (type === 'videos') loadAdminLessonsManagement();
       if (type === 'assignments') { loadAdminStudents(); loadAdminAssignments(); }
       if (type === 'quizzes') { initQuizBuilder(); loadAdminQuizScores(); }
       if (type === 'slots') loadAdminSlots();
+    };
+
+    // ====================================================
+    // CENTRAL DE INFORMACIONES & CHAT ALUNO-PROFESSOR
+    // ====================================================
+    window.loadInfoCenter = async function() {
+      if (!currentUser) return;
+      var sb = getSupabase();
+      if (!sb) return;
+
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
+      // Buscar avisos, mensagens e tarefas destinadas ao aluno ou ao seu nível
+      var { data: messages } = await sb.from('student_messages')
+        .select('*')
+        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false });
+
+      var container = document.getElementById('info-center-list');
+      if (!messages || messages.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-regular fa-bell text-3xl"></i><p class="text-sm font-medium">No tenés nuevos avisos por el momento.</p></div>';
+        return;
+      }
+
+      container.innerHTML = messages.map(function(m) {
+        var isFromStudent = m.sender_type === 'student';
+        var cardBg = isFromStudent ? 'bg-blue-50/70 border-blue-100' : 'bg-slate-50 border-slate-100';
+        var senderName = isFromStudent ? 'Vos (Consulta enviada)' : (m.sender || 'Profesor Renan');
+        var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 underline mt-2"><i class="fa-solid fa-paperclip"></i> Ver archivo o material</a>' : '';
+
+        return '<div class="p-3.5 ' + cardBg + ' border rounded-2xl space-y-1">' +
+          '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
+            '<span class="font-bold text-slate-800">' + senderName + '</span>' +
+            '<span>' + new Date(m.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) + '</span>' +
+          '</div>' +
+          '<p class="text-xs text-slate-700 leading-relaxed">' + m.message_text + '</p>' +
+          fileBtn +
+        '</div>';
+      }).join('');
+    };
+
+    window.studentSendMessage = async function() {
+      var input = document.getElementById('student-msg-input');
+      var text = input.value.trim();
+      if (!text) return alert('Por favor escribí un mensaje.');
+
+      var sb = getSupabase();
+      var studentName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email;
+
+      await sb.from('student_messages').insert([{
+        student_id: currentUser.id,
+        student_email: currentUser.email,
+        sender: studentName,
+        sender_type: 'student',
+        message_text: text,
+        file_url: null
+      }]);
+
+      input.value = '';
+      alert('¡Tu consulta fue enviada a Renan con éxito!');
+      loadInfoCenter();
+    };
+
+    // ====================================================
+    // AVISOS E NOTIFICAÇÕES EM MASSA (ADMIN)
+    // ====================================================
+    window.sendBroadcastMessage = async function() {
+      var target = document.getElementById('broadcast-target').value;
+      var text = document.getElementById('broadcast-text').value.trim();
+      var fileUrl = document.getElementById('broadcast-file-url').value.trim();
+
+      if (!text) return alert('Por favor escribí el texto del aviso.');
+
+      var sb = getSupabase();
+      var { error } = await sb.from('student_messages').insert([{
+        student_email: target,
+        sender: 'Profesor Renan Barbosa',
+        sender_type: 'teacher',
+        message_text: text,
+        file_url: fileUrl || null
+      }]);
+
+      if (error) {
+        alert('Error: ' + error.message);
+      } else {
+        alert('¡Aviso publicado con éxito a la Central de Informaciones!');
+        document.getElementById('broadcast-text').value = '';
+        document.getElementById('broadcast-file-url').value = '';
+      }
     };
 
     // ====================================================
@@ -997,7 +1252,6 @@
       var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
       var sb = getSupabase();
       
-      // Buscar status mais recente de permissão do curso
       var { data: prof } = await sb.from('profiles').select('has_course_access').eq('id', currentUser.id).single();
       var hasAccess = isAdmin || (prof && prof.has_course_access === true);
 
@@ -1118,7 +1372,7 @@
     };
 
     // ====================================================
-    // GESTÃO DE ALUNOS & LIBERAÇÃO DO CURSO (ADMIN)
+    // GESTÃO DE ALUNOS & FICHA DE PROGRESSO INDIVIDUAL
     // ====================================================
     window.loadAdminStudents = async function() {
       var container = document.getElementById('admin-students-list');
@@ -1139,6 +1393,7 @@
             full_name: p.full_name || 'Estudiante',
             email: p.email,
             status: p.status || 'Ativo',
+            student_level: p.student_level || 'iniciante',
             has_course_access: p.has_course_access === true,
             course_receipt_url: p.course_receipt_url,
             last_sign_in_at: p.last_sign_in_at,
@@ -1154,6 +1409,7 @@
             full_name: b.student_name || 'Estudiante',
             email: b.student_email,
             status: 'Ativo',
+            student_level: 'iniciante',
             has_course_access: false,
             course_receipt_url: null,
             last_sign_in_at: b.created_at,
@@ -1165,7 +1421,11 @@
       loadedStudents = Array.from(studentMap.values());
 
       if (assignSelect) {
-        assignSelect.innerHTML = '<option value="TODOS">Para Todos los Alumnos</option>' +
+        assignSelect.innerHTML = '<option value="TODOS">📢 Para Todos los Alumnos</option>' +
+          '<option value="nivel_iniciante">🟢 Nivel Iniciante (A1-A2)</option>' +
+          '<option value="nivel_medio">🔵 Nivel Intermedio (B1-B2)</option>' +
+          '<option value="nivel_avancado">🟣 Nivel Avanzado (C1-C2)</option>' +
+          '<option value="nivel_extras">🟠 Clases Extras</option>' +
           loadedStudents.map(s => '<option value="' + s.email + '">' + s.full_name + ' (' + s.email + ')</option>').join('');
       }
 
@@ -1185,11 +1445,7 @@
 
           var courseAccessBtn = s.has_course_access 
             ? '<button onclick="toggleCourseAccess(\'' + s.id + '\', true)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-1.5 px-2 rounded-xl font-bold text-[11px] transition"><i class="fa-solid fa-lock"></i> Bloquear Curso</button>'
-            : '<button onclick="toggleCourseAccess(\'' + s.id + '\', false)" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-1.5 px-2 rounded-xl font-bold text-[11px] transition shadow-sm"><i class="fa-solid fa-lock-open"></i> Liberar Acceso Curso</button>';
-
-          var receiptInfo = s.course_receipt_url 
-            ? '<a href="' + s.course_receipt_url + '" target="_blank" class="text-blue-600 underline font-bold text-[11px] inline-flex items-center gap-1"><i class="fa-solid fa-file-invoice"></i> Comprobante Curso</a>'
-            : '<button onclick="uploadCourseReceiptForStudent(\'' + s.id + '\')" class="text-emerald-700 underline font-bold text-[11px] inline-flex items-center gap-1"><i class="fa-solid fa-upload"></i> Subir Comprobante Curso</button>';
+            : '<button onclick="toggleCourseAccess(\'' + s.id + '\', false)" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-1.5 px-2 rounded-xl font-bold text-[11px] transition shadow-sm"><i class="fa-solid fa-lock-open"></i> Liberar Acceso</button>';
 
           return '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2.5">' +
             '<div class="flex justify-between items-start">' +
@@ -1197,26 +1453,101 @@
                 '<h4 class="font-bold text-slate-900 text-sm">' + s.full_name + '</h4>' +
                 '<p class="text-[11px] text-slate-500">' + s.email + '</p>' +
               '</div>' +
-              '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' hover:opacity-80 transition">' +
-                s.status +
-              '</button>' +
+              '<div class="flex items-center gap-1.5">' +
+                '<select onchange="updateStudentLevel(\'' + s.id + '\', this.value)" class="text-[10px] font-bold border border-slate-200 bg-white rounded-lg px-2 py-0.5 outline-none">' +
+                  '<option value="iniciante" ' + (s.student_level === 'iniciante' ? 'selected' : '') + '>Iniciante</option>' +
+                  '<option value="medio" ' + (s.student_level === 'medio' ? 'selected' : '') + '>Intermedio</option>' +
+                  '<option value="avancado" ' + (s.student_level === 'avancado' ? 'selected' : '') + '>Avanzado</option>' +
+                '</select>' +
+                '<button onclick="toggleStudentStatus(\'' + s.id + '\', \'' + s.status + '\')" class="px-2 py-0.5 text-[10px] font-bold rounded-full ' + statusColor + ' transition">' +
+                  s.status +
+                '</button>' +
+              '</div>' +
             '</div>' +
             
             '<div class="text-[11px] text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 space-y-1">' +
               '<div>🕒 <b>Último acceso:</b> ' + lastLogin + '</div>' +
               '<div>👁️ <b>Último contenido:</b> <span class="font-semibold text-emerald-800">' + s.last_content_viewed + '</span></div>' +
-              '<div>🎓 <b>Curso Grabado:</b> ' + (s.has_course_access ? '<span class="text-green-700 font-bold">Habilitado</span>' : '<span class="text-red-500 font-bold">Bloqueado</span>') + ' | ' + receiptInfo + '</div>' +
+              '<div>🎓 <b>Curso Grabado:</b> ' + (s.has_course_access ? '<span class="text-green-700 font-bold">Habilitado</span>' : '<span class="text-red-500 font-bold">Bloqueado</span>') + '</div>' +
             '</div>' +
 
             '<div class="flex gap-2 pt-0.5">' +
-              courseAccessBtn +
-              '<button onclick="openSendMessageModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] transition">' +
-                '<i class="fa-solid fa-paper-plane text-blue-300"></i>' +
+              '<button onclick="openStudentDetailModal(\'' + s.id + '\', \'' + s.email + '\', \'' + s.full_name + '\')" class="flex-1 bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-1.5 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1">' +
+                '<i class="fa-solid fa-chart-line text-blue-300"></i> Ver Ficha & Progreso' +
               '</button>' +
+              courseAccessBtn +
             '</div>' +
           '</div>';
         }).join('');
       }
+    };
+
+    window.updateStudentLevel = async function(studentId, newLevel) {
+      var sb = getSupabase();
+      if (!sb) return;
+      await sb.from('profiles').update({ student_level: newLevel }).eq('id', studentId);
+      alert('¡Nivel del alumno actualizado con éxito!');
+    };
+
+    window.openStudentDetailModal = async function(studentId, email, name) {
+      var modal = document.getElementById('student-detail-modal');
+      modal.classList.remove('hidden');
+      document.getElementById('modal-student-name').innerText = name;
+      document.getElementById('modal-student-email').innerText = email;
+
+      var sb = getSupabase();
+
+      // 1. Buscar planos/reservas contratadas
+      var { data: bookings } = await sb.from('bookings').select('*').eq('student_email', email);
+      var plansContainer = document.getElementById('modal-student-plans');
+      var bookingsCount = (bookings || []).length;
+      plansContainer.innerHTML = '• Clases 1:1 agendadas: <b>' + bookingsCount + ' clase(s)</b><br>' +
+        (bookings || []).map(b => '  - 📅 ' + formatSpanishDate(b.slot_date) + ' a las ' + b.slot_time + ' hs').join('<br>');
+
+      // 2. Buscar aulas concluídas
+      var { data: prog } = await sb.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', studentId);
+      var lessonsDoneContainer = document.getElementById('modal-student-lessons-done');
+      if (prog && prog.length > 0) {
+        lessonsDoneContainer.innerHTML = 'Total: <b>' + prog.length + ' lecciones completadas</b>';
+      } else {
+        lessonsDoneContainer.innerHTML = 'Aún no ha completado lecciones';
+      }
+
+      // 3. Buscar provas realizadas e detalhes das respostas
+      var { data: quizzes } = await sb.from('quiz_submissions').select('*').eq('student_email', email);
+      var quizzesContainer = document.getElementById('modal-student-quizzes-detail');
+
+      if (quizzes && quizzes.length > 0) {
+        quizzesContainer.innerHTML = quizzes.map(function(q) {
+          var feedback = q.feedback_text ? '<p class="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg mt-1"><b>Tu devolución:</b> ' + q.feedback_text + '</p>' : '';
+
+          return '<div class="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">' +
+            '<div class="flex justify-between font-bold text-slate-800">' +
+              '<span>' + q.quiz_title + '</span>' +
+              '<span class="text-emerald-700">' + q.score + '/' + q.total_questions + '</span>' +
+            '</div>' +
+            feedback +
+            '<button onclick="sendTeacherFeedback(\'' + q.id + '\')" class="text-[10px] text-blue-600 underline font-bold block mt-1">+ Enviar / Editar Devolución</button>' +
+          '</div>';
+        }).join('');
+      } else {
+        quizzesContainer.innerHTML = '<p class="text-slate-400">Sin exámenes completados</p>';
+      }
+
+      modal.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.sendTeacherFeedback = async function(submissionId) {
+      var feedback = prompt('Escribí tu devolución pedagógica para el alumno sobre esta prueba:');
+      if (!feedback) return;
+
+      var sb = getSupabase();
+      await sb.from('quiz_submissions').update({ feedback_text: feedback }).eq('id', submissionId);
+      alert('¡Devolución guardada con éxito!');
+    };
+
+    window.closeStudentDetailModal = function() {
+      document.getElementById('student-detail-modal').classList.add('hidden');
     };
 
     window.toggleCourseAccess = async function(studentId, currentlyHasAccess) {
@@ -1230,35 +1561,6 @@
         alert(newAccess ? '¡Acceso al curso grabado habilitado!' : 'Acceso al curso bloqueado.');
         loadAdminStudents();
       }
-    };
-
-    window.uploadCourseReceiptForStudent = async function(studentId) {
-      var fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*,.pdf';
-
-      fileInput.onchange = async function() {
-        var file = fileInput.files[0];
-        if (!file) return;
-
-        var sb = getSupabase();
-        var fileName = 'course_receipt_' + Date.now() + '_' + file.name.replace(/\s+/g, '_');
-
-        var uploadRes = await sb.storage.from('comprovantes').upload(fileName, file);
-        if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
-
-        var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
-
-        await sb.from('profiles').update({ 
-          course_receipt_url: publicUrl,
-          has_course_access: true // Libera o curso automaticamente ao subir o comprovante
-        }).eq('id', studentId);
-
-        alert('¡Comprobante subido y curso habilitado!');
-        loadAdminStudents();
-      };
-
-      fileInput.click();
     };
 
     // ====================================================
@@ -1296,7 +1598,6 @@
 
       var sb = getSupabase();
       
-      // Inserir reserva manual
       await sb.from('bookings').insert([{
         user_id: studentId.includes('@') ? null : studentId,
         slot_id: slotId,
@@ -1364,7 +1665,6 @@
         if (uploadRes.error) return alert('Error al subir: ' + uploadRes.error.message);
 
         var publicUrl = sb.storage.from('comprovantes').getPublicUrl(fileName).data.publicUrl;
-
         await sb.from('bookings').update({ receipt_url: publicUrl }).eq('id', bookingId);
 
         alert('¡Comprobante adjuntado con éxito a la reserva!');
@@ -1375,13 +1675,14 @@
     };
 
     // ====================================================
-    // VÍDEOS, TAREFAS, PROVAS E DEMAIS FUNÇÕES
+    // VÍDEOS & NOTIFICAÇÕES
     // ====================================================
     window.addVideo = async function() {
       var title = document.getElementById('admin-video-title').value;
       var url = document.getElementById('admin-video-url').value;
       var level = document.getElementById('admin-video-level').value;
       var material = document.getElementById('admin-video-material').value;
+      var shouldNotify = document.getElementById('admin-video-notify').checked;
 
       if (!title || !url) return alert('Preencha título e link do vídeo!');
 
@@ -1399,10 +1700,21 @@
       if (res.error) {
         alert('Erro ao cadastrar: ' + res.error.message);
       } else {
-        alert('Aula cadastrada com sucesso no módulo!');
+        if (shouldNotify) {
+          await sb.from('student_messages').insert([{
+            student_email: 'nivel_' + level,
+            sender: 'Profesor Renan Barbosa',
+            sender_type: 'teacher',
+            message_text: 'Nova aula publicada no seu módulo: "' + title + '". Já disponível no Curso Gravado!',
+            file_url: material || null
+          }]);
+        }
+
+        alert('Aula cadastrada com sucesso!');
         document.getElementById('admin-video-title').value = '';
         document.getElementById('admin-video-url').value = '';
         document.getElementById('admin-video-material').value = '';
+        document.getElementById('admin-video-notify').checked = false;
         loadAdminLessonsManagement();
       }
     };
@@ -1453,7 +1765,7 @@
       if (!sb) return;
       var { error } = await sb.from('course_lessons').update({ is_active: !currentStatus }).eq('id', lessonId);
       if (error) {
-        alert('Erro ao atualizar: ' + error.message);
+        alert('Erro: ' + error.message);
       } else {
         loadAdminLessonsManagement();
       }
@@ -1468,13 +1780,16 @@
       var { error } = await sb.from('course_lessons').delete().eq('id', lessonId);
       
       if (error) {
-        alert('Erro ao excluir: ' + error.message);
+        alert('Erro: ' + error.message);
       } else {
         alert('Aula excluída com sucesso!');
         loadAdminLessonsManagement();
       }
     };
 
+    // ====================================================
+    // TAREFAS & PROVAS ONLINE
+    // ====================================================
     window.createAssignment = async function() {
       var title = document.getElementById('assign-title').value;
       var desc = document.getElementById('assign-desc').value;
@@ -1492,9 +1807,18 @@
       }]);
 
       if (error) {
-        alert('Error al publicar: ' + error.message);
+        alert('Error: ' + error.message);
       } else {
-        alert('¡Tarea/Material publicado con éxito!');
+        // Enviar notificação na Central de Informações
+        await sb.from('student_messages').insert([{
+          student_email: target,
+          sender: 'Profesor Renan Barbosa',
+          sender_type: 'teacher',
+          message_text: 'Nueva tarea asignada: "' + title + '". Podés revisarla en la sección de Tareas & Evaluaciones.',
+          file_url: url || null
+        }]);
+
+        alert('¡Tarea publicada y notificada con éxito!');
         document.getElementById('assign-title').value = '';
         document.getElementById('assign-desc').value = '';
         document.getElementById('assign-url').value = '';
@@ -1587,7 +1911,7 @@
       }]);
 
       if (error) {
-        alert('Error al guardar prueba: ' + error.message);
+        alert('Error: ' + error.message);
       } else {
         alert('¡Evaluación online creada con éxito!');
         document.getElementById('quiz-title').value = '';
@@ -1649,9 +1973,11 @@
       var sb = getSupabase();
       if (!sb) return;
 
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
       var { data: assignments } = await sb.from('student_assignments')
         .select('*')
-        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email)
+        .or('target_student_email.eq.TODOS,target_student_email.eq.' + currentUser.email + ',target_student_email.eq.' + levelTag)
         .order('created_at', { ascending: false });
 
       var matContainer = document.getElementById('student-assignments-list');
@@ -1739,11 +2065,21 @@
       var questions = activeQuizData.questions_json || [];
       var score = 0;
       var total = questions.length;
+      var answersDetail = [];
 
       for (var i = 0; i < total; i++) {
         var selected = document.querySelector('input[name="student-ans-' + i + '"]:checked');
         if (!selected) return alert('Por favor responde la pregunta #' + (i + 1));
-        if (parseInt(selected.value) === questions[i].correct) score++;
+        var userChoice = parseInt(selected.value);
+        var isCorrect = userChoice === questions[i].correct;
+        if (isCorrect) score++;
+
+        answersDetail.push({
+          question: questions[i].question,
+          user_choice: questions[i].options[userChoice],
+          correct_choice: questions[i].options[questions[i].correct],
+          is_correct: isCorrect
+        });
       }
 
       var percentage = Math.round((score / total) * 100);
@@ -1756,7 +2092,8 @@
         student_email: currentUser.email,
         student_name: studentName,
         score: score,
-        total_questions: total
+        total_questions: total,
+        answers_detail: answersDetail
       }]);
 
       alert('¡Evaluación finalizada!\nTu puntuación: ' + score + '/' + total + ' (' + percentage + '%)');
@@ -1788,16 +2125,16 @@
         return [
           s.full_name || 'Estudiante',
           s.email,
+          s.student_level || 'Iniciante',
           s.status || 'Ativo',
           s.has_course_access ? 'Habilitado' : 'Bloqueado',
-          lastLogin,
-          s.last_content_viewed || 'Inicio'
+          lastLogin
         ];
       });
 
       doc.autoTable({
         startY: 30,
-        head: [['Nombre', 'Email', 'Estado', 'Curso Grabado', 'Ultimo Acceso', 'Contenido Visto']],
+        head: [['Nombre', 'Email', 'Nivel', 'Estado', 'Curso Grabado', 'Ultimo Acceso']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [15, 36, 68] },
@@ -1807,41 +2144,26 @@
       doc.save('listado_alumnos_portugues.pdf');
     };
 
-    window.openSendMessageModal = async function(studentId, email, name) {
-      var message = prompt('Escribí el mensaje o devolución para ' + name + ':');
-      if (!message) return;
-
-      var fileUrl = prompt('¿Deseás adjuntar el link de algún archivo/documento de Drive o PDF? (Dejar vacío si no aplica):');
-
-      var sb = getSupabase();
-      var { error } = await sb.from('student_messages').insert([{
-        student_id: studentId,
-        student_email: email,
-        sender: 'Renan Barbosa',
-        message_text: message,
-        file_url: fileUrl || null
-      }]);
-
-      if (error) {
-        alert('Error al enviar: ' + error.message);
-      } else {
-        alert('¡Mensaje enviado al alumno con éxito!');
-      }
-    };
-
     window.loadStudentInbox = async function() {
       if (!currentUser) return;
       var sb = getSupabase();
       if (!sb) return;
 
-      var { data } = await sb.from('student_messages').select('*').eq('student_email', currentUser.email).order('created_at', { ascending: false });
+      var levelTag = 'nivel_' + (userProfileData.student_level || 'iniciante');
+
+      var { data } = await sb.from('student_messages')
+        .select('*')
+        .or('student_email.eq.TODOS,student_email.eq.' + currentUser.email + ',student_email.eq.' + levelTag)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
       var container = document.getElementById('student-inbox-list');
       var section = document.getElementById('student-inbox-section');
 
       if (data && data.length > 0) {
         section.classList.remove('hidden');
         container.innerHTML = data.map(function(m) {
-          var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline mt-1.5"><i class="fa-solid fa-paperclip"></i> Descargar / Ver archivo adjunto</a>' : '';
+          var fileBtn = m.file_url ? '<a href="' + m.file_url + '" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 underline mt-1.5"><i class="fa-solid fa-paperclip"></i> Ver archivo adjunto</a>' : '';
 
           return '<div class="p-3 bg-white border border-green-200 rounded-2xl shadow-sm space-y-1">' +
             '<div class="flex justify-between items-center text-[10px] text-slate-400">' +
@@ -1857,6 +2179,9 @@
       }
     };
 
+    // ====================================================
+    // HORÁRIOS & AGENDAMENTOS
+    // ====================================================
     window.generateBulkSlots = async function() {
       var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
       var startTime = document.getElementById('bulk-start-time').value;
@@ -1915,7 +2240,7 @@
       btn.disabled = false;
 
       if (error) {
-        alert('Error al generar: ' + error.message);
+        alert('Error: ' + error.message);
       } else {
         alert('¡Se generaron con éxito ' + slotsToInsert.length + ' horarios disponibles!');
         loadAdminSlots();
@@ -2009,7 +2334,7 @@
       await sb.from('bookings').delete().eq('slot_id', slotId);
       var { error } = await sb.from('available_slots').update({ is_booked: false }).eq('id', slotId);
       if (error) {
-        alert('Erro ao liberar horário: ' + error.message);
+        alert('Erro: ' + error.message);
       } else {
         alert('Horário liberado com sucesso!');
         loadAdminSlots();
@@ -2024,7 +2349,7 @@
       await sb.from('bookings').delete().eq('slot_id', slotId);
       var { error } = await sb.from('available_slots').delete().eq('id', slotId);
       if (error) {
-        alert('Erro ao excluir: ' + error.message);
+        alert('Erro: ' + error.message);
       } else {
         alert('Horário excluído com sucesso!');
         loadAdminSlots();
@@ -2101,7 +2426,7 @@
       if (selectedSlots.length > 0) {
         bar.classList.remove('hidden');
         clearBtn.classList.remove('hidden');
-        countLabel.innerText = selectedSlots.length + (selectedSlots.length === 1 ? ' clase seleccionada' : ' clases seleccionadas (mes)');
+        countLabel.innerText = selectedSlots.length + (selectedSlots.length === 1 ? ' clase seleccionada' : ' clases seleccionadas');
         var total = selectedSlots.length * PRICE_PER_LESSON;
         priceLabel.innerText = '$' + total.toLocaleString('es-AR') + ' ARS';
       } else {
