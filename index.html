@@ -28,7 +28,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- YOUTUBE IFRAME API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   
   <style>
@@ -77,19 +76,19 @@
       border: 0;
     }
 
-    /* Escudo Superior: bloqueia título do vídeo e ícones superiores */
-    .video-top-shield {
+    /* ESCUDO SUPERIOR ESQUERDO: Bloqueia apenas o título e foto do canal, liberando CC e engrenagem */
+    .video-top-left-shield {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
+      width: 60%;
       height: 65px;
       z-index: 20;
       background: transparent;
       pointer-events: auto;
     }
 
-    /* Escudo Inferior Direito: bloqueia "Mais vídeos" e logo do YouTube */
+    /* ESCUDO INFERIOR DIREITO: Bloqueia "Mais vídeos" e logo do YouTube */
     .video-bottom-right-shield {
       position: absolute;
       bottom: 0;
@@ -101,12 +100,12 @@
       pointer-events: auto;
     }
 
-    /* Escudo Inferior Esquerdo: bloqueia botão de compartilhar link */
+    /* ESCUDO INFERIOR ESQUERDO: Bloqueia o botão de compartilhar/copiar link */
     .video-bottom-left-shield {
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 80px;
+      width: 90px;
       height: 48px;
       z-index: 20;
       background: transparent;
@@ -118,15 +117,16 @@
       height: 100vh !important;
       border-radius: 0 !important;
     }
-    .video-secure-container:fullscreen .video-top-shield {
+    .video-secure-container:fullscreen .video-top-left-shield {
+      width: 65% !important;
       height: 95px !important;
     }
     .video-secure-container:fullscreen .video-bottom-right-shield {
-      width: 250px !important;
+      width: 260px !important;
       height: 70px !important;
     }
     .video-secure-container:fullscreen .video-bottom-left-shield {
-      width: 120px !important;
+      width: 130px !important;
       height: 70px !important;
     }
 
@@ -1549,7 +1549,6 @@
       }
     };
 
-    // YouTube IFrame API Callback
     function createYouTubePlayer(playerId, videoId) {
       if (window.YT && window.YT.Player) {
         ytPlayersMap[playerId] = new YT.Player(playerId, {
@@ -1563,7 +1562,6 @@
           },
           events: {
             'onStateChange': function(event) {
-              // Quando o vídeo termina (state === 0), pausa e reseta para 0s para não sugerir "Mais vídeos"
               if (event.data === YT.PlayerState.ENDED) {
                 event.target.seekTo(0);
                 event.target.pauseVideo();
@@ -1635,14 +1633,13 @@
           if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
           
           videoContent = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
-            '<div class="video-top-shield"></div>' +
+            '<div class="video-top-left-shield"></div>' +
             '<div class="video-bottom-left-shield"></div>' +
             '<div class="video-bottom-right-shield"></div>' +
             '<div id="' + ytElementId + '"></div>' +
             '<button onclick="toggleSecureFullscreen(\'' + videoContainerId + '\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>' +
           '</div>';
 
-          // Agendar inicialização do player da API após inserção no DOM
           setTimeout(function() {
             createYouTubePlayer(ytElementId, videoId);
           }, 80);
@@ -2808,7 +2805,7 @@
       await sb.from('bookings').delete().eq('slot_id', slotId);
       var { error } = await sb.from('available_slots').update({ is_booked: false }).eq('id', slotId);
       if (error) {
-        alert('Erro: ' + error.message);
+        alert('Erro ao liberar horário: ' + error.message);
       } else {
         alert('Horário liberado com sucesso!');
         loadAdminSlots();
