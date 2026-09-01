@@ -10,7 +10,6 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://app-aulas-sepia.vercel.app">
 
-  <!-- CONFIGURAÇÃO DO APP ANDROID (PWA) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#16a34a">
   <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +18,6 @@
   <meta name="apple-mobile-web-app-title" content="Portugués">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/197/197386.png">
 
-  <!-- Fonte Moderna Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -79,9 +77,34 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 55px;
-      z-index: 10;
+      height: 60px;
+      z-index: 20;
       background: transparent;
+      pointer-events: auto;
+    }
+    /* Tela cheia personalizada do container */
+    .video-secure-container:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
+    }
+    .video-secure-container:fullscreen .video-top-shield {
+      height: 90px !important;
+    }
+    .fs-custom-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      z-index: 25;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
     }
   </style>
 </head>
@@ -1037,6 +1060,7 @@
     var activeQuizData = null;
     var currentCourseLevel = 'iniciante';
     var userCompletedLessons = new Set();
+    var sessionCheckInterval = null;
 
     // ==========================================
     // CONFIGURAÇÕES VISUAIS & CONTEÚDO PROGRAMÁTICO
@@ -1207,6 +1231,9 @@
         if (res.error) {
           alert('Error al registrarse: ' + res.error.message);
         } else {
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
           if (res.data.user) {
             await sb.from('profiles').upsert([{
               id: res.data.user.id,
@@ -1216,6 +1243,7 @@
               student_level: 'iniciante',
               has_course_access: false,
               trial_lesson_id: null,
+              current_session_token: newSessionToken,
               last_sign_in_at: new Date().toISOString(),
               last_content_viewed: 'Registro'
             }]);
@@ -1231,12 +1259,17 @@
         if (res.error) {
           alert('Error al iniciar sesión: ' + res.error.message);
         } else {
+          // Gerar token de sessão única
+          var newSessionToken = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+          localStorage.setItem('user_session_token', newSessionToken);
+
           if (res.data.user) {
             await sb.from('profiles').upsert([{
               id: res.data.user.id,
               email: email,
               full_name: (res.data.user.user_metadata && res.data.user.user_metadata.full_name) || email.split('@')[0],
               status: 'Ativo',
+              current_session_token: newSessionToken,
               last_sign_in_at: new Date().toISOString()
             }]);
           }
@@ -1247,9 +1280,33 @@
 
     async function handleLogout() {
       var sb = getSupabase();
+      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+      localStorage.removeItem('user_session_token');
       await sb.auth.signOut();
       document.getElementById('app-screen').classList.add('hidden');
       document.getElementById('auth-screen').classList.remove('hidden');
+    }
+
+    // Validação contínua de Sessão Única (Desloga se outro dispositivo entrar)
+    function startSingleSessionGuard() {
+      if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+      var isAdmin = ADMIN_EMAILS.includes((currentUser.email || '').toLowerCase());
+      if (isAdmin) return; // Não bloqueia admin
+
+      sessionCheckInterval = setInterval(async function() {
+        if (!currentUser) return;
+        var localToken = localStorage.getItem('user_session_token');
+        if (!localToken) return;
+
+        var sb = getSupabase();
+        var { data } = await sb.from('profiles').select('current_session_token').eq('id', currentUser.id).single();
+
+        if (data && data.current_session_token && data.current_session_token !== localToken) {
+          clearInterval(sessionCheckInterval);
+          alert('⚠️ Tu sesión se ha cerrado porque se inició sesión en otro dispositivo con esta misma cuenta.');
+          handleLogout();
+        }
+      }, 10000);
     }
 
     async function checkSession() {
@@ -1266,6 +1323,13 @@
 
         var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
         userProfileData = prof || { has_course_access: false, student_level: 'iniciante', trial_lesson_id: null };
+
+        // Sincronizar token local se não existir
+        if (!localStorage.getItem('user_session_token') && prof && prof.current_session_token) {
+          localStorage.setItem('user_session_token', prof.current_session_token);
+        }
+
+        startSingleSessionGuard();
 
         var fullName = (currentUser.user_metadata && currentUser.user_metadata.full_name) || currentUser.email.split('@')[0];
         document.getElementById('home-greeting').innerText = 'Olá, ' + fullName + '! 👋';
@@ -1396,7 +1460,7 @@
     };
 
     // ====================================================
-    // CONTROLE DE ACESSO AO CURSO GRAVADO
+    // CONTROLE DE ACESSO AO CURSO GRAVADO (COMPLETO / DEGUSTAÇÃO)
     // ====================================================
     window.checkAndLoadCourse = async function() {
       var isAdmin = ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
@@ -1442,6 +1506,19 @@
       loadLessons();
     };
 
+    // Tela cheia no container seguro (bloqueando clique no título e logo)
+    window.toggleSecureFullscreen = function(containerId) {
+      var el = document.getElementById(containerId);
+      if (!el) return;
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    };
+
     window.loadLessons = async function() {
       var container = document.getElementById('lessons-container');
       var sb = getSupabase();
@@ -1477,7 +1554,7 @@
       var hasFullAccess = isAdmin || (userProfileData && userProfileData.has_course_access === true);
       var trialId = userProfileData ? userProfileData.trial_lesson_id : null;
 
-      container.innerHTML = lessons.map(function(lesson) {
+      container.innerHTML = lessons.map(function(lesson, idx) {
         var isAllowed = hasFullAccess || (trialId === lesson.id);
 
         if (!isAllowed) {
@@ -1494,17 +1571,22 @@
         var doneBadgeClass = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
         var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
 
+        var videoContainerId = 'video-box-' + idx;
         var videoEmbed = '';
+
         if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
           var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
           if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
           
-          videoEmbed = '<div class="video-secure-container mt-2.5 shadow-sm">' +
+          videoEmbed = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
             '<div class="video-top-shield"></div>' +
-            '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>' +
+            '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+            '<button onclick="toggleSecureFullscreen(\'' + videoContainerId + '\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>' +
           '</div>';
         } else {
-          videoEmbed = '<a href="' + lesson.video_url + '" target="_blank" class="text-xs text-blue-600 underline block mt-2">Abrir vídeo</a>';
+          videoEmbed = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
+            '<video src="' + lesson.video_url + '" controls controlsList="nodownload" class="w-full h-full object-cover"></video>' +
+          '</div>';
         }
 
         var materialBtn = lesson.material_url 
