@@ -28,6 +28,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <!-- YOUTUBE IFRAME API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
   <style>
     body { 
       -webkit-tap-highlight-color: transparent; 
@@ -62,18 +65,19 @@
     .video-secure-container {
       position: relative;
       width: 100%;
-      height: 200px;
-      border-radius: 1rem;
+      height: 205px;
+      border-radius: 1.25rem;
       overflow: hidden;
       background: #000;
     }
-    .video-secure-container iframe {
-      width: 100%;
-      height: 100%;
+    .video-secure-container iframe,
+    .video-secure-container div[id^="yt-player-"] {
+      width: 100% !important;
+      height: 100% !important;
       border: 0;
     }
 
-    /* Escudo superior: impede clique no título e logo do YouTube */
+    /* Escudo Superior: bloqueia título do vídeo e ícones superiores */
     .video-top-shield {
       position: absolute;
       top: 0;
@@ -85,12 +89,24 @@
       pointer-events: auto;
     }
 
-    /* Escudo inferior: bloqueia o botão de cópia de link */
-    .video-bottom-shield {
+    /* Escudo Inferior Direito: bloqueia "Mais vídeos" e logo do YouTube */
+    .video-bottom-right-shield {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 180px;
+      height: 48px;
+      z-index: 20;
+      background: transparent;
+      pointer-events: auto;
+    }
+
+    /* Escudo Inferior Esquerdo: bloqueia botão de compartilhar link */
+    .video-bottom-left-shield {
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 95px;
+      width: 80px;
       height: 48px;
       z-index: 20;
       background: transparent;
@@ -105,26 +121,29 @@
     .video-secure-container:fullscreen .video-top-shield {
       height: 95px !important;
     }
-    .video-secure-container:fullscreen .video-bottom-shield {
-      width: 140px !important;
-      height: 65px !important;
+    .video-secure-container:fullscreen .video-bottom-right-shield {
+      width: 250px !important;
+      height: 70px !important;
+    }
+    .video-secure-container:fullscreen .video-bottom-left-shield {
+      width: 120px !important;
+      height: 70px !important;
     }
 
     .fs-custom-btn {
       position: absolute;
       bottom: 8px;
-      right: 10px;
+      right: 8px;
       z-index: 25;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      padding: 5px 9px;
+      padding: 5px 10px;
       border-radius: 8px;
       font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(4px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -1078,6 +1097,7 @@
     var currentCourseLevel = 'iniciante';
     var userCompletedLessons = new Set();
     var sessionCheckInterval = null;
+    var ytPlayersMap = {};
 
     async function loadAppSettings() {
       var sb = getSupabase();
@@ -1529,6 +1549,31 @@
       }
     };
 
+    // YouTube IFrame API Callback
+    function createYouTubePlayer(playerId, videoId) {
+      if (window.YT && window.YT.Player) {
+        ytPlayersMap[playerId] = new YT.Player(playerId, {
+          videoId: videoId,
+          playerVars: {
+            rel: 0,
+            modestbranding: 1,
+            fs: 0,
+            playsinline: 1,
+            iv_load_policy: 3
+          },
+          events: {
+            'onStateChange': function(event) {
+              // Quando o vídeo termina (state === 0), pausa e reseta para 0s para não sugerir "Mais vídeos"
+              if (event.data === YT.PlayerState.ENDED) {
+                event.target.seekTo(0);
+                event.target.pauseVideo();
+              }
+            }
+          }
+        });
+      }
+    }
+
     window.loadLessons = async function() {
       var container = document.getElementById('lessons-container');
       var sb = getSupabase();
@@ -1582,20 +1627,28 @@
         var doneBadgeText = isDone ? '<i class="fa-solid fa-check"></i> Aula Concluída' : 'Marcar como Vista';
 
         var videoContainerId = 'video-box-' + idx;
-        var videoEmbed = '';
+        var ytElementId = 'yt-player-' + idx;
+        var videoContent = '';
 
         if (lesson.video_url.includes('youtube.com') || lesson.video_url.includes('youtu.be')) {
           var videoId = lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop();
           if (videoId.indexOf('&') !== -1) videoId = videoId.split('&')[0];
           
-          videoEmbed = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
+          videoContent = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
             '<div class="video-top-shield"></div>' +
-            '<div class="video-bottom-shield"></div>' +
-            '<iframe src="https://www.youtube-nocookie.com/embed/' + videoId + '?modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>' +
+            '<div class="video-bottom-left-shield"></div>' +
+            '<div class="video-bottom-right-shield"></div>' +
+            '<div id="' + ytElementId + '"></div>' +
             '<button onclick="toggleSecureFullscreen(\'' + videoContainerId + '\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> Pantalla Completa</button>' +
           '</div>';
+
+          // Agendar inicialização do player da API após inserção no DOM
+          setTimeout(function() {
+            createYouTubePlayer(ytElementId, videoId);
+          }, 80);
+
         } else {
-          videoEmbed = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
+          videoContent = '<div id="' + videoContainerId + '" class="video-secure-container mt-2.5 shadow-sm">' +
             '<video src="' + lesson.video_url + '" controls controlsList="nodownload" class="w-full h-full object-cover"></video>' +
           '</div>';
         }
@@ -1613,7 +1666,7 @@
               doneBadgeText +
             '</button>' +
           '</div>' +
-          videoEmbed +
+          videoContent +
           materialBtn +
         '</div>';
       }).join('');
