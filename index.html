@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plataforma de Idiomas</title>
+  <title>Plataforma de Clases</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#16a34a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,18 +14,24 @@
   <script src="https://www.youtube.com/iframe_api"></script>
   
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     body { -webkit-tap-highlight-color: transparent; font-family: 'Plus Jakarta Sans', sans-serif; }
     .nav-active { color: #16a34a !important; }
-    body.theme-pt { background-color: #f6f8f5; background-image: radial-gradient(#16a34a 0.5px, transparent 0.5px); background-size: 24px 24px; }
-    body.theme-es { background-color: #f0f8ff; background-image: radial-gradient(#0284c7 0.5px, transparent 0.5px); background-size: 24px 24px; }
-    body.theme-classic { background-color: #f8f9fa; }
+    
+    /* Temas das Escolas */
+    body.theme-pt { background-color: #f6f8f5; background-image: radial-gradient(#16a34a 0.5px, transparent 0.5px), radial-gradient(#eab308 0.5px, #f6f8f5 0.5px); background-size: 24px 24px; background-position: 0 0, 12px 12px; }
+    body.theme-es { background-color: #f0f8ff; background-image: radial-gradient(#0284c7 0.5px, transparent 0.5px), radial-gradient(#7dd3fc 0.5px, #f0f8ff 0.5px); background-size: 24px 24px; background-position: 0 0, 12px 12px; }
+    
     .doodle-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20h20v20H20zM70 30c5 0 10 5 10 10s-5 10-10 10-10-5-10-10 5-10 10-10zM30 80c8 0 15 5 15 12H15c0-7 7-12 15-12zM80 85c0-6 6-10 12-10s12 4 12 10H80z' fill='%23000' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+    
+    /* Componentes de Vídeo Seguros */
     .video-secure-container { position: relative; width: 100%; height: 205px; border-radius: 1.25rem; overflow: hidden; background: #000; }
     .video-secure-container iframe, .video-secure-container video { width: 100% !important; height: 100% !important; border: 0; }
-    .video-top-left-shield { position: absolute; top: 0; left: 0; width: 60%; height: 65px; z-index: 20; background: transparent; }
-    .video-bottom-right-shield { position: absolute; bottom: 0; right: 0; width: 180px; height: 48px; z-index: 20; background: transparent; }
-    .video-bottom-left-shield { position: absolute; bottom: 0; left: 0; width: 90px; height: 48px; z-index: 20; background: transparent; }
-    .fs-custom-btn { position: absolute; bottom: 8px; right: 8px; z-index: 25; background: rgba(15,23,42,0.88); color: #fff; padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; }
+    .video-top-left-shield { position: absolute; top: 0; left: 0; width: 60%; height: 65px; z-index: 20; background: transparent; pointer-events: auto; }
+    .video-bottom-right-shield { position: absolute; bottom: 0; right: 0; width: 180px; height: 48px; z-index: 20; background: transparent; pointer-events: auto; }
+    .video-bottom-left-shield { position: absolute; bottom: 0; left: 0; width: 90px; height: 48px; z-index: 20; background: transparent; pointer-events: auto; }
+    .fs-custom-btn { position: absolute; bottom: 8px; right: 8px; z-index: 25; background: rgba(15,23,42,0.88); color: #fff; padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+    
     .locked-module { filter: grayscale(100%); opacity: 0.6; pointer-events: none; }
   </style>
 </head>
@@ -37,116 +43,120 @@
     <h1 class="text-2xl font-extrabold text-slate-900 mb-2 text-center">¡Bienvenido! / Bem-vindo!</h1>
     <p class="text-sm text-slate-500 mb-8 text-center">¿Qué vas a aprender hoy? / O que você vai aprender hoje?</p>
     <div class="space-y-4 w-full max-w-xs">
-      <button onclick="selectCourseApp('pt')" class="w-full bg-green-50 border border-green-200 p-4 rounded-2xl flex items-center gap-4 hover:bg-green-100 transition shadow-sm active:scale-95">
-        <div class="text-4xl">🇧🇷</div>
-        <div class="text-left"><h3 class="font-bold text-green-900">Aprender Portugués</h3><p class="text-[10px] text-green-700">Para hispanohablantes</p></div>
+      <button onclick="selectCourseApp('pt')" class="w-full bg-green-50 border border-green-200 p-5 rounded-3xl flex items-center gap-4 hover:bg-green-100 transition shadow-sm active:scale-95">
+        <div class="text-5xl drop-shadow-md">🇧🇷</div>
+        <div class="text-left"><h3 class="font-extrabold text-green-900 text-lg leading-tight">Portugués</h3><p class="text-xs text-green-700 font-medium mt-0.5">Para hispanohablantes</p></div>
       </button>
-      <button onclick="selectCourseApp('es')" class="w-full bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center gap-4 hover:bg-blue-100 transition shadow-sm active:scale-95">
-        <div class="text-4xl">🇦🇷</div>
-        <div class="text-left"><h3 class="font-bold text-blue-900">Aprender Espanhol</h3><p class="text-[10px] text-blue-700">Para brasileiros</p></div>
+      <button onclick="selectCourseApp('es')" class="w-full bg-blue-50 border border-blue-200 p-5 rounded-3xl flex items-center gap-4 hover:bg-blue-100 transition shadow-sm active:scale-95">
+        <div class="text-5xl drop-shadow-md">🇦🇷</div>
+        <div class="text-left"><h3 class="font-extrabold text-blue-900 text-lg leading-tight">Español</h3><p class="text-xs text-blue-700 font-medium mt-0.5">Para brasileiros</p></div>
       </button>
     </div>
   </div>
 
   <!-- TELA DE AUTENTICAÇÃO -->
-  <div id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-4 relative z-10 bg-white/90 backdrop-blur-sm">
-    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl w-full max-w-sm space-y-5">
+  <div id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-4 relative z-10">
+    <div class="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-xl w-full max-w-sm space-y-5">
       <div class="text-center space-y-2">
-        <div id="auth-logo-box" class="w-16 h-16 rounded-2xl bg-yellow-400 text-slate-900 text-2xl flex items-center justify-center mx-auto shadow-sm font-bold">🇧🇷</div>
-        <h2 id="auth-title" class="text-xl font-bold text-slate-900" data-pt="Iniciar sessão" data-es="Iniciar sesión">Iniciar sesión</h2>
-        <p class="text-xs text-slate-500" data-pt="Acesse sua plataforma" data-es="Ingresá a tu plataforma">Ingresá a tu plataforma</p>
+        <div id="auth-logo-box" class="w-16 h-16 rounded-2xl bg-yellow-400 text-slate-900 text-2xl flex items-center justify-center mx-auto shadow-sm font-extrabold border border-yellow-300">🇧🇷</div>
+        <h2 id="auth-title" class="text-xl font-extrabold text-slate-900" data-pt="Iniciar sessão" data-es="Iniciar sesión">Iniciar sesión</h2>
+        <p class="text-xs text-slate-500 font-medium" data-pt="Acesse sua plataforma" data-es="Ingresá a tu plataforma">Ingresá a tu plataforma</p>
       </div>
 
-      <div class="space-y-3">
+      <div class="space-y-3.5">
         <div id="name-field" class="hidden">
-          <label class="text-[11px] font-semibold text-slate-500" data-pt="Nome completo" data-es="Nombre completo">Nombre</label>
-          <input id="auth-name" type="text" class="w-full border rounded-xl px-3.5 py-2.5 text-xs outline-none bg-slate-50">
+          <label class="text-[11px] font-bold text-slate-600 ml-1" data-pt="Nome completo" data-es="Nombre completo">Nombre</label>
+          <input id="auth-name" type="text" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-green-500 transition bg-white shadow-sm mt-1">
         </div>
         <div>
-          <label class="text-[11px] font-semibold text-slate-500">Email</label>
-          <input id="auth-email" type="email" class="w-full border rounded-xl px-3.5 py-2.5 text-xs outline-none bg-slate-50">
+          <label class="text-[11px] font-bold text-slate-600 ml-1">Email</label>
+          <input id="auth-email" type="email" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-green-500 transition bg-white shadow-sm mt-1">
         </div>
         <div>
-          <label class="text-[11px] font-semibold text-slate-500" data-pt="Senha" data-es="Contraseña">Contraseña</label>
-          <input id="auth-password" type="password" class="w-full border rounded-xl px-3.5 py-2.5 text-xs outline-none bg-slate-50">
+          <label class="text-[11px] font-bold text-slate-600 ml-1" data-pt="Senha" data-es="Contraseña">Contraseña</label>
+          <input id="auth-password" type="password" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-green-500 transition bg-white shadow-sm mt-1">
         </div>
-        <button onclick="handleAuth()" id="auth-btn" class="w-full bg-slate-900 text-white py-3 rounded-xl text-xs font-bold transition shadow-sm mt-2" data-pt="Entrar" data-es="Entrar">Entrar</button>
+        <button onclick="handleAuth()" id="auth-btn" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white py-3.5 rounded-xl text-xs font-bold transition shadow-md mt-2" data-pt="Entrar" data-es="Entrar">Entrar</button>
       </div>
 
       <div class="text-center pt-2">
         <p class="text-xs text-slate-500">
           <span id="auth-toggle-text" data-pt="Não tem conta?" data-es="¿No tenés cuenta?">¿No tenés cuenta?</span> 
-          <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-slate-900 font-bold ml-1 underline" data-pt="Criar conta" data-es="Crear cuenta">Crear cuenta</button>
+          <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-green-600 font-bold ml-1 hover:underline" data-pt="Criar conta" data-es="Crear cuenta">Crear cuenta</button>
         </p>
       </div>
-      <div class="text-center pt-2">
-        <button onclick="goBackToLanguage()" class="text-[10px] text-slate-400 underline">Volver / Voltar</button>
+      <div class="text-center pt-2 border-t border-slate-100 mt-2">
+        <button onclick="goBackToLanguage()" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-arrow-left mr-1"></i> Volver / Voltar</button>
       </div>
     </div>
   </div>
 
   <!-- APLICATIVO PRINCIPAL -->
   <div id="app-screen" class="hidden pb-24 relative z-10">
-    <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between">
-      <button onclick="navigate('home')" class="p-1 text-slate-700 text-lg hover:text-green-600 transition"><i class="fa-solid fa-chevron-left"></i></button>
-      <h1 id="header-title" class="font-bold text-base text-slate-900"></h1>
-      <div class="w-6"></div>
+    <header id="top-header" class="hidden sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 z-40 px-4 py-3.5 flex items-center justify-between shadow-sm">
+      <button onclick="navigate('home')" class="p-2 text-slate-700 hover:text-green-600 transition bg-slate-50 rounded-full"><i class="fa-solid fa-chevron-left"></i></button>
+      <h1 id="header-title" class="font-bold text-base text-slate-900 tracking-tight"></h1>
+      <div class="w-8"></div>
     </header>
 
     <main class="max-w-md mx-auto px-4 pt-4">
 
       <!-- ABA 1: INÍCIO -->
       <section id="tab-home" class="space-y-4">
-        <div class="flex items-center justify-between pt-2">
+        <div class="flex items-center justify-between pt-2 pb-2">
           <div>
             <h2 id="home-greeting" class="text-2xl font-extrabold text-slate-900 tracking-tight"></h2>
-            <p class="text-xs text-slate-500 font-medium" data-pt="O que vamos aprender hoje?" data-es="¿Qué querés aprender hoy?"></p>
+            <p class="text-xs text-slate-500 font-medium mt-0.5" data-pt="O que vamos aprender hoje?" data-es="¿Qué querés aprender hoy?"></p>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-yellow-400 flex items-center justify-center text-2xl shadow-sm border border-yellow-300/50" id="home-logo-emoji">🇧🇷</div>
         </div>
 
-        <button id="home-admin-btn" onclick="navigate('admin')" class="hidden w-full bg-[#0f2444] text-white py-3 px-4 rounded-2xl font-semibold text-sm flex items-center justify-between shadow-sm active:scale-[0.98] transition">
-          <div class="flex items-center gap-3"><i class="fa-solid fa-shield-halved text-blue-400"></i><span data-pt="Painel Admin" data-es="Panel Admin">Panel Admin</span></div>
-          <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
+        <button id="home-admin-btn" onclick="navigate('admin')" class="hidden w-full bg-[#0f2444] text-white py-3.5 px-5 rounded-2xl font-semibold text-sm flex items-center justify-between shadow-md active:scale-[0.98] transition">
+          <div class="flex items-center gap-3"><i class="fa-solid fa-shield-halved text-blue-400 text-lg"></i><span data-pt="Painel Administrador" data-es="Panel Administrador">Panel Administrador</span></div>
+          <i class="fa-solid fa-arrow-right text-xs opacity-70"></i>
         </button>
 
-        <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
-          <img id="card-meet-bg-img" src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
-          <div class="relative z-10 space-y-2">
+        <div class="relative rounded-3xl overflow-hidden shadow-md bg-slate-900 text-white min-h-[200px] flex flex-col justify-end p-6 border border-slate-800">
+          <img id="card-meet-bg-img" src="https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
+          <div class="relative z-10 space-y-2.5">
             <div class="flex items-center gap-2">
-              <span class="bg-[#16a34a] text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider" data-pt="Aulas Particulares" data-es="Clases 1:1">Aulas</span>
-              <span id="card-meet-price" class="bg-black/30 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/20"></span>
+              <span class="bg-green-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm" data-pt="AULAS 1:1" data-es="CLASES 1:1">CLASES</span>
+              <span id="card-meet-price" class="bg-black/40 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20"></span>
             </div>
-            <h3 class="text-xl font-extrabold leading-tight tracking-tight" data-pt="Aulas via Meet" data-es="Clases vía Meet">Clases</h3>
-            <p class="text-xs text-slate-200" data-pt="Agende seu horário" data-es="Agendá tu horario">Agendá</p>
-            <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/25 backdrop-blur-md border border-white/40 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-white/35 transition">
+            <div>
+              <h3 class="text-2xl font-extrabold leading-tight tracking-tight" data-pt="Aulas via Meet" data-es="Clases vía Meet">Clases vía Meet</h3>
+              <p class="text-xs text-slate-200 mt-1 font-medium" data-pt="Agende seu horário personalizado" data-es="Agendá tu horario personalizado">Agendá tu horario</p>
+            </div>
+            <button onclick="navigate('calendar')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-xs font-bold hover:bg-white/30 transition shadow-sm">
               <span data-pt="Agendar agora" data-es="Agendar ahora">Agendar</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
           </div>
         </div>
 
-        <div class="relative rounded-3xl overflow-hidden shadow-sm bg-slate-900 text-white min-h-[195px] flex flex-col justify-end p-5 border border-slate-100">
-          <img id="card-course-bg-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-65">
-          <div class="relative z-10 space-y-2">
+        <div class="relative rounded-3xl overflow-hidden shadow-md bg-slate-900 text-white min-h-[200px] flex flex-col justify-end p-6 border border-slate-800">
+          <img id="card-course-bg-img" src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-60">
+          <div class="relative z-10 space-y-2.5">
             <div class="flex items-center gap-2">
-              <span class="bg-yellow-400 text-slate-950 text-[11px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider" data-pt="Curso Gravado" data-es="Curso Grabado">Curso</span>
-              <span id="card-course-price" class="bg-black/30 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/20"></span>
+              <span class="bg-yellow-500 text-slate-900 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm" data-pt="CURSO GRAVADO" data-es="CURSO GRABADO">CURSO</span>
+              <span id="card-course-price" class="bg-black/40 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20"></span>
             </div>
-            <h3 class="text-xl font-extrabold leading-tight tracking-tight" data-pt="Curso no seu ritmo" data-es="Curso a tu ritmo">Curso</h3>
-            <p class="text-xs text-slate-200" data-pt="Vídeos + apostilas" data-es="Videos + tareas">Videos</p>
-            <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/25 backdrop-blur-md border border-white/40 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-white/35 transition">
-              <span data-pt="Ver curso" data-es="Ver curso">Ver</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            <div>
+              <h3 class="text-2xl font-extrabold leading-tight tracking-tight" data-pt="Curso no seu ritmo" data-es="Curso a tu ritmo">Curso a tu ritmo</h3>
+              <p class="text-xs text-slate-200 mt-1 font-medium" data-pt="Vídeos, apostilas e provas" data-es="Videos, tareas y evaluaciones">Videos, tareas y evaluaciones</p>
+            </div>
+            <button onclick="navigate('course')" class="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 text-white px-5 py-2.5 rounded-full text-xs font-bold hover:bg-white/30 transition shadow-sm">
+              <span data-pt="Acessar curso" data-es="Ver curso">Ver curso</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 pt-1">
-          <div onclick="navigate('info')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition">
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm mb-3"><i class="fa-solid fa-bell"></i></div>
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div onclick="navigate('info')" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between cursor-pointer hover:bg-slate-50 transition active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-3 shadow-inner"><i class="fa-solid fa-bell"></i></div>
             <h4 class="font-bold text-xs text-slate-900 leading-snug" data-pt="Central de Avisos" data-es="Central de Informaciones">Central</h4>
           </div>
-          <button onclick="openWhatsApp()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition text-left w-full">
-            <div class="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-base mb-3"><i class="fa-brands fa-whatsapp"></i></div>
+          <button onclick="openWhatsApp()" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:bg-slate-50 transition text-left w-full active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center text-lg mb-3 shadow-inner"><i class="fa-brands fa-whatsapp"></i></div>
             <h4 class="font-bold text-xs text-slate-900 leading-snug">Chat WhatsApp</h4>
           </button>
         </div>
@@ -154,317 +164,406 @@
 
       <!-- ABA 2: AGENDAR -->
       <section id="tab-calendar" class="space-y-4 hidden">
-        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-          <div class="flex justify-between items-start">
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+          <div class="flex justify-between items-start border-b border-slate-100 pb-3">
             <div>
-              <h2 class="text-lg font-bold text-slate-900" data-pt="Agendar aulas" data-es="Agendar clases">Agendar</h2>
-              <p class="text-xs text-slate-500" data-pt="Escolha seus horários" data-es="Elegí tus horarios">Elegí</p>
+              <h2 class="text-lg font-extrabold text-slate-900" data-pt="Agendar aulas" data-es="Agendar clases">Agendar</h2>
+              <p class="text-xs text-slate-500 font-medium mt-1" data-pt="Escolha seus horários" data-es="Elegí tus horarios disponibles">Elegí</p>
             </div>
-            <button onclick="clearSelectedSlots()" id="clear-selection-btn" class="hidden text-xs text-red-500 font-bold hover:underline" data-pt="Limpar" data-es="Limpiar">Limpiar</button>
+            <button onclick="clearSelectedSlots()" id="clear-selection-btn" class="hidden text-xs text-red-500 font-bold hover:bg-red-50 px-2 py-1 rounded-lg transition" data-pt="Limpar" data-es="Limpiar">Limpiar</button>
           </div>
 
-          <div id="booking-selection-bar" class="hidden p-4 bg-green-50 border border-green-200 rounded-2xl space-y-3">
-            <div class="flex justify-between items-center text-xs font-bold text-green-950">
+          <div id="booking-selection-bar" class="hidden p-4 bg-green-50 border border-green-200 rounded-2xl space-y-3 shadow-inner">
+            <div class="flex justify-between items-center text-xs font-bold text-green-900">
               <span id="selected-count-label"></span>
-              <span id="selected-total-price" class="text-green-700 font-extrabold text-sm"></span>
+              <span id="selected-total-price" class="text-green-700 font-extrabold text-base"></span>
             </div>
-            <button onclick="openPaymentSection()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2">
-              <span data-pt="Ir para Pagamento" data-es="Ir al Pago">Continuar</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            <button onclick="openPaymentSection()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-2">
+              <span data-pt="Avançar para Pagamento" data-es="Continuar a Confirmar">Continuar</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
           </div>
 
-          <div id="booking-step-payment" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3.5">
-            <div class="flex justify-between items-center">
-              <span class="bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full" data-pt="Passo Final" data-es="Paso Final">Paso</span>
-              <button onclick="closePaymentSection()" class="text-xs text-slate-400 hover:text-slate-600" data-pt="Voltar" data-es="Volver">Volver</button>
+          <div id="booking-step-payment" class="hidden p-5 bg-emerald-50 border border-emerald-200 rounded-3xl space-y-4 shadow-sm">
+            <div class="flex justify-between items-center border-b border-emerald-100 pb-2">
+              <span class="bg-emerald-700 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider" data-pt="Passo Final" data-es="Paso Final">Pago</span>
+              <button onclick="closePaymentSection()" class="text-xs font-bold text-emerald-800 hover:bg-emerald-100 px-2 py-1 rounded-lg transition" data-pt="Voltar" data-es="Volver">Volver</button>
             </div>
-            <div class="bg-white p-3.5 rounded-xl border border-emerald-100 shadow-sm text-xs">
-              <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="font-bold">Total:</span><span id="payment-summary-total" class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md"></span></div>
-              <div id="payment-instructions" class="pt-2 text-slate-700 space-y-1"></div>
+            
+            <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm text-xs">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2"><span class="font-bold text-slate-600" data-pt="Total a pagar:" data-es="Total a transferir:">Total:</span><span id="payment-summary-total" class="font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-sm"></span></div>
+              <div id="payment-instructions" class="text-slate-800 space-y-1 text-[13px] leading-relaxed"></div>
+              <div id="payment-slots-summary" class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 font-medium space-y-1"></div>
             </div>
-            <p class="text-[11px] font-bold text-slate-700" data-pt="Envie o comprovante abaixo:" data-es="Subí el comprobante abajo:"></p>
-            <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-white p-2 rounded-xl border border-emerald-200 outline-none">
-            <button onclick="submitMultipleBookingsWithReceipt()" id="confirm-booking-btn" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-sm" data-pt="Confirmar Reserva" data-es="Confirmar Reserva">Confirmar</button>
-            <div class="relative flex py-1 items-center"><div class="flex-grow border-t border-emerald-200"></div></div>
-            <button onclick="sendMultipleReceiptViaWhatsApp()" class="w-full bg-[#25D366] text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-sm"></i> <span data-pt="Enviar por WhatsApp" data-es="Enviar por WhatsApp">WhatsApp</span></button>
+
+            <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm space-y-3">
+              <p class="text-[11px] font-bold text-slate-800" data-pt="1. Envie o comprovante em PDF ou Foto:" data-es="1. Subí tu comprobante aquí (PDF o Foto):"></p>
+              <input id="payment-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200 outline-none">
+              <button onclick="submitMultipleBookingsWithReceipt()" id="confirm-booking-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition" data-pt="Confirmar Reserva" data-es="Confirmar y Guardar Reserva">Confirmar</button>
+              
+              <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink mx-3 text-[10px] text-slate-400 font-bold uppercase" data-pt="OU" data-es="O">O</span><div class="flex-grow border-t border-slate-200"></div></div>
+              
+              <p class="text-[11px] font-bold text-slate-800 text-center" data-pt="2. Ou envie pelo WhatsApp:" data-es="2. O envialo por WhatsApp:"></p>
+              <button onclick="sendMultipleReceiptViaWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20ba56] text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition"><i class="fa-brands fa-whatsapp text-base"></i> <span data-pt="Enviar comprovante no WhatsApp" data-es="Enviar captura a WhatsApp">WhatsApp</span></button>
+            </div>
           </div>
 
-          <div id="slots-container" class="space-y-2.5 pt-2"></div>
+          <div id="slots-container" class="space-y-3 pt-2"></div>
         </div>
       </section>
 
-      <!-- ABA 3: CURSO GRAVADO (TRILHA E VÍDEOS) -->
+      <!-- ABA 3: CURSO GRAVADO -->
       <section id="tab-course" class="space-y-4 hidden">
-        <div id="course-locked-screen" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
-          <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 text-2xl flex items-center justify-center mx-auto shadow-sm"><i class="fa-solid fa-lock"></i></div>
-          <h3 class="font-bold text-base text-slate-900" data-pt="Curso Bloqueado" data-es="Curso Bloqueado">Bloqueado</h3>
-          <div class="bg-slate-50 p-4 rounded-2xl border text-left text-xs space-y-2" id="locked-pay-info"></div>
-          <button onclick="openSyllabusModal()" class="w-full bg-slate-100 text-slate-800 font-bold py-2.5 rounded-xl text-xs" data-pt="Ver Programa" data-es="Ver Programa">Ver Programa</button>
-          <button onclick="requestCourseAccessWhatsApp()" class="w-full bg-[#25D366] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i> <span data-pt="Enviar comprovante" data-es="Enviar comprobante">Enviar</span></button>
+        
+        <div id="course-locked-screen" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-md text-center space-y-5">
+          <div class="w-20 h-20 rounded-full bg-amber-50 text-amber-500 text-3xl flex items-center justify-center mx-auto shadow-inner border border-amber-100"><i class="fa-solid fa-lock"></i></div>
+          <div class="space-y-1.5">
+            <h3 class="font-extrabold text-lg text-slate-900" data-pt="Curso Bloqueado" data-es="Curso Bloqueado">Bloqueado</h3>
+            <p class="text-xs text-slate-500 font-medium leading-relaxed px-4" data-pt="Para acessar todas as aulas por nível, confirme sua matrícula." data-es="Para acceder a todas las lecciones, confirmá tu inscripción:">Para acceder...</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left text-xs space-y-2 shadow-sm" id="locked-pay-info"></div>
+          <div class="space-y-2.5">
+            <button onclick="openSyllabusModal()" class="w-full bg-white border border-slate-200 text-slate-800 font-bold py-3 rounded-xl text-xs hover:bg-slate-50 transition shadow-sm" data-pt="Ver Programa de Aulas" data-es="Ver Contenido Programático">Ver Programa</button>
+            <button onclick="requestCourseAccessWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20ba56] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition"><i class="fa-brands fa-whatsapp text-base"></i> <span data-pt="Enviar comprovante para liberar" data-es="Enviar comprobante por WhatsApp">Enviar</span></button>
+          </div>
         </div>
 
-        <div id="course-unlocked-content" class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-          <div class="flex justify-between items-start">
+        <div id="course-unlocked-content" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+          <div class="flex justify-between items-start border-b border-slate-100 pb-3">
             <div>
-              <h2 class="text-lg font-bold text-slate-900" data-pt="Curso Gravado" data-es="Curso Grabado">Curso</h2>
-              <p class="text-xs text-slate-500" data-pt="Aprenda no seu ritmo" data-es="A tu ritmo">Ritmo</p>
+              <h2 class="text-lg font-extrabold text-slate-900" data-pt="Curso Gravado" data-es="Curso Grabado">Curso</h2>
+              <p class="text-xs text-slate-500 font-medium mt-0.5" data-pt="Aprenda no seu ritmo" data-es="Aprendé a tu propio ritmo">Ritmo</p>
             </div>
-            <button onclick="openSyllabusModal()" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl">Programa</button>
+            <button onclick="openSyllabusModal()" class="text-[11px] font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition" data-pt="Programa" data-es="Programa">Programa</button>
           </div>
 
-          <div id="course-trial-banner" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-1">
-            <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-gift text-amber-600"></i> <span data-pt="Aula de Teste" data-es="Aula de Prueba">Teste</span></div>
+          <div id="course-trial-banner" class="hidden p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl text-xs text-amber-900 shadow-sm">
+            <div class="font-extrabold flex items-center gap-2 mb-1 text-sm"><i class="fa-solid fa-gift text-amber-600"></i> <span data-pt="Aula de Teste Grátis" data-es="Aula de Prueba Habilitada">Teste</span></div>
+            <p class="text-[11px] font-medium opacity-90" data-pt="Aproveite esta aula demonstrativa!" data-es="Tenés acceso libre a esta lección.">Aproveite!</p>
           </div>
 
-          <div class="bg-slate-900 text-white p-3.5 rounded-2xl space-y-1.5 shadow-sm">
-            <div class="flex justify-between items-center text-xs font-semibold"><span data-pt="Seu progresso" data-es="Tu progreso">Progreso</span><span id="course-progress-text" class="text-emerald-400 font-bold"></span></div>
-            <div class="w-full bg-slate-800 rounded-full h-2"><div id="course-progress-bar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-2 rounded-full" style="width: 0%"></div></div>
+          <div class="bg-slate-900 text-white p-4 rounded-2xl space-y-2 shadow-md">
+            <div class="flex justify-between items-center text-xs font-bold"><span data-pt="Seu progresso:" data-es="Tu progreso:">Progreso</span><span id="course-progress-text" class="text-green-400"></span></div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden"><div id="course-progress-bar" class="bg-gradient-to-r from-green-500 to-emerald-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
           </div>
 
-          <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none" id="course-levels-nav"></div>
-          <div id="lessons-container" class="space-y-4 pt-1"></div>
+          <div class="flex gap-2 overflow-x-auto pb-2 text-[11px] font-bold scrollbar-none" id="course-levels-nav"></div>
+          
+          <div id="lessons-container" class="space-y-4 pt-2"></div>
         </div>
       </section>
 
       <!-- ABA 4: TAREFAS E PROVAS -->
       <section id="tab-tasks" class="space-y-4 hidden">
-        <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-bold">
-          <button onclick="switchTasksTab('materials')" id="tab-btn-tasks-mat" class="flex-1 py-2 rounded-lg bg-green-600 text-white shadow-sm transition" data-pt="Apostilas" data-es="Apostilas">Apostilas</button>
-          <button onclick="switchTasksTab('quizzes')" id="tab-btn-tasks-quiz" class="flex-1 py-2 rounded-lg text-slate-600 transition" data-pt="Provas" data-es="Evaluaciones">Provas</button>
+        <div class="bg-slate-100 p-1.5 rounded-xl flex text-xs font-bold shadow-inner">
+          <button onclick="switchTasksTab('materials')" id="tab-btn-tasks-mat" class="flex-1 py-2.5 rounded-lg bg-green-600 text-white shadow-md transition" data-pt="Apostilas & Materiais" data-es="Tareas & Apostilas">Apostilas</button>
+          <button onclick="switchTasksTab('quizzes')" id="tab-btn-tasks-quiz" class="flex-1 py-2.5 rounded-lg text-slate-500 hover:text-slate-800 transition" data-pt="Provas Online" data-es="Evaluaciones Online">Provas</button>
         </div>
 
         <div id="tasks-sub-materials" class="space-y-3"><div id="student-assignments-list" class="space-y-3"></div></div>
 
         <div id="tasks-sub-quizzes" class="space-y-3 hidden">
           <div id="student-quizzes-list" class="space-y-3"></div>
-          <div id="active-quiz-container" class="hidden bg-white p-5 rounded-3xl border shadow-sm space-y-4">
-            <div class="flex justify-between items-start border-b pb-3"><div><h3 id="active-quiz-title" class="font-bold text-sm text-slate-900"></h3><p id="active-quiz-desc" class="text-xs text-slate-500"></p></div><button onclick="closeActiveQuiz()" class="text-xs text-slate-400" data-pt="Fechar" data-es="Cerrar">Cerrar</button></div>
-            <div id="active-quiz-questions" class="space-y-4 text-xs"></div>
-            <button onclick="submitQuizAnswers()" class="w-full bg-green-600 text-white font-bold py-2.5 rounded-xl text-xs" data-pt="Finalizar" data-es="Finalizar">Finalizar</button>
+          
+          <div id="active-quiz-container" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-md space-y-5">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div><h3 id="active-quiz-title" class="font-extrabold text-base text-slate-900"></h3><p id="active-quiz-desc" class="text-xs text-slate-500 mt-1 font-medium"></p></div>
+              <button onclick="closeActiveQuiz()" class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded hover:bg-slate-100 transition" data-pt="Cancelar" data-es="Cancelar">Cancelar</button>
+            </div>
+            <div id="active-quiz-questions" class="space-y-5 text-sm"></div>
+            <button onclick="submitQuizAnswers()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-md transition" data-pt="Finalizar Prova e Ver Nota" data-es="Finalizar y Calificar Examen">Finalizar</button>
           </div>
 
-          <div id="quiz-review-container" class="hidden bg-white p-5 rounded-3xl border shadow-sm space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-              <div><h3 class="font-bold text-sm" data-pt="Resultado" data-es="Resultado">Resultado</h3><p id="quiz-review-score-badge" class="mt-0.5"></p></div>
-              <button onclick="closeQuizReview()" class="text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-xl" data-pt="Voltar" data-es="Volver">Volver</button>
+          <div id="quiz-review-container" class="hidden bg-white p-6 rounded-3xl border border-slate-100 shadow-md space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div><h3 class="font-extrabold text-base" data-pt="Resultado Oficial" data-es="Resultado de la Evaluación">Resultado</h3><p id="quiz-review-score-badge" class="mt-1"></p></div>
+              <button onclick="closeQuizReview()" class="text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition" data-pt="Voltar" data-es="Volver">Volver</button>
             </div>
-            <div id="quiz-review-feedback-box" class="p-3 rounded-2xl text-xs space-y-1"></div>
-            <div id="quiz-review-questions-list" class="space-y-3 text-xs"></div>
+            <div id="quiz-review-feedback-box" class="p-4 rounded-2xl text-xs space-y-2 shadow-sm"></div>
+            <div class="pt-2"><p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3" data-pt="Correção Pedagógica:" data-es="Revisión Pedagógica:"></p><div id="quiz-review-questions-list" class="space-y-3 text-sm"></div></div>
           </div>
         </div>
       </section>
 
-      <!-- ABA 5: CENTRAL DE INFORMAÇÕES -->
+      <!-- ABA 5: CENTRAL DE AVISOS -->
       <section id="tab-info" class="space-y-4 hidden">
-        <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-4">
-          <h2 class="text-lg font-bold text-slate-900" data-pt="Central de Avisos" data-es="Central de Avisos">Avisos</h2>
-          <div class="bg-slate-50 p-3.5 rounded-2xl border space-y-2">
-            <textarea id="student-msg-input" rows="2" class="w-full border rounded-xl px-3 py-2 text-xs outline-none" data-pt="Escreva sua mensagem..." data-es="Escribí tu consulta..."></textarea>
-            <button onclick="studentSendMessage()" class="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold" data-pt="Enviar" data-es="Enviar">Enviar</button>
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+          <div class="border-b border-slate-100 pb-3">
+            <h2 class="text-lg font-extrabold text-slate-900" data-pt="Central de Comunicação" data-es="Central de Informaciones">Central</h2>
+            <p class="text-xs text-slate-500 font-medium mt-1" data-pt="Avisos e mensagens diretas" data-es="Avisos y mensajes de tu profesor">Avisos</p>
           </div>
-          <div id="info-center-list" class="space-y-2.5 pt-1"></div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 shadow-inner">
+            <label class="text-[11px] font-bold text-slate-700 ml-1" data-pt="Mande uma mensagem pro Renan:" data-es="Enviar duda o mensaje a Renan:">Mensagem:</label>
+            <textarea id="student-msg-input" rows="3" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-green-500 bg-white shadow-sm" data-pt="Escreva aqui..." data-es="Escribí tu consulta acá..."></textarea>
+            <button onclick="studentSendMessage()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2" data-pt="Enviar Mensagem" data-es="Enviar Consulta">Enviar</button>
+          </div>
+          <div id="info-center-list" class="space-y-3 pt-2"></div>
         </div>
       </section>
 
       <!-- ABA 6: PERFIL -->
       <section id="tab-profile" class="space-y-4 hidden">
-        <div class="text-center py-4 space-y-2">
-          <div id="profile-avatar" class="w-16 h-16 rounded-full bg-yellow-400 text-slate-900 text-2xl font-bold flex items-center justify-center mx-auto shadow-sm"></div>
-          <h3 id="profile-name" class="font-bold text-base text-slate-900"></h3>
-          <p id="profile-email" class="text-xs text-slate-500"></p>
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-3">
+          <div id="profile-avatar" class="w-20 h-20 rounded-full bg-yellow-400 text-slate-900 text-3xl font-extrabold flex items-center justify-center mx-auto shadow-md border-4 border-white"></div>
+          <div><h3 id="profile-name" class="font-extrabold text-lg text-slate-900"></h3><p id="profile-email" class="text-xs text-slate-500 font-medium"></p></div>
+          <span id="profile-badge" class="inline-block bg-slate-100 text-slate-600 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200"></span>
         </div>
-        <div class="bg-white rounded-3xl border shadow-sm divide-y overflow-hidden text-sm">
-          <button onclick="navigate('calendar')" class="w-full px-4 py-3.5 flex justify-between hover:bg-slate-50"><span data-pt="Reservas" data-es="Reservas">Reservas</span><i class="fa-solid fa-chevron-right text-xs"></i></button>
-          <button onclick="navigate('tasks')" class="w-full px-4 py-3.5 flex justify-between hover:bg-slate-50"><span data-pt="Tarefas" data-es="Tareas">Tareas</span><i class="fa-solid fa-chevron-right text-xs"></i></button>
-          <button id="profile-admin-btn" onclick="navigate('admin')" class="hidden w-full px-4 py-3.5 flex justify-between hover:bg-slate-50 text-blue-600"><span data-pt="Painel Admin" data-es="Admin">Admin</span><i class="fa-solid fa-shield-halved text-xs"></i></button>
-          <button onclick="handleLogout()" class="w-full px-4 py-3.5 flex justify-between hover:bg-slate-50 text-red-500"><span data-pt="Sair" data-es="Salir">Salir</span><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden text-sm font-bold">
+          <button onclick="navigate('calendar')" class="w-full px-5 py-4 flex justify-between items-center hover:bg-slate-50 transition"><div class="flex items-center gap-3"><i class="fa-regular fa-calendar w-5 text-slate-400 text-lg"></i> <span data-pt="Minhas Reservas" data-es="Mis reservas">Reservas</span></div><i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i></button>
+          <button onclick="navigate('tasks')" class="w-full px-5 py-4 flex justify-between items-center hover:bg-slate-50 transition"><div class="flex items-center gap-3"><i class="fa-solid fa-clipboard-list w-5 text-slate-400 text-lg"></i> <span data-pt="Tarefas e Provas" data-es="Tareas y Evaluaciones">Tareas</span></div><i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i></button>
+          <button onclick="navigate('rules')" class="w-full px-5 py-4 flex justify-between items-center hover:bg-slate-50 transition"><div class="flex items-center gap-3"><i class="fa-solid fa-book-open-reader w-5 text-emerald-500 text-lg"></i> <span data-pt="Regras do Aluno" data-es="Manual del Alumno">Regras</span></div><i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i></button>
+          <button id="profile-admin-btn" onclick="navigate('admin')" class="hidden w-full px-5 py-4 flex justify-between items-center hover:bg-slate-50 transition text-blue-700"><div class="flex items-center gap-3"><i class="fa-solid fa-shield-halved w-5 text-lg"></i> <span data-pt="Painel Admin" data-es="Panel Admin">Admin</span></div><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i></button>
+          <button onclick="handleLogout()" class="w-full px-5 py-4 flex justify-between items-center hover:bg-red-50 transition text-red-600"><div class="flex items-center gap-3"><i class="fa-solid fa-arrow-right-from-bracket w-5 text-lg"></i> <span data-pt="Sair da Conta" data-es="Cerrar sesión">Salir</span></div><i class="fa-solid fa-chevron-right text-[10px] opacity-50"></i></button>
         </div>
       </section>
 
-      <!-- ABA 7: ADMIN -->
+      <!-- ABA 7: REGRAS -->
+      <section id="tab-rules" class="space-y-4 hidden">
+        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 border-l-4 border-emerald-500 pl-3"><h3 class="font-extrabold text-sm text-slate-900 uppercase tracking-wider" data-pt="Faltas e Remarcações" data-es="Asistencia y Cambios">Regras</h3></div>
+            <div class="space-y-2.5 text-xs text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-200 leading-relaxed font-medium">
+              <div class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-xs font-bold">✕</span><div><b class="text-slate-900" data-pt="Faltas:" data-es="Faltas:">Faltas:</b> <span data-pt="Não justificadas com atestado não podem ser repostas." data-es="Injustificadas no se recuperan (salvo certificado médico).">Desc</span></div></div>
+              <div class="flex items-start gap-3"><span class="w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 text-xs font-bold">↻</span><div><b class="text-slate-900" data-pt="Remarcação:" data-es="Cambios:">Cambios:</b> <span data-pt="Avisar com no mínimo 48 horas de antecedência." data-es="Solicitar con un mínimo de 48 horas previo a la clase.">Desc</span></div></div>
+            </div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-2 border-l-4 border-blue-800 pl-3"><h3 class="font-extrabold text-sm text-slate-900 uppercase tracking-wider" data-pt="Pontualidade" data-es="Reglas de Puntualidad">Puntualidad</h3></div>
+            <div class="rounded-2xl border border-slate-200 overflow-hidden text-xs font-medium">
+              <div class="bg-[#0f2444] text-white p-3.5 flex justify-between font-bold text-[11px] uppercase tracking-wider"><span class="w-1/2" data-pt="Atraso" data-es="Espera">Espera</span><span class="w-1/2" data-pt="Consequência" data-es="Condición">Cond</span></div>
+              <div class="divide-y divide-slate-100 bg-slate-50">
+                <div class="p-3.5 flex justify-between items-center"><span class="w-1/2 font-extrabold text-slate-800" data-pt="Até 15 Min" data-es="Hasta 15 Min">15</span><span class="w-1/2 text-slate-600" data-pt="Tolerância máxima." data-es="Tolerancia permitida.">Desc</span></div>
+                <div class="p-3.5 flex justify-between items-center bg-white"><span class="w-1/2 font-extrabold text-red-600" data-pt="Mais de 15 Min" data-es="Más de 15 Min">15+</span><span class="w-1/2 text-slate-600" data-pt="Aula cancelada sem reposição." data-es="Se dicta solo el tiempo restante.">Desc</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA ADMIN -->
       <section id="tab-admin" class="space-y-4 hidden">
-        <!-- SELETOR CAMALEÃO DE MUNDO -->
-        <div class="bg-slate-900 p-3 rounded-2xl flex justify-center gap-2 mb-4 shadow-sm">
-          <button onclick="switchAdminCourse('pt')" id="admin-toggle-pt" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white transition">🇧🇷 Gerenciando: Português</button>
-          <button onclick="switchAdminCourse('es')" id="admin-toggle-es" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-700 text-slate-300 transition">🇦🇷 Gerenciando: Espanhol</button>
+        
+        <!-- SELETOR DE MUNDO (O CAMALEÃO) -->
+        <div class="bg-[#0f2444] p-2 rounded-2xl flex justify-center gap-1 shadow-lg mb-5">
+          <button onclick="switchAdminCourse('pt')" id="admin-toggle-pt" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-green-500 text-white transition shadow-sm border border-green-400">🇧🇷 Admin Português</button>
+          <button onclick="switchAdminCourse('es')" id="admin-toggle-es" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-transparent text-slate-300 hover:text-white transition">🇦🇷 Admin Espanhol</button>
         </div>
 
-        <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-          <button onclick="showAdminSub('students')" id="btn-adm-students" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white">Alunos</button>
-          <button onclick="showAdminSub('finance')" id="btn-adm-finance" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">💰 Caixa</button>
-          <button onclick="showAdminSub('quizzes')" id="btn-adm-quizzes" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">📝 Provas</button>
-          <button onclick="showAdminSub('videos')" id="btn-adm-videos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Vídeos</button>
-          <button onclick="showAdminSub('slots')" id="btn-adm-slots" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Agenda</button>
-          <button onclick="showAdminSub('settings')" id="btn-adm-settings" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Config</button>
-          <button onclick="showAdminSub('broadcast')" id="btn-adm-broadcast" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Chat</button>
+        <div class="flex gap-2 border-b border-slate-200 pb-3 overflow-x-auto scrollbar-none">
+          <button onclick="showAdminSub('students')" id="btn-adm-students" class="px-4 py-2 rounded-xl text-[11px] font-extrabold bg-slate-900 text-white uppercase tracking-wider whitespace-nowrap shadow-sm">Alunos</button>
+          <button onclick="showAdminSub('finance')" id="btn-adm-finance" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">💰 Caixa</button>
+          <button onclick="showAdminSub('quizzes')" id="btn-adm-quizzes" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">📝 Provas</button>
+          <button onclick="showAdminSub('videos')" id="btn-adm-videos" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">Vídeos</button>
+          <button onclick="showAdminSub('slots')" id="btn-adm-slots" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">Agenda</button>
+          <button onclick="showAdminSub('broadcast')" id="btn-adm-broadcast" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">Chat</button>
+          <button onclick="showAdminSub('settings')" id="btn-adm-settings" class="px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm">Config</button>
         </div>
 
+        <!-- SUB: ALUNOS -->
         <div id="adm-sec-students" class="space-y-4">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm">
-            <div class="flex justify-between items-center mb-3">
-              <h3 class="font-bold text-sm">Alunos Matriculados (Universo <span id="adm-lbl-univ"></span>)</h3>
-              <button onclick="exportStudentsToPDFWithFilter()" class="bg-[#0f2444] text-white px-3 py-1 rounded-lg text-xs">PDF</button>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+              <div><h3 class="font-extrabold text-base text-slate-900">Alunos Matriculados</h3><p class="text-[11px] font-bold text-emerald-600 uppercase mt-0.5">Escola: <span id="adm-lbl-univ"></span></p></div>
+              <div class="flex items-center gap-2">
+                <select id="pdf-filter-select" class="text-[10px] font-bold border border-slate-200 bg-slate-50 rounded-lg px-2 py-1.5 outline-none"><option value="all">Todos</option><option value="course">Curso</option><option value="meet">Meet</option></select>
+                <button onclick="exportStudentsToPDFWithFilter()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+              </div>
             </div>
-            <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px] font-bold">
-              <button onclick="filterStudentsView('all')" id="btn-filter-all" class="px-3 py-1 rounded-xl bg-slate-900 text-white">Todos</button>
-              <button onclick="filterStudentsView('course')" id="btn-filter-course" class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600">🟡 Curso</button>
-              <button onclick="filterStudentsView('meet')" id="btn-filter-meet" class="px-3 py-1 rounded-xl bg-slate-100 text-slate-600">🟢 Meet</button>
+            
+            <div class="flex gap-1.5 overflow-x-auto pb-2 text-[10px] font-bold mb-2 scrollbar-none">
+              <button onclick="filterStudentsView('all')" id="btn-filter-all" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white shadow-sm transition">Todos</button>
+              <button onclick="filterStudentsView('course')" id="btn-filter-course" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm transition">🟡 Curso Grabado</button>
+              <button onclick="filterStudentsView('meet')" id="btn-filter-meet" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm transition">🟢 Clases Meet</button>
+              <button onclick="filterStudentsView('none')" id="btn-filter-none" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm transition">⚪ Sin Plan</button>
             </div>
-            <div id="admin-students-list" class="space-y-3 pt-3 text-xs"></div>
+            <div id="admin-students-list" class="space-y-3 pt-2 text-xs"></div>
           </div>
 
           <!-- Modais Admin -->
-          <div id="receipt-upload-modal" class="hidden bg-white p-5 rounded-3xl border shadow-xl space-y-3">
-            <div class="flex justify-between items-start border-b pb-2"><div><h3 class="font-bold text-sm">Subir Comprobante</h3><p id="receipt-modal-student-name" class="text-xs text-slate-500"></p></div><button onclick="closeReceiptUploadModal()" class="text-xs text-slate-400">Cerrar</button></div>
-            <div class="space-y-2.5 text-xs">
-              <select id="receipt-modal-type" class="w-full border rounded-xl px-3 py-2 outline-none"><option value="curso_completo">Pago de Curso Grabado</option><option value="clase_meet">Pago de Clase Meet</option></select>
-              <input id="receipt-modal-note" type="text" placeholder="Nota opcional..." class="w-full border rounded-xl px-3 py-2 outline-none">
-              <input id="receipt-modal-file" type="file" accept="image/*,.pdf" class="w-full border rounded-xl p-2 outline-none bg-slate-50">
-              <button onclick="submitStudentReceiptWithJustification()" id="btn-save-receipt" class="w-full bg-green-600 text-white py-2.5 rounded-xl font-bold">Guardar</button>
+          <div id="receipt-upload-modal" class="hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-2xl space-y-4">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3"><div><h3 class="font-extrabold text-sm text-slate-900">Subir Comprobante</h3><p id="receipt-modal-student-name" class="text-[11px] text-slate-500 font-bold mt-1"></p></div><button onclick="closeReceiptUploadModal()" class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">Cerrar</button></div>
+            <div class="space-y-3 text-xs font-medium">
+              <label class="block"><span class="mb-1 block">Motivo:</span><select id="receipt-modal-type" class="w-full border rounded-xl px-3 py-2 outline-none bg-white focus:border-green-500"><option value="curso_completo">Pago Curso Grabado</option><option value="clase_meet">Pago Clase Meet</option></select></label>
+              <label class="block"><span class="mb-1 block">Nota Opcional:</span><input id="receipt-modal-note" type="text" placeholder="Detalles..." class="w-full border rounded-xl px-3 py-2 outline-none focus:border-green-500"></label>
+              <label class="block"><span class="mb-1 block">Archivo (Foto/PDF):</span><input id="receipt-modal-file" type="file" accept="image/*,.pdf" class="w-full border rounded-xl p-2 outline-none bg-slate-50 text-[11px]"></label>
+              <button onclick="submitStudentReceiptWithJustification()" id="btn-save-receipt" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold shadow-md transition mt-2">Guardar Pago</button>
             </div>
           </div>
 
-          <div id="student-detail-modal" class="hidden bg-white p-5 rounded-3xl border shadow-lg space-y-4">
-            <div class="flex justify-between items-start border-b pb-2"><div><h3 id="modal-student-name" class="font-bold text-sm"></h3><p id="modal-student-email" class="text-xs text-slate-500"></p></div><button onclick="closeStudentDetailModal()" class="text-xs text-slate-400">Cerrar</button></div>
-            <div class="space-y-2 text-xs">
-              <div class="p-3 bg-slate-50 rounded-xl border"><h4 class="font-bold">Planes:</h4><p id="modal-student-plans"></p></div>
-              <div class="p-3 bg-slate-50 rounded-xl border"><h4 class="font-bold">Comprobantes:</h4><div id="modal-student-receipts-list"></div></div>
-              <div class="p-3 bg-slate-50 rounded-xl border"><h4 class="font-bold">Aulas Concluidas:</h4><div id="modal-student-lessons-done"></div></div>
-              <div class="p-3 bg-slate-50 rounded-xl border"><h4 class="font-bold">Exámenes:</h4><div id="modal-student-quizzes-detail" class="space-y-2"></div></div>
+          <div id="student-detail-modal" class="hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-3"><div><h3 id="modal-student-name" class="font-extrabold text-base text-slate-900"></h3><p id="modal-student-email" class="text-[11px] text-slate-500 font-bold"></p></div><button onclick="closeStudentDetailModal()" class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">Cerrar</button></div>
+            <div class="space-y-3 text-xs">
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100"><h4 class="font-extrabold mb-1">Planes Contratados:</h4><div id="modal-student-plans" class="font-medium text-slate-600"></div></div>
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100"><h4 class="font-extrabold mb-1">Comprobantes:</h4><div id="modal-student-receipts-list" class="space-y-1.5 font-medium text-slate-600"></div></div>
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100"><h4 class="font-extrabold mb-1">Aulas del Curso Vistas:</h4><div id="modal-student-lessons-done" class="font-medium text-slate-600"></div></div>
+              <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100"><h4 class="font-extrabold mb-2">Exámenes Realizados:</h4><div id="modal-student-quizzes-detail" class="space-y-2.5"></div></div>
             </div>
           </div>
         </div>
 
+        <!-- SUB: FATURAMENTO E CAIXA COM SENHA -->
         <div id="adm-sec-finance" class="space-y-4 hidden">
-          <div id="finance-lock-screen" class="bg-white p-6 rounded-3xl border text-center space-y-4">
-            <div class="w-14 h-14 rounded-2xl bg-slate-900 text-yellow-400 text-2xl flex items-center justify-center mx-auto shadow-sm"><i class="fa-solid fa-lock"></i></div>
-            <h3 class="font-bold">Control de Caja Protegido</h3>
-            <input id="finance-admin-pass" type="password" placeholder="Tu contraseña de admin" class="w-full max-w-xs mx-auto border rounded-xl px-3 py-2 text-xs outline-none block">
-            <button onclick="unlockFinanceSection()" class="w-full max-w-xs mx-auto bg-slate-900 text-white py-2.5 rounded-xl text-xs font-bold block">Desbloquear</button>
+          <div id="finance-lock-screen" class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm text-center space-y-5">
+            <div class="w-16 h-16 rounded-full bg-slate-900 text-yellow-400 text-2xl flex items-center justify-center mx-auto shadow-inner"><i class="fa-solid fa-lock"></i></div>
+            <div><h3 class="font-extrabold text-lg text-slate-900">Área Financiera Protegida</h3><p class="text-xs text-slate-500 font-medium mt-1">Por seguridad, confirmá tu contraseña.</p></div>
+            <div class="max-w-xs mx-auto space-y-2.5">
+              <input id="finance-admin-pass" type="password" placeholder="Contraseña..." class="w-full border border-slate-300 rounded-xl px-4 py-3 text-xs outline-none focus:border-slate-900 text-center font-bold tracking-widest shadow-sm">
+              <button onclick="unlockFinanceSection()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white py-3 rounded-xl text-xs font-bold transition shadow-md">Desbloquear Faturamento</button>
+            </div>
           </div>
+
           <div id="finance-unlocked-content" class="hidden space-y-4">
-            <div class="grid grid-cols-2 gap-2.5">
-              <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-sm"><span class="text-[10px] font-bold">Saldo em Pesos (ARS)</span><h4 id="fin-bal-ars" class="text-xl font-extrabold">$0</h4></div>
-              <div class="bg-blue-600 text-white p-4 rounded-2xl shadow-sm"><span class="text-[10px] font-bold">Saldo em Reais (BRL)</span><h4 id="fin-bal-brl" class="text-xl font-extrabold">R$0</h4></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-emerald-600 text-white p-5 rounded-3xl shadow-md border border-emerald-500"><span class="text-[10px] font-extrabold uppercase tracking-widest opacity-90">Saldo ARS (Pesos)</span><h4 id="fin-bal-ars" class="text-2xl font-black mt-1">$0</h4><p class="text-[9px] font-medium opacity-80 mt-1">Escuela Portugués</p></div>
+              <div class="bg-blue-600 text-white p-5 rounded-3xl shadow-md border border-blue-500"><span class="text-[10px] font-extrabold uppercase tracking-widest opacity-90">Saldo BRL (Reais)</span><h4 id="fin-bal-brl" class="text-2xl font-black mt-1">R$0</h4><p class="text-[9px] font-medium opacity-80 mt-1">Escuela Español</p></div>
             </div>
-            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-              <h4 class="font-bold text-xs">Generar Informe de Faturamento (PDF)</h4>
-              <select id="fin-report-mode" class="w-full border rounded-xl px-2.5 py-1.5 text-xs outline-none"><option value="detailed">📋 Analítico Detallado (Con nombre)</option><option value="summary">📊 Resumido Sintético</option></select>
-              <select id="fin-report-period" class="w-full border rounded-xl px-2.5 py-1.5 text-xs outline-none" onchange="document.getElementById('fin-custom-dates-row').classList.toggle('hidden', this.value!=='custom')"><option value="all_time">Todo el Historial</option><option value="current_month">Mes Actual</option><option value="custom">Fechas Manuales</option></select>
-              <div id="fin-custom-dates-row" class="hidden grid grid-cols-2 gap-2"><input id="fin-report-start" type="date" class="border rounded-xl px-2 text-xs"><input id="fin-report-end" type="date" class="border rounded-xl px-2 text-xs"></div>
-              <button onclick="generateFinancePDFReport()" class="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold">Descargar PDF</button>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-              <h4 class="font-bold text-xs">Registrar Salida / Despesa</h4>
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <input id="fin-exp-amount" type="number" placeholder="Monto" class="border rounded-xl px-2 py-1.5 outline-none">
-                <select id="fin-exp-currency" class="border rounded-xl px-2 py-1.5 outline-none"><option value="ARS">Pesos (ARS)</option><option value="BRL">Reais (BRL)</option></select>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-3"><h4 class="font-extrabold text-sm text-slate-900">Generar Informe PDF</h4><i class="fa-solid fa-file-pdf text-red-500 text-lg"></i></div>
+              <div class="space-y-3 text-xs font-bold text-slate-700">
+                <label class="block"><span class="mb-1 block">Modalidad:</span><select id="fin-report-mode" class="w-full border rounded-xl px-3 py-2.5 bg-slate-50 outline-none"><option value="detailed">📋 Analítico (Con nombre alumno y curso)</option><option value="summary">📊 Resumido (Solo totales)</option></select></label>
+                <label class="block"><span class="mb-1 block">Período:</span><select id="fin-report-period" class="w-full border rounded-xl px-3 py-2.5 bg-slate-50 outline-none" onchange="document.getElementById('fin-custom-dates-row').classList.toggle('hidden', this.value!=='custom')"><option value="all_time">Todo el Historial</option><option value="current_month">Mes Actual</option><option value="custom">Rango de Fechas</option></select></label>
+                <div id="fin-custom-dates-row" class="hidden grid grid-cols-2 gap-2"><input id="fin-report-start" type="date" class="border rounded-xl px-3 py-2 bg-slate-50"><input id="fin-report-end" type="date" class="border rounded-xl px-3 py-2 bg-slate-50"></div>
+                <button onclick="generateFinancePDFReport()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white py-3 rounded-xl font-bold shadow-md transition">Generar y Descargar PDF</button>
               </div>
-              <input id="fin-exp-desc" type="text" placeholder="Justificación..." class="w-full border rounded-xl px-2 py-1.5 text-xs outline-none">
-              <button onclick="registerCashExpense()" class="w-full bg-red-600 text-white py-2 rounded-xl text-xs font-bold">Registrar Salida</button>
             </div>
-            <div class="bg-white p-4 rounded-2xl border shadow-sm"><h4 class="font-bold text-xs mb-2">Movimientos Recientes:</h4><div id="fin-cashflow-list" class="space-y-2 text-xs"></div></div>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div class="border-b border-slate-100 pb-3"><h4 class="font-extrabold text-sm text-slate-900">Registrar Salida / Retiro</h4><p class="text-[10px] text-slate-500 mt-0.5">Controlá tus gastos o retiros personales.</p></div>
+              <div class="space-y-3 text-xs font-bold text-slate-700">
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="block"><span class="mb-1 block">Monto:</span><input id="fin-exp-amount" type="number" placeholder="Ej: 5000" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"></label>
+                  <label class="block"><span class="mb-1 block">Moneda:</span><select id="fin-exp-currency" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"><option value="ARS">Pesos (ARS)</option><option value="BRL">Reais (BRL)</option></select></label>
+                </div>
+                <label class="block"><span class="mb-1 block">Justificación:</span><input id="fin-exp-desc" type="text" placeholder="Ej: Anuncios Instagram, Uso propio..." class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"></label>
+                <button onclick="registerCashExpense()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-md transition">Registrar Salida de Dinero</button>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><h4 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3 mb-3">Movimientos Recientes</h4><div id="fin-cashflow-list" class="space-y-2 text-xs font-medium text-slate-600"></div></div>
           </div>
         </div>
 
+        <!-- SUB: PROVAS, NÍVEIS E NOTAS -->
         <div id="adm-sec-quizzes" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <div class="flex justify-between items-center"><h3 id="quiz-builder-title" class="font-bold text-sm">Crear Prueba</h3><button id="quiz-cancel-edit-btn" onclick="cancelQuizEditing()" class="hidden text-xs text-red-500 font-bold">Cancelar</button></div>
-            <input id="quiz-title" type="text" placeholder="Título" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <select id="quiz-level" class="w-full border rounded-xl px-3 py-2 text-xs outline-none"><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option><option value="extras">Extras</option></select>
-            <div class="flex items-center gap-2 pt-1"><input type="checkbox" id="quiz-is-final" class="rounded"><label class="text-[11px] font-bold text-amber-700">Esta prueba es FINAL y desbloquea el siguiente nivel (>60%)</label></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3"><h3 id="quiz-builder-title" class="font-extrabold text-sm text-slate-900">Crear Evaluación</h3><button id="quiz-cancel-edit-btn" onclick="cancelQuizEditing()" class="hidden text-[10px] bg-red-50 text-red-600 px-2 py-1 rounded font-bold">Cancelar</button></div>
+            <div class="space-y-3 text-xs font-bold text-slate-700">
+              <input id="quiz-title" type="text" placeholder="Título (Ej: Prueba Módulo 1)" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50">
+              <input id="quiz-desc" type="text" placeholder="Instrucciones para el alumno..." class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50">
+              <label class="block"><span class="mb-1 block">Nivel al que pertenece:</span><select id="quiz-level" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option><option value="extras">Extras</option></select></label>
+              <label class="flex items-center gap-2 p-3 bg-amber-50 border border-amber-100 rounded-xl cursor-pointer"><input type="checkbox" id="quiz-is-final" class="w-4 h-4 text-amber-600"><span class="text-[11px] text-amber-900 leading-tight">Es una PRUEBA FINAL. Si el alumno aprueba (>60%), desbloquea automáticamente el siguiente nivel del curso.</span></label>
+            </div>
             <div id="quiz-questions-builder" class="space-y-3 pt-2"></div>
-            <div class="flex gap-2"><button onclick="addQuizQuestionField()" class="flex-1 bg-slate-100 py-2 rounded-xl text-xs font-bold">+ Pregunta</button><button onclick="saveNewQuiz()" id="quiz-submit-btn" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-bold">Guardar</button></div>
+            <div class="flex gap-2 pt-2 border-t border-slate-100"><button onclick="addQuizQuestionField()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3 rounded-xl text-xs font-extrabold transition">+ Pregunta</button><button onclick="saveNewQuiz()" id="quiz-submit-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-xs font-extrabold shadow-md transition">Guardar</button></div>
           </div>
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3"><h3 class="font-bold text-sm">Pruebas Creadas</h3><div id="admin-created-quizzes-list" class="space-y-2 text-xs"></div></div>
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <h3 class="font-bold text-sm">Notas & Filtros</h3>
-            <div class="grid grid-cols-2 gap-2 text-xs"><select id="score-filter-status" onchange="filterAdminQuizScores()" class="border rounded px-2 py-1"><option value="all">Todos</option><option value="passed">Aprobados</option><option value="failed">Reprobados</option></select><select id="score-filter-level" onchange="filterAdminQuizScores()" class="border rounded px-2 py-1"><option value="all">Todos Niveles</option><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option></select></div>
-            <select id="score-filter-student" onchange="filterAdminQuizScores()" class="w-full border rounded px-2 py-1 text-xs"><option value="all">Todos los alumnos</option></select>
-            <div id="admin-quiz-scores-list" class="space-y-2 text-xs pt-2"></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3"><h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-2">Evaluaciones Creadas</h3><div id="admin-created-quizzes-list" class="space-y-2.5 text-xs font-medium"></div></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3"><h3 class="font-extrabold text-sm text-slate-900">Notas de Alumnos</h3><p class="text-[10px] text-slate-500 font-medium">Corregir y enviar devolución</p></div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700"><label class="block">Estado:<select id="score-filter-status" onchange="filterAdminQuizScores()" class="w-full border rounded-lg px-2 py-2 bg-slate-50 outline-none"><option value="all">Todos</option><option value="passed">Aprobados</option><option value="failed">Reprobados</option></select></label><label class="block">Nivel:<select id="score-filter-level" onchange="filterAdminQuizScores()" class="w-full border rounded-lg px-2 py-2 bg-slate-50 outline-none"><option value="all">Todos Niveles</option><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option></select></label></div>
+            <select id="score-filter-student" onchange="filterAdminQuizScores()" class="w-full border rounded-lg px-3 py-2 text-xs font-bold bg-slate-50 outline-none"><option value="all">Todos los alumnos</option></select>
+            <div id="admin-quiz-scores-list" class="space-y-3 text-xs pt-1"></div>
           </div>
         </div>
 
+        <!-- SUB: VÍDEOS -->
         <div id="adm-sec-videos" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <h3 class="font-bold text-sm">Adicionar Aula</h3>
-            <input id="admin-video-title" type="text" placeholder="Título" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <input id="admin-video-url" type="text" placeholder="Link do Vídeo" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <select id="admin-video-level" class="w-full border rounded-xl px-3 py-2 text-xs outline-none"><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option><option value="extras">Extras</option></select>
-            <input id="admin-video-material" type="text" placeholder="Link Apostila/PDF" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <button onclick="addVideo()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-xs font-bold">Salvar Aula</button>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Adicionar Aula / Vídeo</h3>
+            <div class="space-y-3 text-xs font-bold text-slate-700">
+              <input id="admin-video-title" type="text" placeholder="Título do Vídeo" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50">
+              <input id="admin-video-url" type="text" placeholder="Link do YouTube" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50">
+              <label class="block"><span class="mb-1 block">Nível do Módulo:</span><select id="admin-video-level" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"><option value="iniciante">Iniciante</option><option value="medio">Intermedio</option><option value="avancado">Avanzado</option><option value="extras">Extras</option></select></label>
+              <input id="admin-video-material" type="text" placeholder="Link do PDF/Material (Opcional)" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50">
+              <button onclick="addVideo()" class="w-full bg-[#0f2444] text-white py-3 rounded-xl font-extrabold shadow-md transition">Salvar Aula e Notificar</button>
+            </div>
           </div>
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3"><h3 class="font-bold text-sm">Tarefas & PDFs</h3>
-            <input id="assign-title" type="text" placeholder="Título" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <input id="assign-url" type="text" placeholder="Link" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
-            <select id="assign-target-student" class="w-full border rounded-xl px-3 py-2 text-xs outline-none"></select>
-            <button onclick="createAssignment()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold">Publicar Tarea</button>
-          </div>
-          <div class="bg-white p-5 rounded-3xl border shadow-sm"><h3 class="font-bold text-sm mb-2">Aulas Cadastradas</h3><div id="admin-lessons-management-list" class="space-y-2 text-xs"></div></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3"><h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Aulas Cadastradas</h3><div id="admin-lessons-management-list" class="space-y-2.5 text-xs"></div></div>
         </div>
 
+        <!-- SUB: AGENDA E SLOTS UNIFICADOS -->
         <div id="adm-sec-slots" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <h3 class="font-bold text-sm">Gerar Franja Horária Unificada</h3>
-            <select id="bulk-day-of-week" class="w-full border rounded-xl px-3 py-2 text-xs outline-none"><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5" selected>Sexta</option></select>
-            <div class="grid grid-cols-2 gap-2"><input id="bulk-start-time" type="time" value="14:00" class="border rounded-xl px-3 py-2 text-xs"><input id="bulk-end-time" type="time" value="19:00" class="border rounded-xl px-3 py-2 text-xs"></div>
-            <div class="grid grid-cols-2 gap-2"><select id="bulk-duration" class="border rounded-xl px-3 py-2 text-xs"><option value="60">60 min</option></select><select id="bulk-weeks" class="border rounded-xl px-3 py-2 text-xs"><option value="4">4 sem</option></select></div>
-            <button onclick="generateBulkSlots()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-xs font-bold">Gerar Horários</button>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3"><h3 class="font-extrabold text-sm text-slate-900">Generar Franja Horaria en Masa</h3><p class="text-[10px] text-slate-500 font-medium mt-0.5">Vale para ambos idiomas</p></div>
+            <div class="space-y-3 text-xs font-bold text-slate-700">
+              <label class="block"><span class="mb-1 block">Día recurrente:</span><select id="bulk-day-of-week" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5" selected>Viernes</option><option value="6">Sábado</option><option value="0">Domingo</option></select></label>
+              <div class="grid grid-cols-2 gap-2"><label class="block"><span class="mb-1 block">Inicio:</span><input id="bulk-start-time" type="time" value="14:00" class="w-full border rounded-xl px-3 py-2 bg-slate-50"></label><label class="block"><span class="mb-1 block">Fin:</span><input id="bulk-end-time" type="time" value="19:00" class="w-full border rounded-xl px-3 py-2 bg-slate-50"></label></div>
+              <div class="grid grid-cols-2 gap-2"><label class="block"><span class="mb-1 block">Duración:</span><select id="bulk-duration" class="w-full border rounded-xl px-3 py-2 bg-slate-50"><option value="60">60 min</option></select></label><label class="block"><span class="mb-1 block">Semanas:</span><select id="bulk-weeks" class="w-full border rounded-xl px-3 py-2 bg-slate-50"><option value="4">4 Semanas</option></select></label></div>
+              <button onclick="generateBulkSlots()" class="w-full bg-[#0f2444] hover:bg-slate-800 text-white py-3 rounded-xl font-extrabold shadow-md transition">Generar y Abrir Agenda</button>
+            </div>
           </div>
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Agenda Unificada</h3><button onclick="deleteAllAvailableSlots()" class="text-[10px] text-red-500 font-bold">Limpar Livres</button></div><div id="admin-slots-list" class="space-y-2.5 text-xs"></div></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3"><h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Adicionar Único</h3><div class="grid grid-cols-2 gap-2"><input id="admin-slot-date" type="date" class="border rounded-xl px-3 py-2 text-xs outline-none bg-slate-50"><input id="admin-slot-time" type="time" class="border rounded-xl px-3 py-2 text-xs outline-none bg-slate-50"></div><button onclick="addSlot()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-sm mt-1">Guardar</button></div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3"><div class="flex justify-between items-center border-b border-slate-100 pb-3"><h3 class="font-extrabold text-sm text-slate-900">Horarios Disponibles</h3><button onclick="deleteAllAvailableSlots()" class="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-1 rounded">Limpiar Libres</button></div><div id="admin-slots-list" class="space-y-2.5 text-xs font-medium"></div></div>
         </div>
 
         <div id="adm-sec-broadcast" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <h3 class="font-bold text-sm">Chat / Mensajes</h3>
-            <select id="broadcast-target" onchange="handleBroadcastTargetChange(this.value)" class="w-full border rounded-xl px-3 py-2 text-xs outline-none"><option value="TODOS">Todos</option><optgroup id="broadcast-students-group" label="Alumnos"></optgroup></select>
-            <div id="admin-chat-history-box" class="hidden p-3 bg-slate-50 border rounded-xl space-y-2"><div class="flex justify-between"><b class="text-[10px]">Chat:</b><button onclick="refreshCurrentAdminChat()" class="text-[10px] text-blue-600">Att</button></div><div id="admin-chat-messages-container" class="max-h-40 overflow-y-auto space-y-1 text-xs"></div></div>
-            <textarea id="broadcast-text" rows="2" placeholder="Mensaje..." class="w-full border rounded-xl px-3 py-2 text-xs outline-none"></textarea>
-            <button onclick="sendBroadcastMessage()" class="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-bold">Enviar</button>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Chat de Alumnos</h3>
+            <div class="space-y-3 text-xs font-bold text-slate-700">
+              <label class="block"><span class="mb-1 block">Seleccionar Alumno o Grupo:</span><select id="broadcast-target" onchange="handleBroadcastTargetChange(this.value)" class="w-full border rounded-xl px-3 py-2.5 outline-none bg-slate-50"><option value="TODOS">📢 Todos los alumnos (Este idioma)</option><optgroup id="broadcast-students-group" label="Individual"></optgroup></select></label>
+              
+              <div id="admin-chat-history-box" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner space-y-2">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-1.5"><b class="text-[11px] text-slate-600 uppercase tracking-wider">Historial de Chat:</b><button onclick="refreshCurrentAdminChat()" class="text-[10px] text-blue-600 hover:underline">Actualizar</button></div>
+                <div id="admin-chat-messages-container" class="max-h-56 overflow-y-auto space-y-1.5 text-xs font-medium pr-1 scrollbar-none"></div>
+              </div>
+
+              <textarea id="broadcast-text" rows="3" placeholder="Mensaje..." class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50"></textarea>
+              <button onclick="sendBroadcastMessage()" class="w-full bg-[#0f2444] text-white py-3 rounded-xl font-extrabold shadow-md transition">Enviar Mensaje</button>
+            </div>
           </div>
         </div>
 
         <div id="adm-sec-settings" class="space-y-4 hidden">
-          <div class="bg-white p-5 rounded-3xl border shadow-sm space-y-3">
-            <h3 class="font-bold text-sm">Configurações Gerais</h3>
-            <label class="text-[10px] font-bold">Preço Aula PT (ARS):</label><input id="setting-price-meet-pt" type="number" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-1">
-            <label class="text-[10px] font-bold">Preço Curso PT (ARS):</label><input id="setting-price-course-pt" type="number" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-2">
-            <label class="text-[10px] font-bold">Preço Aula ES (BRL):</label><input id="setting-price-meet-es" type="number" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-1">
-            <label class="text-[10px] font-bold">Preço Curso ES (BRL):</label><input id="setting-price-course-es" type="number" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-2">
-            <button onclick="saveAppSettings()" class="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-bold">Salvar Preços</button>
-            <div class="border-t pt-2 mt-2">
-              <label class="text-[10px] font-bold">Logo URL:</label><input id="setting-app-logo" type="text" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-1">
-              <button onclick="saveDesignSettings()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold">Salvar Visual</button>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Configurações Gerais</h3>
+            <div class="space-y-2 text-xs font-bold text-slate-700">
+              <label class="block">Preço Aula PT (Pesos ARS):<input id="setting-price-meet-pt" type="number" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <label class="block">Preço Curso PT (Pesos ARS):<input id="setting-price-course-pt" type="number" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <label class="block mt-2">Preço Aula ES (Reais BRL):<input id="setting-price-meet-es" type="number" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <label class="block">Preço Curso ES (Reais BRL):<input id="setting-price-course-es" type="number" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <button onclick="saveAppSettings()" class="w-full bg-green-600 text-white py-3 rounded-xl font-extrabold mt-2 shadow-md">Salvar Preços do App</button>
             </div>
-            <div class="border-t pt-2 mt-2">
-              <label class="text-[10px] font-bold">Programa do Curso (Texto):</label><textarea id="setting-syllabus-text" rows="3" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-1"></textarea>
-              <label class="text-[10px] font-bold">Link PDF Programa:</label><input id="setting-syllabus-pdf" type="text" class="w-full border rounded-xl px-3 py-2 text-xs outline-none mb-1">
-              <button onclick="saveSyllabusSettings()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-xs font-bold">Salvar Programa</button>
+          </div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Design do Aplicativo</h3>
+            <div class="space-y-2 text-xs font-bold text-slate-700">
+              <label class="block">URL do seu Logo (PNG/JPG):<input id="setting-app-logo" type="text" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <button onclick="saveDesignSettings()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-extrabold shadow-md">Atualizar Logo Global</button>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+            <h3 class="font-extrabold text-sm text-slate-900 border-b border-slate-100 pb-3">Programa de Curso (Syllabus)</h3>
+            <div class="space-y-2 text-xs font-bold text-slate-700">
+              <label class="block">Texto do Programa:<textarea id="setting-syllabus-text" rows="4" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1 font-medium"></textarea></label>
+              <label class="block">Link PDF Drive:<input id="setting-syllabus-pdf" type="text" class="w-full border rounded-xl px-3 py-2 outline-none bg-slate-50 mt-1"></label>
+              <button onclick="saveSyllabusSettings()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-extrabold shadow-md">Salvar Programa</button>
             </div>
           </div>
         </div>
+
       </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t px-6 py-2.5 flex justify-around items-center z-50 max-w-md mx-auto">
-      <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[10px] font-bold nav-active"><i class="fa-solid fa-house text-lg"></i><span data-pt="Início" data-es="Inicio">Inicio</span></button>
-      <button onclick="navigate('calendar')" id="nav-calendar" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400"><i class="fa-regular fa-calendar text-lg"></i><span data-pt="Agendar" data-es="Agendar">Agendar</span></button>
-      <button onclick="navigate('course')" id="nav-course" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400"><i class="fa-solid fa-circle-play text-lg"></i><span data-pt="Curso" data-es="Curso">Curso</span></button>
-      <button onclick="navigate('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400"><i class="fa-regular fa-user text-lg"></i><span data-pt="Perfil" data-es="Perfil">Perfil</span></button>
+    <!-- NAVEGAÇÃO BOTTOM -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-3 flex justify-around items-center z-50 max-w-md mx-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <button onclick="navigate('home')" id="nav-home" class="flex flex-col items-center gap-1.5 text-[10px] font-extrabold nav-active transition hover:scale-105"><i class="fa-solid fa-house text-xl"></i><span data-pt="Início" data-es="Inicio">Inicio</span></button>
+      <button onclick="navigate('calendar')" id="nav-calendar" class="flex flex-col items-center gap-1.5 text-[10px] font-extrabold text-slate-400 transition hover:scale-105 hover:text-slate-600"><i class="fa-regular fa-calendar text-xl"></i><span data-pt="Agendar" data-es="Agendar">Agendar</span></button>
+      <button onclick="navigate('course')" id="nav-course" class="flex flex-col items-center gap-1.5 text-[10px] font-extrabold text-slate-400 transition hover:scale-105 hover:text-slate-600"><i class="fa-solid fa-circle-play text-xl"></i><span data-pt="Curso" data-es="Curso">Curso</span></button>
+      <button onclick="navigate('profile')" id="nav-profile" class="flex flex-col items-center gap-1.5 text-[10px] font-extrabold text-slate-400 transition hover:scale-105 hover:text-slate-600"><i class="fa-regular fa-user text-xl"></i><span data-pt="Perfil" data-es="Perfil">Perfil</span></button>
     </nav>
 
-    <div id="syllabus-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div class="bg-white p-5 rounded-3xl w-full max-w-sm max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center border-b pb-2 mb-2"><h3 class="font-bold text-sm">Programa</h3><button onclick="closeSyllabusModal()" class="text-xs font-bold">X</button></div>
-        <div id="syllabus-content-display" class="text-xs whitespace-pre-line bg-slate-50 p-3 rounded-xl mb-2"></div>
-        <div id="syllabus-pdf-link-box" class="hidden"><a id="syllabus-pdf-link" target="_blank" class="block w-full bg-emerald-50 text-emerald-800 text-center py-2 rounded-xl text-xs font-bold">Descargar PDF</a></div>
+    <!-- MODAL DO PROGRAMA DE CURSO -->
+    <div id="syllabus-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white p-6 rounded-3xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3"><h3 class="font-extrabold text-base text-slate-900">Programa Completo</h3><button onclick="closeSyllabusModal()" class="text-xs font-bold bg-slate-100 px-2 py-1 rounded">X</button></div>
+        <div id="syllabus-content-display" class="text-xs font-medium text-slate-700 whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-3 leading-relaxed"></div>
+        <div id="syllabus-pdf-link-box" class="hidden"><a id="syllabus-pdf-link" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-center py-3 rounded-xl text-xs font-extrabold shadow-md transition">Descargar / Baixar PDF</a></div>
       </div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // CONFIGURAÇÕES GLOBAIS E BANCO DE DADOS
+    // 1. CHAVES E VARIÁVEIS GLOBAIS
     // ==========================================
     var SUPABASE_URL = "https://wukagpszsmlbvcwxhfsw.supabase.co";
     var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a2FncHN6c21sYnZjd3hoZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNDIxMzksImV4cCI6MjEwMzcxODEzOX0.rIRZ9hb5rjeW3-0YepVezCuiDyEkvq36h7CsUwDWXqE";
@@ -477,17 +576,18 @@
     var PRICES = { pt: { meet: 12500, course: 30000, curr: 'ARS' }, es: { meet: 50, course: 150, curr: 'BRL' } };
 
     function getSupabase() { return window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null; }
+    
     var currentUser = null, userProfileData = null, selectedSlots = [], loadedStudents = [], allLessonsCache = [], quizQuestions = [], editingQuizId = null, allScoresCache = [], isFinanceUnlocked = false;
 
     // ==========================================
-    // SELEÇÃO DE IDIOMA E INTERFACE
+    // 2. TELA INICIAL (IDIOMA E TRADUÇÃO)
     // ==========================================
     window.selectCourseApp = function(courseStr) {
       appCourseType = courseStr;
       localStorage.setItem('app_course_type', courseStr);
       document.getElementById('lang-selection-screen').classList.add('hidden');
       document.getElementById('auth-screen').classList.remove('hidden');
-      applyTranslations();
+      window.applyTranslations();
     };
 
     window.goBackToLanguage = function() {
@@ -497,9 +597,9 @@
       document.getElementById('lang-selection-screen').classList.remove('hidden');
     };
 
-    function applyTranslations() {
+    window.applyTranslations = function() {
       if (!appCourseType) return;
-      uiLang = appCourseType === 'pt' ? 'es' : 'pt'; 
+      uiLang = appCourseType === 'pt' ? 'es' : 'pt'; // Regra de cruzamento
       document.body.className = "text-slate-800 min-h-screen select-none relative theme-" + appCourseType;
       
       document.querySelectorAll('[data-pt]').forEach(el => {
@@ -510,10 +610,10 @@
       var pMeet = document.getElementById('card-meet-price'), pCourse = document.getElementById('card-course-price');
       if(pMeet) pMeet.innerText = (PRICES[appCourseType].curr === 'BRL' ? 'R$' : '$') + PRICES[appCourseType].meet;
       if(pCourse) pCourse.innerText = (PRICES[appCourseType].curr === 'BRL' ? 'R$' : '$') + PRICES[appCourseType].course;
-    }
+    };
 
     // ==========================================
-    // LOAD SETTINGS (O Erro foi corrigido aqui!)
+    // 3. CARREGAMENTO DE DADOS E CONFIGURAÇÕES
     // ==========================================
     window.loadAppSettings = async function() {
       try {
@@ -539,12 +639,11 @@
             }
           });
         }
-        applyTranslations();
-        // Popula Admin Inputs
-        document.getElementById('setting-price-meet-pt').value = PRICES.pt.meet;
-        document.getElementById('setting-price-course-pt').value = PRICES.pt.course;
-        document.getElementById('setting-price-meet-es').value = PRICES.es.meet;
-        document.getElementById('setting-price-course-es').value = PRICES.es.course;
+        window.applyTranslations();
+        var mp = document.getElementById('setting-price-meet-pt'); if(mp) mp.value = PRICES.pt.meet;
+        var cp = document.getElementById('setting-price-course-pt'); if(cp) cp.value = PRICES.pt.course;
+        var me = document.getElementById('setting-price-meet-es'); if(me) me.value = PRICES.es.meet;
+        var ce = document.getElementById('setting-price-course-es'); if(ce) ce.value = PRICES.es.course;
       } catch (err) { console.error("Config error:", err); }
     };
 
@@ -552,19 +651,19 @@
       var mpt = document.getElementById('setting-price-meet-pt').value, cpt = document.getElementById('setting-price-course-pt').value;
       var mes = document.getElementById('setting-price-meet-es').value, ces = document.getElementById('setting-price-course-es').value;
       await getSupabase().from('app_settings').upsert([{key:'price_meet_pt',value:mpt},{key:'price_course_pt',value:cpt},{key:'price_meet_es',value:mes},{key:'price_course_es',value:ces}]);
-      alert('Preços salvos!'); window.loadAppSettings();
+      alert('Configurações de Preços atualizadas!'); window.loadAppSettings();
     };
 
     window.saveDesignSettings = async function() {
       var logo = document.getElementById('setting-app-logo').value.trim();
       await getSupabase().from('app_settings').upsert([{key:'app_logo_url',value:logo}]);
-      alert('Design salvo!'); window.loadAppSettings();
+      alert('Logo atualizado!'); window.loadAppSettings();
     };
 
     window.saveSyllabusSettings = async function() {
       var t = document.getElementById('setting-syllabus-text').value, p = document.getElementById('setting-syllabus-pdf').value.trim();
       await getSupabase().from('app_settings').upsert([{key:'course_syllabus_text',value:t},{key:'course_syllabus_pdf_url',value:p}]);
-      alert('Programa salvo!'); window.loadAppSettings();
+      alert('Programa Salvo!'); window.loadAppSettings();
     };
 
     window.applyLogo = function(url) {
@@ -578,7 +677,7 @@
     window.closeSyllabusModal = function() { document.getElementById('syllabus-modal').classList.add('hidden'); };
 
     // ==========================================
-    // AUTENTICAÇÃO
+    // 4. SISTEMA DE LOGIN, REGISTRO E SESSÃO
     // ==========================================
     var isSignUp = false;
     window.toggleAuthMode = function() {
@@ -593,16 +692,19 @@
       var nm = document.getElementById('auth-name').value.trim();
       var btn = document.getElementById('auth-btn');
 
-      if (!em || !pw) return alert(uiLang==='pt'?'Preencha tudo':'Completá los campos');
+      if (!em || !pw) return alert(uiLang==='pt'?'Preencha e-mail e senha.':'Completá email y contraseña.');
       btn.disabled = true; btn.innerText = '...';
 
       try {
         var sb = getSupabase();
+        if(!sb) throw new Error('Falha de conexão com banco.');
+        
         if (isSignUp) {
           var res = await sb.auth.signUp({ email: em, password: pw, options: { data: { full_name: nm } }});
           if (res.error) throw res.error;
           if (res.data.user) await sb.from('profiles').upsert([{ id: res.data.user.id, email: em, full_name: nm, course_type: appCourseType, unlocked_levels: 'iniciante', status: 'Ativo' }]);
-          alert('Conta criada!'); await window.checkSession();
+          alert(uiLang==='pt'?'Conta criada!':'¡Cuenta creada!'); 
+          await window.checkSession();
         } else {
           var res = await sb.auth.signInWithPassword({ email: em, password: pw });
           if (res.error) throw res.error;
@@ -622,6 +724,7 @@
         var sb = getSupabase();
         if (!sb) return;
         var { data } = await sb.auth.getSession();
+        
         if (data && data.session) {
           currentUser = data.session.user;
           var { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
@@ -655,11 +758,11 @@
         } else {
           document.getElementById('lang-selection-screen').classList.remove('hidden');
         }
-      } catch(e) { console.error("Session error:", e); }
+      } catch(e) { console.error("Session erro:", e); }
     };
 
     // ==========================================
-    // NAVEGAÇÃO GERAL
+    // 5. NAVEGAÇÃO E ADMINISTRAÇÃO (CAMALEÃO)
     // ==========================================
     window.navigate = function(tab) {
       ['home','calendar','course','tasks','info','profile','admin','rules'].forEach(t => {
@@ -680,8 +783,8 @@
 
     window.switchAdminCourse = function(type) {
       adminCourseType = type;
-      document.getElementById('admin-toggle-pt').className = type==='pt' ? 'px-4 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white' : 'px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-700 text-slate-300';
-      document.getElementById('admin-toggle-es').className = type==='es' ? 'px-4 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white' : 'px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-700 text-slate-300';
+      document.getElementById('admin-toggle-pt').className = type==='pt' ? 'flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-green-500 text-white transition shadow-sm border border-green-400' : 'flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-transparent text-slate-300 hover:text-white transition';
+      document.getElementById('admin-toggle-es').className = type==='es' ? 'flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-blue-500 text-white transition shadow-sm border border-blue-400' : 'flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-transparent text-slate-300 hover:text-white transition';
       document.getElementById('adm-lbl-univ').innerText = type==='pt' ? 'Português' : 'Espanhol';
       window.showAdminSub('students');
     };
@@ -690,7 +793,7 @@
       ['students','finance','quizzes','videos','slots','settings','broadcast','assignments','bookings'].forEach(s => {
         var el = document.getElementById('adm-sec-'+s), btn = document.getElementById('btn-adm-'+s);
         if(el) el.classList.toggle('hidden', s!==sub);
-        if(btn) btn.className = s===sub ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white' : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600';
+        if(btn) btn.className = s===sub ? 'px-4 py-2 rounded-xl text-[11px] font-extrabold bg-slate-900 text-white uppercase tracking-wider whitespace-nowrap shadow-sm' : 'px-4 py-2 rounded-xl text-[11px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 uppercase tracking-wider whitespace-nowrap shadow-sm';
       });
       if(sub==='students') window.loadAdminStudents();
       if(sub==='videos') window.loadAdminLessons();
@@ -698,12 +801,10 @@
       if(sub==='slots') window.loadAdminSlots();
       if(sub==='finance') window.checkFinanceLockStatus();
       if(sub==='broadcast') window.populateBroadcastStudentOptions();
-      if(sub==='assignments') window.loadAdminAssignments();
-      if(sub==='bookings') window.loadAdminBookings();
     };
 
     // ==========================================
-    // TRILHA DE CURSOS (ALUNO)
+    // 6. CURSO GRAVADO E TRILHA DO ALUNO
     // ==========================================
     var currentCourseLevel = 'iniciante';
     var orderLevels = ['iniciante', 'medio', 'avancado', 'extras'];
@@ -716,8 +817,8 @@
       
       if(!hasAccess) {
         var info = document.getElementById('locked-pay-info');
-        if(appCourseType==='pt') info.innerHTML = "<b>Valor:</b> $"+PRICES.pt.course+" ARS<br><b>Alias:</b> renan.barbosa";
-        else info.innerHTML = "<b>Valor:</b> R$ "+PRICES.es.course+" BRL<br><b>PIX:</b> 40447470833 (Renan Barbosa)";
+        if(appCourseType==='pt') info.innerHTML = "<b>Valor:</b> $"+PRICES.pt.course+" ARS<br><b>Alias MP:</b> renan.barbosa";
+        else info.innerHTML = "<b>Valor:</b> R$ "+PRICES.es.course+" BRL<br><b>PIX Nubank:</b> 40447470833 (Renan Barbosa)";
         return;
       }
 
@@ -727,9 +828,9 @@
       var nav = document.getElementById('course-levels-nav');
       nav.innerHTML = orderLevels.map(lvl => {
         var isUnlocked = unlocked.includes(lvl) || lvl === 'extras';
-        var activeClass = lvl === currentCourseLevel ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600';
-        if(!isUnlocked) return `<button class="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-400 locked-module whitespace-nowrap"><i class="fa-solid fa-lock"></i> ${lvl}</button>`;
-        return `<button onclick="switchCourseLevel('${lvl}')" class="px-3.5 py-2 rounded-xl whitespace-nowrap transition ${activeClass} capitalize">${lvl}</button>`;
+        var activeClass = lvl === currentCourseLevel ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 border border-slate-200';
+        if(!isUnlocked) return `<button class="px-4 py-2.5 rounded-xl bg-slate-50 text-slate-400 locked-module whitespace-nowrap border border-slate-200"><i class="fa-solid fa-lock mr-1"></i> ${lvl}</button>`;
+        return `<button onclick="switchCourseLevel('${lvl}')" class="px-4 py-2.5 rounded-xl whitespace-nowrap transition ${activeClass} capitalize">${lvl}</button>`;
       }).join('');
 
       var { data: prog } = await sb.from('lesson_progress').select('lesson_id').eq('user_id', currentUser.id).eq('completed', true);
@@ -738,18 +839,18 @@
       var { data: lessons } = await sb.from('course_lessons').select('*').eq('course_type', appCourseType).eq('level', currentCourseLevel).neq('is_active', false).order('created_at', {ascending:true});
       var container = document.getElementById('lessons-container');
       
-      if(!lessons || lessons.length===0) { container.innerHTML = '<p class="text-center text-slate-400 py-4">Nenhum vídeo neste módulo ainda.</p>'; return; }
+      if(!lessons || lessons.length===0) { container.innerHTML = '<p class="text-center text-slate-400 py-6 font-medium">Nenhum vídeo neste módulo ainda.</p>'; return; }
 
       container.innerHTML = lessons.map((l, i) => {
         if(!ADMIN_EMAILS.includes(currentUser.email) && !userProfileData.has_course_access && userProfileData.trial_lesson_id !== l.id) {
-           return `<div class="bg-slate-50 p-4 rounded-2xl border space-y-2 opacity-75"><h4 class="font-bold text-sm flex gap-2"><i class="fa-solid fa-lock text-amber-500"></i> ${l.title}</h4></div>`;
+           return `<div class="bg-slate-50 p-5 rounded-3xl border border-slate-100 space-y-2 opacity-75 shadow-sm"><h4 class="font-extrabold text-sm flex gap-2"><i class="fa-solid fa-lock text-amber-500"></i> ${l.title}</h4></div>`;
         }
         var isDone = userCompletedLessons.has(l.id);
-        var doneCls = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600';
+        var doneCls = isDone ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200';
         var doneTxt = isDone ? '<i class="fa-solid fa-check"></i> Visto' : 'Marcar Visto';
         var yt = (l.video_url.includes('youtube.com') || l.video_url.includes('youtu.be')) ? `<iframe src="https://www.youtube-nocookie.com/embed/${l.video_url.split('v=')[1]||l.video_url.split('/').pop().split('?')[0]}?modestbranding=1&rel=0" allowfullscreen></iframe>` : `<video src="${l.video_url}" controls class="w-full h-full object-cover"></video>`;
-        var matBtn = l.material_url ? `<a href="${l.material_url}" target="_blank" class="block w-full text-center bg-emerald-50 text-emerald-800 py-2 rounded-xl text-xs font-bold mt-2">Baixar PDF</a>` : '';
-        return `<div class="bg-white p-4 rounded-2xl border shadow-sm space-y-2"><div class="flex justify-between items-center"><h4 class="font-bold text-sm">${l.title}</h4><button onclick="toggleLessonProgress('${l.id}')" class="text-[10px] px-2 py-1 rounded-full font-bold ${doneCls}">${doneTxt}</button></div><div class="video-secure-container mt-2">${yt}</div>${matBtn}</div>`;
+        var matBtn = l.material_url ? `<a href="${l.material_url}" target="_blank" class="block w-full text-center bg-emerald-50 text-emerald-800 py-3 rounded-xl text-xs font-bold mt-3 shadow-sm border border-emerald-100"><i class="fa-solid fa-file-pdf mr-1"></i> Baixar PDF da Aula</a>` : '';
+        return `<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3"><div class="flex justify-between items-center"><h4 class="font-extrabold text-sm text-slate-900">${l.title}</h4><button onclick="toggleLessonProgress('${l.id}')" class="text-[10px] px-3 py-1.5 rounded-lg font-bold transition ${doneCls}">${doneTxt}</button></div><div class="video-secure-container mt-2">${yt}</div>${matBtn}</div>`;
       }).join('');
     };
 
@@ -764,24 +865,33 @@
     window.requestCourseAccessWhatsApp = function() {
       var cur = PRICES[appCourseType].curr === 'BRL' ? 'R$' : '$';
       var val = PRICES[appCourseType].course;
-      var msg = "¡Hola Renan! Acabo de hacer la transferencia de "+cur+val+" para el Curso Grabado (Email: "+currentUser.email+"). Te adjunto comprobante:";
+      var msg = "¡Hola Renan! Acabo de transferir "+cur+val+" para el Curso Grabado (Email: "+currentUser.email+"). Comprobante:";
       window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), '_blank');
     };
     window.openWhatsApp = function() { window.open("https://wa.me/" + WHATSAPP_NUMBER, '_blank'); };
 
+    function formatSpanishDate(dateStr) {
+      if (!dateStr) return '';
+      var parts = dateStr.split('-');
+      var dateObj = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+      var days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      var months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      return days[dateObj.getDay()] + ' ' + dateObj.getDate() + ' de ' + months[dateObj.getMonth()];
+    }
+
     // ==========================================
-    // AGENDA E PAGAMENTOS (ALUNO E ADMIN)
+    // 7. CALENDÁRIO, AGENDA UNIFICADA E RESERVAS
     // ==========================================
     window.loadStudentSlots = async function() {
       var sb = getSupabase();
       var { data } = await sb.from('available_slots').select('*').eq('is_booked', false).order('date').order('time');
       var container = document.getElementById('slots-container');
-      if(!data || data.length===0) { container.innerHTML='<p class="text-center text-slate-400 py-4">Sin horarios disponibles.</p>'; return; }
+      if(!data || data.length===0) { container.innerHTML='<p class="text-center text-slate-400 py-6 font-medium">No hay horarios disponibles en este momento.</p>'; return; }
       
       container.innerHTML = data.map(s => {
         var isSel = selectedSlots.includes(s.id);
-        var cls = isSel ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-slate-50';
-        return `<div class="flex justify-between items-center p-3 border rounded-xl ${cls}"><div><b>${formatSpanishDate(s.date)}</b><br><span class="text-xs text-green-700">⏰ ${s.time} hs</span></div><button onclick="toggleSlot('${s.id}')" class="px-3 py-1.5 text-xs font-bold rounded-lg ${isSel?'bg-green-600 text-white':'bg-white border'}">${isSel?'Sel':'+ Agregar'}</button></div>`;
+        var cls = isSel ? 'border-green-500 bg-green-50 shadow-md ring-1 ring-green-500' : 'border-slate-200 bg-slate-50 hover:bg-white shadow-sm';
+        return `<div class="flex justify-between items-center p-4 border rounded-2xl transition ${cls}"><div><b class="text-sm text-slate-900 capitalize">${formatSpanishDate(s.date)}</b><br><span class="text-xs text-green-700 font-extrabold mt-0.5 inline-block">⏰ ${s.time} hs</span></div><button onclick="toggleSlot('${s.id}')" class="px-4 py-2 text-xs font-bold rounded-xl transition ${isSel?'bg-green-600 text-white shadow-md':'bg-white border text-slate-600 hover:bg-slate-100'}">${isSel?'Seleccionado':'+ Agregar'}</button></div>`;
       }).join('');
       window.updateSelectionBar();
     };
@@ -796,10 +906,14 @@
       var bar = document.getElementById('booking-selection-bar');
       if(selectedSlots.length>0) {
         bar.classList.remove('hidden');
+        document.getElementById('clear-selection-btn').classList.remove('hidden');
         var cur = PRICES[appCourseType].curr === 'BRL' ? 'R$' : '$';
         document.getElementById('selected-total-price').innerText = cur + (selectedSlots.length * PRICES[appCourseType].meet);
         document.getElementById('selected-count-label').innerText = selectedSlots.length + ' class(es)';
-      } else { bar.classList.add('hidden'); }
+      } else { 
+        bar.classList.add('hidden'); 
+        document.getElementById('clear-selection-btn').classList.add('hidden');
+      }
     };
 
     window.clearSelectedSlots = function() { selectedSlots = []; window.closePaymentSection(); window.loadStudentSlots(); };
@@ -811,17 +925,21 @@
       var inst = document.getElementById('payment-instructions');
       if(appCourseType==='pt') inst.innerHTML = "<b>Mercado Pago:</b> renan.barbosa";
       else inst.innerHTML = "<b>PIX Nubank:</b> 40447470833<br>Renan Barbosa";
-      document.getElementById('booking-step-payment').scrollIntoView();
+      document.getElementById('booking-step-payment').scrollIntoView({behavior:'smooth'});
     };
 
     window.closePaymentSection = function() { document.getElementById('booking-step-payment').classList.add('hidden'); document.getElementById('payment-receipt-file').value = ''; };
 
     window.submitMultipleBookingsWithReceipt = async function() {
       var file = document.getElementById('payment-receipt-file').files[0];
-      if(!file) return alert('Sube el comprobante!');
+      if(!file) return alert('Sube el comprobante de pago.');
       var sb = getSupabase();
       var fName = 'receipt_'+Date.now()+'_'+file.name;
-      await sb.storage.from('comprovantes').upload(fName, file);
+      
+      document.getElementById('confirm-booking-btn').innerText = "Subiendo...";
+      var uploadRes = await sb.storage.from('comprovantes').upload(fName, file);
+      if(uploadRes.error) { document.getElementById('confirm-booking-btn').innerText = "Confirmar"; return alert('Error al subir: ' + uploadRes.error.message); }
+
       var url = sb.storage.from('comprovantes').getPublicUrl(fName).data.publicUrl;
 
       for(var id of selectedSlots) {
@@ -855,26 +973,40 @@
       
       cont.innerHTML = slots.map(s => {
         var b = books.find(x => x.slot_id === s.id);
-        var info = s.is_booked && b ? `<div class="mt-2 text-[10px] p-2 bg-white rounded">Reserva: <b>${b.student_name}</b> (${b.course_type==='pt'?'Portugués':'Espanhol'})</div>` : '';
-        var btn = s.is_booked ? `<button onclick="releaseSlot('${s.id}')" class="text-xs bg-amber-500 text-white px-2 py-1 rounded">Liberar</button>` : `<button onclick="deleteSlot('${s.id}')" class="text-xs bg-red-500 text-white px-2 py-1 rounded">Excluir</button>`;
-        return `<div class="p-3 bg-slate-50 border rounded-xl flex justify-between items-center"><div><b>${formatSpanishDate(s.date)} ${s.time}</b>${info}</div>${btn}</div>`;
+        var info = s.is_booked && b ? `<div class="mt-2 text-[10px] p-2 bg-white border border-slate-100 rounded-lg">Reserva: <b>${b.student_name}</b> (${b.course_type==='pt'?'Portugués':'Espanhol'})</div>` : '';
+        var btn = s.is_booked ? `<button onclick="releaseSlot('${s.id}')" class="text-[10px] bg-amber-500 text-white px-2.5 py-1.5 font-bold rounded-lg shadow-sm">Liberar</button>` : `<button onclick="deleteSlot('${s.id}')" class="text-[10px] bg-red-100 text-red-600 px-2.5 py-1.5 font-bold rounded-lg">Excluir</button>`;
+        return `<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center"><div><b class="text-sm">${formatSpanishDate(s.date)} ${s.time}</b>${info}</div>${btn}</div>`;
       }).join('');
     };
 
     window.releaseSlot = async function(id) { var sb=getSupabase(); await sb.from('bookings').delete().eq('slot_id',id); await sb.from('available_slots').update({is_booked:false}).eq('id',id); window.loadAdminSlots(); };
     window.deleteSlot = async function(id) { var sb=getSupabase(); await sb.from('bookings').delete().eq('slot_id',id); await sb.from('available_slots').delete().eq('id',id); window.loadAdminSlots(); };
     window.deleteAllAvailableSlots = async function() { var sb=getSupabase(); await sb.from('available_slots').delete().eq('is_booked',false); window.loadAdminSlots(); };
-    window.generateBulkSlots = async function() { alert('Horários gerados em lote (Simplificado no momento).'); };
-    window.addSlot = async function() { var d=document.getElementById('admin-slot-date').value, t=document.getElementById('admin-slot-time').value; if(d&&t){ await getSupabase().from('available_slots').insert([{date:d, time:t, is_booked:false}]); window.loadAdminSlots(); } };
-
-    window.loadAdminBookings = async function() {
-      var sb = getSupabase();
-      var {data} = await sb.from('bookings').select('*').eq('course_type', adminCourseType).order('created_at', {ascending:false});
-      document.getElementById('admin-bookings-list').innerHTML = (data||[]).map(b => `<div class="p-3 border rounded-xl mb-2 text-xs"><b>${b.student_name}</b><br>📅 ${formatSpanishDate(b.slot_date)} ${b.slot_time}<br>${b.receipt_url?`<a href="${b.receipt_url}" target="_blank" class="text-blue-600 underline">Comprovante</a>`:'Sem Comprovante'}</div>`).join('');
+    
+    window.generateBulkSlots = async function() { 
+      var targetDay = parseInt(document.getElementById('bulk-day-of-week').value);
+      var startTime = document.getElementById('bulk-start-time').value, endTime = document.getElementById('bulk-end-time').value;
+      if (!startTime || !endTime) return alert('Por favor, ingresá hora de inicio y fin.');
+      var startM = parseInt(startTime.split(':')[0])*60 + parseInt(startTime.split(':')[1]);
+      var endM = parseInt(endTime.split(':')[0])*60 + parseInt(endTime.split(':')[1]);
+      var slotsToInsert = [], today = new Date();
+      for (var w=0; w<4; w++) {
+        var loopDate = new Date(); loopDate.setDate(today.getDate() + ((targetDay - today.getDay() + 7) % 7) + (w * 7));
+        var dStr = loopDate.getFullYear() + '-' + String(loopDate.getMonth()+1).padStart(2,'0') + '-' + String(loopDate.getDate()).padStart(2,'0');
+        var curM = startM;
+        while (curM + 60 <= endM) {
+          slotsToInsert.push({ date: dStr, time: String(Math.floor(curM/60)).padStart(2,'0')+':'+String(curM%60).padStart(2,'0'), is_booked: false });
+          curM += 60;
+        }
+      }
+      await getSupabase().from('available_slots').insert(slotsToInsert);
+      alert('Horarios generados!'); window.loadAdminSlots();
     };
 
+    window.addSlot = async function() { var d=document.getElementById('admin-slot-date').value, t=document.getElementById('admin-slot-time').value; if(d&&t){ await getSupabase().from('available_slots').insert([{date:d, time:t, is_booked:false}]); window.loadAdminSlots(); } };
+
     // ==========================================
-    // ADMIN: PROVAS E DESBLOQUEIOS
+    // 8. TAREFAS, PROVAS E CORREÇÃO (O CORAÇÃO DO E-LEARNING)
     // ==========================================
     window.switchTasksTab = function(type) {
       document.getElementById('tasks-sub-materials').classList.toggle('hidden', type !== 'materials');
@@ -884,23 +1016,25 @@
     window.initQuizBuilder = async function() {
       quizQuestions = [{ question: '', options: ['', '', '', ''], correct: 0 }];
       window.renderQuizBuilder();
-      var {data} = await getSupabase().from('online_quizzes').select('*').eq('course_type', adminCourseType);
+      var {data} = await getSupabase().from('online_quizzes').select('*').eq('course_type', adminCourseType).order('created_at', {ascending:false});
       var c = document.getElementById('admin-created-quizzes-list');
-      if(c) c.innerHTML = (data||[]).map(q => `<div class="p-2 border rounded text-xs flex justify-between"><span><b>${q.title}</b> (${q.level}) - ${q.is_final_exam?'Prova Final':'Comum'}</span><div><button onclick="startEditQuiz('${q.id}')" class="text-blue-500 mr-2">Editar</button><button onclick="deleteQuiz('${q.id}')" class="text-red-500">Excluir</button></div></div>`).join('');
+      if(c) c.innerHTML = (data||[]).map(q => `<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center"><div><b class="text-slate-800">${q.title}</b><br><span class="text-[10px] text-slate-500 uppercase">${q.level} ${q.is_final_exam?'• Prova Final':''}</span></div><div class="flex gap-2"><button onclick="startEditQuiz('${q.id}')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">Edit</button><button onclick="deleteQuiz('${q.id}')" class="bg-red-100 text-red-600 px-2 py-1 rounded font-bold">Del</button></div></div>`).join('');
     };
     
     window.addQuizQuestionField = function() { quizQuestions.push({ question: '', options: ['', '', '', ''], correct: 0 }); window.renderQuizBuilder(); };
+    
     window.renderQuizBuilder = function() {
-      document.getElementById('quiz-questions-builder').innerHTML = quizQuestions.map((q, i) => `<div class="p-2 border rounded space-y-1 mb-2"><b>Q${i+1}</b><button onclick="removeQuizQuestion(${i})" class="float-right text-[10px] text-red-500">X</button><input class="w-full border p-1" value="${q.question}" onchange="quizQuestions[${i}].question=this.value">`+ q.options.map((o,j)=>`<div class="flex gap-1"><input type="radio" name="q${i}" ${q.correct===j?'checked':''} onchange="quizQuestions[${i}].correct=${j}"><input class="w-full border p-1" value="${o}" onchange="quizQuestions[${i}].options[${j}]=this.value"></div>`).join('') + `</div>`).join('');
+      document.getElementById('quiz-questions-builder').innerHTML = quizQuestions.map((q, i) => `<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2 mb-2"><div class="flex justify-between"><b>P${i+1}</b><button onclick="removeQuizQuestion(${i})" class="text-[10px] text-red-500 font-bold bg-white px-2 py-1 border rounded">Remover</button></div><input class="w-full border rounded px-2 py-1.5 text-xs outline-none focus:border-green-500" value="${q.question}" placeholder="Pergunta" onchange="quizQuestions[${i}].question=this.value">`+ q.options.map((o,j)=>`<div class="flex items-center gap-2"><input type="radio" name="q${i}" ${q.correct===j?'checked':''} onchange="quizQuestions[${i}].correct=${j}"><input class="w-full border rounded px-2 py-1 text-xs outline-none" value="${o}" placeholder="Opção ${j+1}" onchange="quizQuestions[${i}].options[${j}]=this.value"></div>`).join('') + `</div>`).join('');
     };
+    
     window.removeQuizQuestion = function(i) { quizQuestions.splice(i, 1); window.renderQuizBuilder(); };
     
     window.saveNewQuiz = async function() {
-      var t = document.getElementById('quiz-title').value, l = document.getElementById('quiz-level').value, isF = document.getElementById('quiz-is-final').checked;
-      var d = document.getElementById('quiz-desc').value;
+      var t = document.getElementById('quiz-title').value, l = document.getElementById('quiz-level').value, isF = document.getElementById('quiz-is-final').checked, d = document.getElementById('quiz-desc').value;
+      if(!t) return alert('Preencha o título.');
       if(editingQuizId) await getSupabase().from('online_quizzes').update({title:t, description:d, level:l, is_final_exam:isF, questions_json:quizQuestions}).eq('id',editingQuizId);
       else await getSupabase().from('online_quizzes').insert([{ title: t, description:d, level: l, course_type: adminCourseType, is_final_exam: isF, questions_json: quizQuestions }]);
-      alert('Prova Salva!'); window.cancelQuizEditing();
+      alert('Prova Salva com Sucesso!'); window.cancelQuizEditing();
     };
 
     window.startEditQuiz = async function(id) {
@@ -910,14 +1044,15 @@
       document.getElementById('quiz-level').value = data.level; document.getElementById('quiz-is-final').checked = data.is_final_exam;
       quizQuestions = data.questions_json || []; window.renderQuizBuilder();
       document.getElementById('quiz-cancel-edit-btn').classList.remove('hidden');
+      document.getElementById('quiz-title').scrollIntoView();
     };
     window.cancelQuizEditing = function() { editingQuizId=null; document.getElementById('quiz-title').value=''; document.getElementById('quiz-cancel-edit-btn').classList.add('hidden'); window.initQuizBuilder(); };
-    window.deleteQuiz = async function(id) { await getSupabase().from('online_quizzes').delete().eq('id',id); window.initQuizBuilder(); };
+    window.deleteQuiz = async function(id) { if(confirm('Excluir prova?')) { await getSupabase().from('online_quizzes').delete().eq('id',id); window.initQuizBuilder(); } };
 
     window.loadAdminQuizScores = async function() {
       var {data} = await getSupabase().from('quiz_submissions').select('*').order('created_at', {ascending:false});
       allScoresCache = data || [];
-      document.getElementById('score-filter-student').innerHTML = '<option value="all">Todos</option>' + Array.from(new Set(allScoresCache.map(x=>x.student_email))).map(e=>`<option value="${e}">${e}</option>`).join('');
+      document.getElementById('score-filter-student').innerHTML = '<option value="all">Todos os Alunos</option>' + Array.from(new Set(allScoresCache.map(x=>x.student_email))).map(e=>`<option value="${e}">${e}</option>`).join('');
       window.filterAdminQuizScores();
     };
 
@@ -927,23 +1062,23 @@
         if(s==='passed' && !x.is_passed) return false; if(s==='failed' && x.is_passed) return false;
         if(l!=='all' && x.student_level!==l) return false; if(st!=='all' && x.student_email!==st) return false; return true;
       });
-      document.getElementById('admin-quiz-scores-list').innerHTML = f.map(x => `<div class="p-3 border rounded-xl text-xs mb-2"><b>${x.quiz_title}</b> - ${x.student_name}<br>Nota: ${x.score}/${x.total_questions} - <b class="${x.is_passed?'text-green-600':'text-red-600'}">${x.is_passed?'Aprovado':'Reprovado'}</b><br><button onclick="sendTeacherFeedback('${x.id}')" class="text-blue-500 underline mt-1">Devolutiva</button></div>`).join('');
+      document.getElementById('admin-quiz-scores-list').innerHTML = f.map(x => `<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs mb-2 shadow-sm"><div class="flex justify-between items-start"><div><b class="text-sm text-slate-900">${x.quiz_title}</b><br><span class="text-slate-500">${x.student_name}</span></div><span class="px-2 py-1 rounded-lg font-bold ${x.is_passed?'bg-green-100 text-green-700':'bg-red-100 text-red-600'}">${x.score}/${x.total_questions}</span></div>${x.feedback_text?`<div class="mt-2 p-2 bg-white border border-emerald-100 rounded-lg text-emerald-800"><b>Devolutiva:</b> ${x.feedback_text}</div>`:''}<button onclick="sendTeacherFeedback('${x.id}')" class="text-blue-600 font-bold underline mt-2 inline-block">+ Devolución Pedagógica</button></div>`).join('');
     };
 
     window.sendTeacherFeedback = async function(id) {
-      var f = prompt('Escreva a devolutiva:');
-      if(f) { await getSupabase().from('quiz_submissions').update({feedback_text: f}).eq('id', id); alert('Salvo!'); window.loadAdminQuizScores(); }
+      var f = prompt('Escreva a devolutiva (feedback) pedagógica para o aluno:');
+      if(f) { await getSupabase().from('quiz_submissions').update({feedback_text: f}).eq('id', id); alert('Feedback Salvo!'); window.loadAdminQuizScores(); }
     };
 
-    // ALUNO PROVAS
+    // ALUNO FAZENDO A PROVA
     window.loadStudentTasksAndQuizzes = async function() {
       var sb = getSupabase();
       var lvl = userProfileData.student_level || 'iniciante';
-      var {data: q} = await sb.from('online_quizzes').select('*').eq('course_type', appCourseType).or('level.eq.'+lvl+',level.eq.extras');
-      document.getElementById('student-quizzes-list').innerHTML = (q||[]).map(x => `<div class="p-4 border shadow-sm rounded-xl mb-2 flex justify-between items-center"><div><b>${x.title}</b><br><span class="text-xs text-slate-500">${x.level}</span></div><button onclick="startStudentQuiz('${x.id}')" class="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg">Realizar</button></div>`).join('');
+      var {data: q} = await sb.from('online_quizzes').select('*').eq('course_type', appCourseType).or('level.eq.'+lvl+',level.eq.extras').order('created_at', {ascending:false});
+      document.getElementById('student-quizzes-list').innerHTML = (q||[]).map(x => `<div class="p-5 bg-white border border-slate-100 shadow-sm rounded-2xl mb-3 flex justify-between items-center"><div><b class="text-sm text-slate-900">${x.title}</b><br><span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-500 uppercase tracking-widest mt-1 inline-block">${x.level}</span></div><button onclick="startStudentQuiz('${x.id}')" class="bg-[#0f2444] hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">Iniciar</button></div>`).join('');
       
-      var {data: a} = await sb.from('student_assignments').select('*').eq('course_type', appCourseType).or('target_student_email.eq.TODOS,target_student_email.eq.'+currentUser.email);
-      document.getElementById('student-assignments-list').innerHTML = (a||[]).map(x => `<div class="p-4 border shadow-sm rounded-xl mb-2"><b>${x.title}</b><p class="text-xs">${x.description}</p>${x.material_url?`<a href="${x.material_url}" target="_blank" class="text-blue-600 text-xs underline">Material</a>`:''}</div>`).join('');
+      var {data: a} = await sb.from('student_assignments').select('*').eq('course_type', appCourseType).or('target_student_email.eq.TODOS,target_student_email.eq.'+currentUser.email).order('created_at',{ascending:false});
+      document.getElementById('student-assignments-list').innerHTML = (a||[]).map(x => `<div class="p-5 bg-white border border-slate-100 shadow-sm rounded-2xl mb-3"><b class="text-sm text-slate-900">${x.title}</b><p class="text-xs text-slate-600 mt-1 leading-relaxed">${x.description}</p>${x.material_url?`<a href="${x.material_url}" target="_blank" class="block text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2 rounded-xl text-xs mt-3 transition border border-emerald-100"><i class="fa-solid fa-download mr-1"></i> Baixar Material</a>`:''}</div>`).join('');
     };
 
     window.startStudentQuiz = async function(id) {
@@ -952,54 +1087,64 @@
       document.getElementById('student-quizzes-list').classList.add('hidden');
       document.getElementById('active-quiz-container').classList.remove('hidden');
       document.getElementById('active-quiz-title').innerText = data.title;
-      document.getElementById('active-quiz-questions').innerHTML = data.questions_json.map((q,i) => `<div class="border p-2 rounded mb-2"><b>${i+1}. ${q.question}</b>`+q.options.map((o,j)=>`<label class="block text-xs mt-1"><input type="radio" name="ans-${i}" value="${j}"> ${o}</label>`).join('')+`</div>`).join('');
+      document.getElementById('active-quiz-questions').innerHTML = data.questions_json.map((q,i) => `<div class="border border-slate-200 bg-slate-50 p-4 rounded-2xl mb-3"><b class="text-sm text-slate-900">${i+1}. ${q.question}</b><div class="mt-2 space-y-2">`+q.options.map((o,j)=>`<label class="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer text-xs font-medium"><input type="radio" name="ans-${i}" value="${j}" class="w-4 h-4 text-green-600"> ${o}</label>`).join('')+`</div></div>`).join('');
+      document.getElementById('active-quiz-container').scrollIntoView();
     };
 
     window.closeActiveQuiz = function() { activeQuizData=null; document.getElementById('active-quiz-container').classList.add('hidden'); document.getElementById('student-quizzes-list').classList.remove('hidden'); };
 
     window.submitQuizAnswers = async function() {
+      if (!activeQuizData) return;
       var q = activeQuizData.questions_json, score=0, det=[];
       for(var i=0; i<q.length; i++) {
         var sel = document.querySelector(`input[name="ans-${i}"]:checked`);
         if(!sel) return alert('Responda todas as perguntas.');
         var isC = parseInt(sel.value) === q[i].correct;
         if(isC) score++;
-        det.push({q: q[i].question, u_ans: q[i].options[parseInt(sel.value)], c_ans: q[i].options[q[i].correct], is_correct: isC});
+        det.push({question_number: i+1, question: q[i].question, user_choice: q[i].options[parseInt(sel.value)], correct_choice: q[i].options[q[i].correct], is_correct: isC});
       }
       var pct = Math.round((score/q.length)*100), pass = pct>60;
       await getSupabase().from('quiz_submissions').insert([{ quiz_id: activeQuizData.id, quiz_title: activeQuizData.title, student_email: currentUser.email, student_name: userProfileData.full_name, student_level: userProfileData.student_level, score: score, total_questions: q.length, is_passed: pass, answers_detail: det }]);
       
-      // Auto-Desbloqueio de Nivel Mágico
+      // Auto-Desbloqueio Gamificado
       if(activeQuizData.is_final_exam && pass) {
         var idx = orderLevels.indexOf(activeQuizData.level);
-        if(idx !== -1 && idx < orderLevels.length-2) { // -2 pq ultimo é 'extras'
+        if(idx !== -1 && idx < orderLevels.length-2) {
           var nextLvl = orderLevels[idx+1];
           var unls = (userProfileData.unlocked_levels||'iniciante').split(',');
           if(!unls.includes(nextLvl)) {
             unls.push(nextLvl);
             await getSupabase().from('profiles').update({unlocked_levels: unls.join(',')}).eq('id', currentUser.id);
             userProfileData.unlocked_levels = unls.join(',');
-            alert('🎉 Parabéns! Você desbloqueou o nível: ' + nextLvl.toUpperCase() + '!');
           }
         }
       }
 
       document.getElementById('active-quiz-container').classList.add('hidden');
       document.getElementById('quiz-review-container').classList.remove('hidden');
-      document.getElementById('quiz-review-score-badge').innerText = `${score}/${q.length} (${pct}%) - ${pass?'Aprovado':'Reprovado'}`;
-      document.getElementById('quiz-review-questions-list').innerHTML = det.map((x,i) => `<div class="p-2 border rounded ${x.is_correct?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}"><b>${i+1}. ${x.q}</b><br>Você: ${x.u_ans} ${x.is_correct?'✅':'❌'}<br>${!x.is_correct?`Correta: ${x.c_ans}`:''}</div>`).join('');
+      
+      var sBadge = document.getElementById('quiz-review-score-badge');
+      sBadge.innerText = `Puntaje: ${score}/${q.length} (${pct}%)`;
+      sBadge.className = pass ? 'text-lg font-black text-green-600' : 'text-lg font-black text-red-600';
+      
+      var fBox = document.getElementById('quiz-review-feedback-box');
+      if(pass) fBox.innerHTML = '<div class="font-extrabold text-green-900 bg-green-50 p-4 border border-green-200 rounded-2xl"><i class="fa-solid fa-circle-check text-green-600 text-lg mr-1"></i> ¡Aprobado! Has desbloqueado conocimientos.</div>';
+      else fBox.innerHTML = '<div class="font-extrabold text-amber-900 bg-amber-50 p-4 border border-amber-200 rounded-2xl"><i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mr-1"></i> Se requiere más de 60%. Te recomendamos revisar las clases de este módulo y volver a intentar.</div>';
+
+      document.getElementById('quiz-review-questions-list').innerHTML = det.map((x) => `<div class="p-4 border rounded-2xl ${x.is_correct?'bg-green-50/50 border-green-200':'bg-red-50/50 border-red-200'}"><b class="text-sm text-slate-900">${x.question_number}. ${x.question}</b><br><div class="mt-2 text-xs">Tu respuesta: <b class="${x.is_correct?'text-green-700':'text-red-600'}">${x.user_choice}</b> ${x.is_correct?'✅':'❌'}</div>${!x.is_correct?`<div class="mt-1 text-xs bg-white p-2 border rounded-lg">💡 Correcta: <b>${x.correct_choice}</b></div>`:''}</div>`).join('');
+      document.getElementById('quiz-review-container').scrollIntoView();
     };
 
     window.closeQuizReview = function() { document.getElementById('quiz-review-container').classList.add('hidden'); window.loadStudentTasksAndQuizzes(); };
 
     // ==========================================
-    // ADMIN: FATURAMENTO SEPARADO
+    // 9. ADMIN: FATURAMENTO (SENHA E MULTI-MOEDA)
     // ==========================================
     window.unlockFinanceSection = async function() {
       var pass = document.getElementById('finance-admin-pass').value;
       var res = await getSupabase().auth.signInWithPassword({ email: currentUser.email, password: pass });
       if(!res.error) { isFinanceUnlocked = true; document.getElementById('finance-lock-screen').classList.add('hidden'); document.getElementById('finance-unlocked-content').classList.remove('hidden'); window.loadFinanceData(); }
-      else alert('Senha incorreta.');
+      else alert('Contraseña incorrecta.');
     };
 
     window.checkFinanceLockStatus = function() {
@@ -1012,7 +1157,6 @@
       var {data: b} = await sb.from('bookings').select('course_type');
       var {data: p} = await sb.from('profiles').select('email, course_type, has_course_access').eq('has_course_access', true);
       var {data: e} = await sb.from('cash_flow').select('*').order('created_at', {ascending:false});
-      
       p = p.filter(x => !ADMIN_EMAILS.includes((x.email||'').toLowerCase()));
 
       var recPT = (b.filter(x=>x.course_type==='pt').length * PRICES.pt.meet) + (p.filter(x=>x.course_type==='pt').length * PRICES.pt.course);
@@ -1023,14 +1167,15 @@
       document.getElementById('fin-bal-ars').innerText = '$' + (recPT - expPT).toLocaleString('es-AR');
       document.getElementById('fin-bal-brl').innerText = 'R$' + (recES - expES).toLocaleString('pt-BR');
       
-      document.getElementById('fin-cashflow-list').innerHTML = e.map(x => `<div class="text-xs p-2 border-b flex justify-between"><span>${x.description} (${x.course_type.toUpperCase()})</span><b class="text-red-500">-${x.currency} ${x.amount}</b></div>`).join('');
+      document.getElementById('fin-cashflow-list').innerHTML = e.map(x => `<div class="text-xs p-3 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center mb-2"><div><b class="text-slate-800">${x.description}</b><br><span class="text-[10px] text-slate-400 uppercase tracking-widest">${x.course_type} • ${new Date(x.created_at).toLocaleDateString()}</span></div><b class="text-red-600 bg-red-50 px-2 py-1 rounded">-${x.currency} ${x.amount}</b></div>`).join('');
     };
 
     window.registerCashExpense = async function() {
       var a = document.getElementById('fin-exp-amount').value, c = document.getElementById('fin-exp-currency').value, d = document.getElementById('fin-exp-desc').value;
+      if(!a || !d) return alert('Completa monto y justificación');
       var ct = c === 'ARS' ? 'pt' : 'es';
       await getSupabase().from('cash_flow').insert([{ type: 'expense', amount: a, currency: c, course_type: ct, category: 'outro', description: d }]);
-      alert('Registrado!'); window.loadFinanceData();
+      alert('Registrado!'); document.getElementById('fin-exp-amount').value=''; document.getElementById('fin-exp-desc').value=''; window.loadFinanceData();
     };
 
     window.generateFinancePDFReport = async function() {
@@ -1042,53 +1187,54 @@
       p = p.filter(x => !ADMIN_EMAILS.includes((x.email||'').toLowerCase()));
 
       var { jsPDF } = window.jspdf; var doc = new jsPDF();
-      doc.text("Relatorio Financeiro", 14, 16);
+      doc.setFontSize(16); doc.text("Informe Financiero - Plataforma de Clases", 14, 16); doc.setFontSize(10); doc.text("Emision: " + new Date().toLocaleDateString('es-AR'), 14, 22);
       
       var rows = [];
       if(mode==='detailed') {
-        b.forEach(x => rows.push([new Date(x.created_at).toLocaleDateString(), x.student_name, x.course_type==='pt'?'Português':'Espanhol', 'Aula Meet']));
-        p.forEach(x => rows.push([new Date(x.created_at).toLocaleDateString(), x.full_name, x.course_type==='pt'?'Português':'Espanhol', 'Curso Completo']));
-        doc.autoTable({ startY: 25, head: [['Data', 'Aluno', 'Escola', 'Produto']], body: rows });
+        b.forEach(x => rows.push([new Date(x.created_at).toLocaleDateString(), x.student_name, x.course_type==='pt'?'Portugués (ARS)':'Espanhol (BRL)', 'Aula Meet']));
+        p.forEach(x => rows.push([new Date(x.created_at).toLocaleDateString(), x.full_name, x.course_type==='pt'?'Português (ARS)':'Espanhol (BRL)', 'Curso Completo']));
+        doc.autoTable({ startY: 28, head: [['Data/Fecha', 'Alumno', 'Universo/Moneda', 'Servicio']], body: rows, styles:{fontSize:8} });
       } else {
-        rows.push(['Escola Português (ARS)', b.filter(x=>x.course_type==='pt').length + ' aulas', p.filter(x=>x.course_type==='pt').length + ' cursos']);
-        rows.push(['Escola Espanhol (BRL)', b.filter(x=>x.course_type==='es').length + ' aulas', p.filter(x=>x.course_type==='es').length + ' cursos']);
-        doc.autoTable({ startY: 25, head: [['Escola', 'Total Aulas', 'Total Cursos']], body: rows });
+        rows.push(['Escuela Portugués (ARS)', b.filter(x=>x.course_type==='pt').length + ' aulas', p.filter(x=>x.course_type==='pt').length + ' cursos']);
+        rows.push(['Escuela Español (BRL)', b.filter(x=>x.course_type==='es').length + ' aulas', p.filter(x=>x.course_type==='es').length + ' cursos']);
+        doc.autoTable({ startY: 28, head: [['Escuela / Universo', 'Total Aulas 1:1', 'Total Cursos Grabados']], body: rows, styles:{fontSize:9} });
       }
-      doc.save('Faturamento.pdf');
+      doc.save('Finanzas_Reporte.pdf');
     };
 
     // ==========================================
-    // ADMIN: ALUNOS, VÍDEOS E CHAT
+    // 10. ADMIN: ALUNOS, VÍDEOS E CHAT
     // ==========================================
     window.loadAdminStudents = async function() {
       var {data: p} = await getSupabase().from('profiles').select('*').eq('course_type', adminCourseType);
+      loadedStudents = p || [];
+      window.renderAdminStudents();
+    };
+
+    window.renderAdminStudents = function() {
       var c = document.getElementById('admin-students-list');
-      if(!p || p.length===0) { c.innerHTML = '<p class="text-slate-400">Sem alunos nesta escola.</p>'; return; }
-      c.innerHTML = p.map(s => {
-        var unlocks = s.unlocked_levels || 'iniciante';
-        return `<div class="p-3 bg-slate-50 border rounded-xl mb-2"><div class="flex justify-between font-bold text-sm"><span>${s.full_name} (${s.email})</span><button onclick="openChatWithStudent('${s.email}')" class="text-blue-600 underline text-xs">Chat</button></div><div class="text-xs mt-1">Status: ${s.has_course_access?'Liberado':'Sem Acesso'} | Níveis: <input type="text" value="${unlocks}" class="border p-1 rounded" onchange="updateUnlocks('${s.id}', this.value)"> <button onclick="setStudentCourseAccess('${s.id}', '${s.has_course_access?'none':'full'}')" class="bg-slate-200 px-2 rounded">Mudar Acesso</button></div></div>`;
+      if(loadedStudents.length===0) { c.innerHTML = '<p class="text-slate-400">Sem alunos.</p>'; return; }
+      c.innerHTML = loadedStudents.map(s => {
+        return `<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl mb-3 shadow-sm"><div class="flex justify-between font-bold text-sm text-slate-900 mb-2"><span>${s.full_name} <br><span class="text-[10px] text-slate-500 font-medium">${s.email}</span></span><button onclick="openChatWithStudent('${s.email}')" class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold transition border border-blue-100"><i class="fa-solid fa-comment-dots mr-1"></i> Chat</button></div><div class="text-xs text-slate-700 pt-2 border-t border-slate-200/60 flex flex-wrap gap-2 items-center"><span class="bg-white border px-2 py-1 rounded-md"><b>Acesso:</b> ${s.has_course_access?'Liberado':'Bloqueado'}</span><div class="flex items-center gap-1 bg-white border px-2 py-1 rounded-md"><b>Níveis:</b><input type="text" value="${s.unlocked_levels||'iniciante'}" class="w-32 border border-slate-300 rounded px-1 outline-none text-[10px]" onchange="updateUnlocks('${s.id}', this.value)"></div><button onclick="setStudentCourseAccess('${s.id}', '${s.has_course_access?'none':'full'}')" class="bg-[#0f2444] text-white px-2 py-1 rounded-md font-bold transition">Inverter Acesso Curso</button></div></div>`;
       }).join('');
     };
 
-    window.updateUnlocks = async function(id, val) { await getSupabase().from('profiles').update({unlocked_levels: val}).eq('id',id); alert('Níveis atualizados!'); };
-
-    window.setStudentCourseAccess = async function(id, type) {
-      await getSupabase().from('profiles').update({has_course_access: type==='full', trial_lesson_id: null}).eq('id',id);
-      window.loadAdminStudents();
-    };
+    window.updateUnlocks = async function(id, val) { await getSupabase().from('profiles').update({unlocked_levels: val}).eq('id',id); alert('Níveis salvos!'); };
+    window.setStudentCourseAccess = async function(id, type) { await getSupabase().from('profiles').update({has_course_access: type==='full', trial_lesson_id: null}).eq('id',id); window.loadAdminStudents(); };
 
     window.loadAdminLessons = async function() {
-      var {data} = await getSupabase().from('course_lessons').select('*').eq('course_type', adminCourseType);
-      document.getElementById('admin-lessons-management-list').innerHTML = (data||[]).map(x => `<div class="p-2 border text-xs flex justify-between"><span>${x.title} (${x.level})</span><button onclick="deleteLessonPermanently('${x.id}')" class="text-red-500">Del</button></div>`).join('');
+      var {data} = await getSupabase().from('course_lessons').select('*').eq('course_type', adminCourseType).order('created_at',{ascending:false});
+      document.getElementById('admin-lessons-management-list').innerHTML = (data||[]).map(x => `<div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs flex justify-between items-center mb-2"><span class="font-bold text-slate-800">${x.title} <span class="text-[9px] uppercase tracking-widest text-slate-400 bg-white border px-1.5 py-0.5 rounded ml-1">${x.level}</span></span><button onclick="deleteLessonPermanently('${x.id}')" class="bg-red-50 text-red-600 px-2.5 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-trash"></i></button></div>`).join('');
     };
 
     window.addVideo = async function() {
       var t = document.getElementById('admin-video-title').value, u = document.getElementById('admin-video-url').value, l = document.getElementById('admin-video-level').value, m = document.getElementById('admin-video-material').value;
+      if(!t||!u) return alert('Título e URL obrigatórios');
       await getSupabase().from('course_lessons').insert([{title:t, video_url:u, level:l, material_url:m, course_type: adminCourseType, is_active:true}]);
-      alert('Aula Salva!'); window.loadAdminLessons();
+      alert('Aula Salva!'); document.getElementById('admin-video-title').value=''; document.getElementById('admin-video-url').value=''; window.loadAdminLessons();
     };
 
-    window.deleteLessonPermanently = async function(id) { await getSupabase().from('course_lessons').delete().eq('id',id); window.loadAdminLessons(); };
+    window.deleteLessonPermanently = async function(id) { if(confirm('Excluir aula?')){ await getSupabase().from('course_lessons').delete().eq('id',id); window.loadAdminLessons(); } };
 
     window.populateBroadcastStudentOptions = async function() {
       var {data} = await getSupabase().from('profiles').select('email, full_name').eq('course_type', adminCourseType);
@@ -1106,37 +1252,27 @@
       document.getElementById('admin-chat-history-box').classList.remove('hidden');
       var {data} = await getSupabase().from('student_messages').select('*').eq('student_email', em).order('created_at',{ascending:true});
       var cont = document.getElementById('admin-chat-messages-container');
-      cont.innerHTML = (data||[]).map(m=>`<div class="p-1 text-[10px] ${m.sender_type==='student'?'text-left':'text-right'}"><b>${m.sender}:</b> ${m.message_text}</div>`).join('');
+      cont.innerHTML = (data||[]).map(m=>`<div class="p-2 text-xs rounded-xl w-4/5 ${m.sender_type==='student'?'bg-slate-200 text-slate-800 self-start':'bg-green-600 text-white self-end ml-auto'} mb-1"><b class="text-[9px] block opacity-70 mb-0.5">${m.sender}</b> ${m.message_text}</div>`).join('');
       cont.scrollTop = cont.scrollHeight;
     };
 
     window.sendBroadcastMessage = async function() {
       var t = document.getElementById('broadcast-target').value, m = document.getElementById('broadcast-text').value;
-      await getSupabase().from('student_messages').insert([{student_email:t, sender:'Admin', sender_type:'teacher', message_text:m, course_type:adminCourseType}]);
-      document.getElementById('broadcast-text').value='';
-      window.handleBroadcastTargetChange(t);
+      if(!m) return;
+      await getSupabase().from('student_messages').insert([{student_email:t, sender:'Admin Renan', sender_type:'teacher', message_text:m, course_type:adminCourseType}]);
+      document.getElementById('broadcast-text').value=''; window.handleBroadcastTargetChange(t);
     };
 
     window.studentSendMessage = async function() {
       var m = document.getElementById('student-msg-input').value;
+      if(!m) return;
       await getSupabase().from('student_messages').insert([{student_id:currentUser.id, student_email:currentUser.email, sender:userProfileData.full_name, sender_type:'student', message_text:m, course_type:appCourseType}]);
-      alert('Enviado!'); document.getElementById('student-msg-input').value=''; window.loadInfoCenter();
+      alert('Mensagem enviada pro professor!'); document.getElementById('student-msg-input').value=''; window.loadInfoCenter();
     };
 
     window.loadInfoCenter = async function() {
       var {data} = await getSupabase().from('student_messages').select('*').eq('course_type', appCourseType).or('student_email.eq.TODOS,student_email.eq.'+currentUser.email).order('created_at',{ascending:false});
-      document.getElementById('info-center-list').innerHTML = (data||[]).map(m=>`<div class="p-2 text-xs border rounded-xl mb-1"><b>${m.sender}:</b> ${m.message_text}</div>`).join('');
-    };
-
-    window.loadAdminAssignments = async function() {
-      var {data} = await getSupabase().from('student_assignments').select('*').eq('course_type', adminCourseType);
-      document.getElementById('admin-assignments-list').innerHTML = (data||[]).map(a=>`<div class="text-xs p-1">${a.title}</div>`).join('');
-    };
-
-    window.createAssignment = async function() {
-      var t = document.getElementById('assign-title').value, u = document.getElementById('assign-url').value;
-      await getSupabase().from('student_assignments').insert([{title:t, material_url:u, target_student_email:'TODOS', course_type:adminCourseType}]);
-      alert('Criada!'); window.loadAdminAssignments();
+      document.getElementById('info-center-list').innerHTML = (data||[]).map(m=>`<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl mb-2 shadow-sm text-xs"><div class="flex justify-between border-b border-slate-200/50 pb-1.5 mb-1.5"><b class="text-slate-800">${m.sender}</b><span class="text-[10px] text-slate-400">${new Date(m.created_at).toLocaleDateString()}</span></div><p class="text-slate-700 leading-relaxed">${m.message_text}</p></div>`).join('');
     };
 
   </script>
