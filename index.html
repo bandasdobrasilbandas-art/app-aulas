@@ -3956,5 +3956,210 @@
     },100);
 
 </script>
+
+
+<script>
+/* ==========================================================
+   PATCH FINAL — UNIVERSOS, AULAS, YOUTUBE E PROGRESSO
+   ========================================================== */
+(function(){
+  function courseType(){ return (typeof ADMIN_COURSE_TYPE !== 'undefined' && currentUser && ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase())) ? ADMIN_COURSE_TYPE : (typeof CURRENT_COURSE_TYPE !== 'undefined' && CURRENT_COURSE_TYPE) || 'pt'; }
+  function raw(){ return typeof rawClient === 'function' ? rawClient() : getSupabase(); }
+
+  // Título do curso gravado nunca fica igual nos dois universos.
+  window.updateCourseUniverseTexts = function(type){
+    var es = type === 'es';
+    var subtitle = document.querySelector('#course-unlocked-content > div:first-child p');
+    if (subtitle) subtitle.textContent = es ? 'Aprenda espanhol no seu próprio ritmo' : 'Aprenda português no seu próprio ritmo';
+    var homeCard = document.querySelector('#card-course-bg-img')?.parentElement;
+    if (homeCard) {
+      var h = homeCard.querySelector('h3');
+      if (h) h.textContent = es ? 'Curso de espanhol no seu ritmo' : 'Curso de português no seu ritmo';
+    }
+  };
+
+  // Substitui a tradução errada que trocava português por espanhol.
+  var oldSetCourseVisual = window.setCourseVisual;
+  window.setCourseVisual = function(type){
+    if (typeof oldSetCourseVisual === 'function') oldSetCourseVisual(type);
+    window.updateCourseUniverseTexts(type);
+  };
+
+  // Aulas gravadas: filtro explícito pelo universo, independente do Proxy.
+  window.loadLessons = async function(){
+    var container=document.getElementById('lessons-container');
+    var sb=raw();
+    if(!container||!sb||!currentUser)return;
+    var type=courseType();
+    if(typeof canOpenLevel==='function' && !canOpenLevel(currentCourseLevel)) currentCourseLevel='iniciante';
+
+    var r=await sb.from('course_lessons').select('*')
+      .eq('course_type',type)
+      .eq('level',currentCourseLevel)
+      .neq('is_active',false)
+      .order('created_at',{ascending:true});
+    if(r.error){ console.error('Erro ao carregar aulas:',r.error); container.innerHTML='<p class="text-red-500 text-sm">Não foi possível carregar as aulas.</p>'; return; }
+    var lessons=r.data||[];
+
+    var prog=await sb.from('lesson_progress').select('lesson_id').eq('user_id',currentUser.id).eq('completed',true);
+    userCompletedLessons=new Set((prog.data||[]).map(function(x){return x.lesson_id;}));
+
+    var all=await sb.from('course_lessons').select('id').eq('course_type',type).neq('is_active',false);
+    var total=(all.data||[]).length, done=userCompletedLessons.size;
+    var pct=total?Math.round(done/total*100):0;
+    var pt=document.getElementById('course-progress-text'); if(pt)pt.innerText=done+' / '+total+' aulas ('+pct+'%)';
+    var pb=document.getElementById('course-progress-bar'); if(pb)pb.style.width=pct+'%';
+
+    if(!lessons.length){
+      container.innerHTML='<div class="text-center py-8 text-slate-400 space-y-2"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm">Ainda não há vídeos neste módulo.</p></div>';
+      return;
+    }
+
+    container.innerHTML=lessons.map(function(lesson){
+      var done=userCompletedLessons.has(lesson.id);
+      var trial=(userProfileData && userProfileData.trial_lesson_id===lesson.id && !userProfileData.has_course_access);
+      var m=(lesson.video_url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/);
+      var pid='yt-'+String(lesson.id).replace(/[^a-zA-Z0-9_-]/g,'');
+      var video=m ? '<div class="video-secure-container" data-video-id="'+m[1]+'"><div id="'+pid+'" class="w-full h-full"></div><div class="video-top-left-shield"></div><div class="video-bottom-right-shield"></div><div class="video-bottom-left-shield"></div><button type="button" class="fs-custom-btn" onclick="toggleSecureFullscreen(this.parentElement)">⛶ Tela cheia</button></div>' : '<div class="video-secure-container"><video src="'+String(lesson.video_url||'').replace(/"/g,'&quot;')+'" controls controlsList="nodownload noplaybackrate" disablePictureInPicture class="w-full h-full object-cover"></video></div>';
+      var material=lesson.material_url?'<a href="'+lesson.material_url+'" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-50 text-emerald-800 border border-emerald-200 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 mt-2.5"><i class="fa-solid fa-file-arrow-down"></i> Baixar Apostila / Material</a>':'';
+      return '<div class="bg-white p-4 rounded-2xl border '+(done?'border-green-200':'border-slate-100')+' shadow-sm space-y-2"><div class="flex justify-between items-center gap-2"><h4 class="font-bold text-sm text-slate-900 leading-snug flex-1">'+lesson.title+'</h4><button type="button" onclick="toggleLessonProgress(\''+lesson.id+'\')" class="text-[11px] font-bold px-2.5 py-1 rounded-full transition '+(done?'bg-green-600 text-white':'bg-slate-100 text-slate-600')+'">'+(done?'✓ Aula concluída':'Marcar como vista')+'</button></div>'+video+material+(trial?'<div class="text-[10px] text-amber-700 font-bold">Aula de teste</div>':'')+'</div>';
+    }).join('');
+
+    lessons.forEach(function(lesson){
+      var m=(lesson.video_url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/);
+      var pid='yt-'+String(lesson.id).replace(/[^a-zA-Z0-9_-]/g,'');
+      if(m) setTimeout(function(){ window.createYouTubePlayer(pid,m[1]); },120);
+    });
+    window.updateCourseUniverseTexts(type);
+  };
+
+  // Tela cheia: tenta o container e, se o navegador móvel exigir, tenta o iframe.
+  window.toggleSecureFullscreen = async function(target){
+    var el=typeof target==='string'?document.getElementById(target):target;
+    if(!el)return;
+    try{
+      if(document.fullscreenElement || document.webkitFullscreenElement){
+        if(document.exitFullscreen) await document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+        return;
+      }
+      if(el.requestFullscreen){ await el.requestFullscreen({navigationUI:'hide'}); return; }
+      if(el.webkitRequestFullscreen){ el.webkitRequestFullscreen(); return; }
+      var iframe=el.querySelector('iframe');
+      if(iframe && iframe.requestFullscreen){ await iframe.requestFullscreen({navigationUI:'hide'}); return; }
+      if(iframe && iframe.webkitRequestFullscreen){ iframe.webkitRequestFullscreen(); return; }
+      alert('Seu navegador não permite tela cheia neste dispositivo.');
+    }catch(e){
+      console.warn('Fullscreen container falhou:',e);
+      var iframe=el.querySelector('iframe');
+      try{
+        if(iframe && iframe.requestFullscreen) await iframe.requestFullscreen();
+        else if(iframe && iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else alert('Seu navegador bloqueou a tela cheia.');
+      }catch(e2){ alert('Seu navegador bloqueou a tela cheia.'); }
+    }
+  };
+
+  // Player YouTube com fullscreen habilitado para o navegador; shields continuam protegendo links/branding.
+  window.createYouTubePlayer = function(playerId,videoId){
+    if(!(window.YT&&window.YT.Player))return;
+    var old=ytPlayersMap[playerId];
+    if(old&&old.destroy){try{old.destroy();}catch(e){}}
+    ytPlayersMap[playerId]=new YT.Player(playerId,{
+      videoId:videoId,
+      playerVars:{rel:0,modestbranding:1,fs:1,playsinline:1,iv_load_policy:3,disablekb:0},
+      events:{
+        onReady:function(ev){
+          var iframe=ev.target.getIframe&&ev.target.getIframe();
+          if(iframe){ iframe.setAttribute('allowfullscreen',''); iframe.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen'); }
+        },
+        onStateChange:function(ev){
+          if(ev.data===YT.PlayerState.ENDED){try{ev.target.seekTo(0);ev.target.pauseVideo();}catch(e){}}
+        }
+      }
+    });
+  };
+
+  // Marcar como visto: atualização explícita, com tratamento de erro.
+  window.toggleLessonProgress = async function(lessonId){
+    if(!currentUser)return;
+    var sb=raw();
+    var done=userCompletedLessons.has(lessonId);
+    var result;
+    if(done) result=await sb.from('lesson_progress').delete().eq('user_id',currentUser.id).eq('lesson_id',lessonId);
+    else result=await sb.from('lesson_progress').upsert([{user_id:currentUser.id,lesson_id:lessonId,completed:true}],{onConflict:'user_id,lesson_id'});
+    if(result.error){ console.error(result.error); alert('Não foi possível atualizar o progresso: '+result.error.message); return; }
+    await window.loadLessons();
+  };
+
+  // Cadastro de aula: sempre grava o universo administrativo explicitamente.
+  window.addVideo = async function(){
+    var title=(document.getElementById('admin-video-title')?.value||'').trim();
+    var url=(document.getElementById('admin-video-url')?.value||'').trim();
+    var level=document.getElementById('admin-video-level')?.value;
+    var material=(document.getElementById('admin-video-material')?.value||'').trim();
+    var notify=!!document.getElementById('admin-video-notify')?.checked;
+    if(!title||!url)return alert('Preencha título e link do vídeo.');
+    var sb=raw(), type=ADMIN_COURSE_TYPE;
+    var r=await sb.from('course_lessons').insert([{title:title,video_url:url,level:level,material_url:material||null,is_active:true,course_type:type}]);
+    if(r.error){alert('Erro ao cadastrar: '+r.error.message);return;}
+    if(notify){
+      var n=await sb.from('student_messages').insert([{student_email:'nivel_'+level,sender:'Profesor Renan Barbosa',sender_type:'teacher',message_text:'Nova aula publicada no módulo: "'+title+'".',file_url:material||null,course_type:type}]);
+      if(n.error) console.warn('Aviso não enviado:',n.error);
+    }
+    ['admin-video-title','admin-video-url','admin-video-material'].forEach(function(id){var x=document.getElementById(id);if(x)x.value='';});
+    var cb=document.getElementById('admin-video-notify');if(cb)cb.checked=false;
+    alert('Aula cadastrada somente no universo '+COURSE_CONFIG[type].flag+' '+COURSE_CONFIG[type].name+'.');
+    await window.loadAdminLessonsManagement();
+  };
+
+  // Gestão administrativa: lista, oculta/mostra e exclui apenas o universo atual.
+  window.loadAdminLessonsManagement = async function(){
+    var c=document.getElementById('admin-lessons-management-list'),sb=raw();
+    if(!c||!sb)return;
+    var type=ADMIN_COURSE_TYPE;
+    var r=await sb.from('course_lessons').select('*').eq('course_type',type).order('created_at',{ascending:false});
+    if(r.error){c.innerHTML='<p class="text-red-500 text-xs">Erro ao carregar aulas: '+r.error.message+'</p>';return;}
+    var labels={iniciante:'Iniciante (A1-A2)',medio:'Intermediário (B1-B2)',avancado:'Avançado (C1-C2)',extras:'Extras'};
+    c.innerHTML=(r.data||[]).map(function(l){
+      var active=l.is_active!==false;
+      return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2"><div class="flex justify-between items-start gap-2"><div><h4 class="font-bold text-slate-900 text-xs">'+l.title+'</h4><span class="text-[10px] text-slate-500">'+COURSE_CONFIG[type].flag+' '+COURSE_CONFIG[type].name+' · '+(labels[l.level]||l.level)+'</span></div><span class="px-2 py-0.5 rounded-full text-[10px] font-bold '+(active?'bg-green-100 text-green-700':'bg-red-100 text-red-600')+'">'+(active?'Visível':'Oculta')+'</span></div><div class="flex gap-2"><button type="button" onclick="toggleLessonVisibility(\''+l.id+'\','+active+')" class="flex-1 py-2 px-2 rounded-xl text-[11px] font-bold '+(active?'bg-amber-500 text-white':'bg-green-600 text-white')+'">'+(active?'👁 Ocultar aula':'👁 Tornar disponível')+'</button><button type="button" onclick="deleteLessonPermanently(\''+l.id+'\')" class="py-2 px-3 rounded-xl bg-red-100 text-red-700 font-bold text-[11px]"><i class="fa-solid fa-trash"></i> Excluir</button></div></div>';
+    }).join('')||'<p class="text-slate-400">Nenhuma aula cadastrada neste universo.</p>';
+  };
+
+  window.toggleLessonVisibility = async function(id,current){
+    var sb=raw(),type=ADMIN_COURSE_TYPE;
+    var r=await sb.from('course_lessons').update({is_active:!current}).eq('id',id).eq('course_type',type).select('id,is_active');
+    if(r.error){alert('Não foi possível alterar a visibilidade: '+r.error.message);return;}
+    if(!r.data||!r.data.length){alert('Aula não encontrada neste universo.');return;}
+    await window.loadAdminLessonsManagement();
+  };
+
+  window.deleteLessonPermanently = async function(id){
+    if(!confirm('Tem certeza que deseja excluir esta aula permanentemente? Esta ação não pode ser desfeita.'))return;
+    var sb=raw(),type=ADMIN_COURSE_TYPE;
+    // Primeiro remove progresso relacionado, depois a aula. Se a política impedir o primeiro, ainda tentamos a aula.
+    var pr=await sb.from('lesson_progress').delete().eq('lesson_id',id);
+    if(pr.error) console.warn('Não foi possível limpar progresso:',pr.error.message);
+    var r=await sb.from('course_lessons').delete().eq('id',id).eq('course_type',type).select('id');
+    if(r.error){alert('Não foi possível excluir a aula: '+r.error.message);return;}
+    if(!r.data||!r.data.length){alert('Aula não encontrada neste universo.');return;}
+    alert('Aula excluída com sucesso.');
+    await window.loadAdminLessonsManagement();
+  };
+
+  // Garante o texto correto também quando o app troca de tela.
+  var oldNavigate2=window.navigate;
+  window.navigate=function(tab){
+    oldNavigate2(tab);
+    setTimeout(function(){ if(typeof CURRENT_COURSE_TYPE!=='undefined') window.updateCourseUniverseTexts(courseType()); },30);
+  };
+
+  // Corrige imediatamente a string estática errada, sem depender do tradutor.
+  setTimeout(function(){
+    if(typeof CURRENT_COURSE_TYPE!=='undefined')window.updateCourseUniverseTexts(courseType());
+  },100);
+})();
+</script>
 </body>
 </html>
