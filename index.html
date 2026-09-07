@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -4997,6 +4997,130 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(initValidation,250);}); else setTimeout(initValidation,250);
   var oldNavValidation=window.navigate;
   if(typeof oldNavValidation==='function') window.navigate=function(tab){ oldNavValidation(tab); setTimeout(function(){ if(tab==='course')installCourseReceiptUpload(); },30); };
+})();
+</script>
+
+
+<script>
+/* ==========================================================
+   PATCH FINAL — RESERVAS DO ALUNO + NOTIFICAÇÃO + HISTÓRICO
+   ========================================================== */
+(function(){
+  'use strict';
+  function hRaw(){ try{return typeof rawClient==='function'?rawClient():(typeof getSupabase==='function'?getSupabase():null);}catch(e){return null;} }
+  function hEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function hStudentType(){return (typeof CURRENT_COURSE_TYPE!=='undefined'&&CURRENT_COURSE_TYPE)||((typeof userProfileData!=='undefined'&&userProfileData&&userProfileData.course_type)||'pt');}
+  function hAdminType(){return (typeof ADMIN_COURSE_TYPE!=='undefined'&&ADMIN_COURSE_TYPE)||'pt';}
+  function hCfg(t){return t==='es'?{flag:'🇦🇷',name:'Espanhol'}:{flag:'🇧🇷',name:'Português'};}
+  function hIsAdmin(){return !!(typeof currentUser!=='undefined'&&currentUser&&typeof ADMIN_EMAILS!=='undefined'&&ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase()));}
+  async function hAdminName(){
+    if(typeof currentUser==='undefined'||!currentUser)return {id:null,email:'Administrador'};
+    return {id:currentUser.id||null,email:currentUser.email||'Administrador'};
+  }
+  async function hLog(receipt,fromStatus,toStatus,note){
+    var sb=hRaw(); if(!sb)return;
+    var a=await hAdminName();
+    try{await sb.from('payment_validation_history').insert([{
+      receipt_id:receipt.id,student_email:receipt.student_email,course_type:receipt.course_type||'pt',receipt_type:receipt.receipt_type,
+      from_status:fromStatus||null,to_status:toStatus,admin_id:a.id,admin_email:a.email,note:note||null
+    }]);}catch(e){console.error('Histórico de validação:',e);}
+  }
+  async function hNotifyStudent(email,type,text){
+    var sb=hRaw(); if(!sb||!email)return;
+    try{await sb.from('student_messages').insert([{student_email:email,sender:'Profesor Renan Barbosa',sender_type:'teacher',message_text:text,file_url:null,course_type:type||'pt'}]);}catch(e){console.error('Notificação ao aluno:',e);}
+  }
+
+  // -------- MIS RESERVAS DO ALUNO --------
+  function ensureMyBookingsBox(){
+    var sec=document.getElementById('tab-calendar'); if(!sec||document.getElementById('student-my-bookings'))return;
+    var box=document.createElement('div'); box.id='student-my-bookings'; box.className='bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3';
+    box.innerHTML='<div><h3 class="font-bold text-sm text-slate-900">Mis reservas</h3><p class="text-[11px] text-slate-500">Estado de tus clases reservadas</p></div><div id="student-my-bookings-list" class="space-y-2 text-xs text-slate-500">Cargando...</div>';
+    sec.appendChild(box);
+  }
+  window.loadStudentMyBookings=async function(){
+    ensureMyBookingsBox(); var c=document.getElementById('student-my-bookings-list'),sb=hRaw(); if(!c||!sb||typeof currentUser==='undefined'||!currentUser)return;
+    var type=hStudentType();
+    var q=await sb.from('bookings').select('*').eq('student_email',currentUser.email).eq('course_type',type).order('created_at',{ascending:false});
+    if(q.error){c.innerHTML='<p class="text-red-500">'+hEsc(q.error.message)+'</p>';return;}
+    var rows=q.data||[]; if(!rows.length){c.innerHTML='<p class="text-slate-400">Aún no tenés reservas.</p>';return;}
+    c.innerHTML=rows.map(function(b){
+      var st=b.status||'pending_validation';
+      var text=st==='confirmed'?'Confirmada':st==='payment_rejected'?'Pago rechazado':st==='pending_receipt'?'Pendiente de comprobante':'Pendiente de validación';
+      var cls=st==='confirmed'?'bg-green-100 text-green-700':st==='payment_rejected'?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700';
+      return '<div class="p-3.5 rounded-2xl border border-slate-100 bg-slate-50"><div class="flex justify-between gap-2"><div><b class="text-xs">📅 '+hEsc(b.slot_date||'')+' · '+hEsc(b.slot_time||'')+'</b><div class="text-[10px] text-slate-500">Google Meet</div></div><span class="'+cls+' px-2 py-1 rounded-full text-[9px] font-bold h-fit">'+text+'</span></div>'+(b.meet_link&&st==='confirmed'?'<a href="'+hEsc(b.meet_link)+'" target="_blank" class="inline-block mt-2 text-[10px] text-blue-600 underline font-bold">Abrir enlace de Meet</a>':'')+'</div>';
+    }).join('');
+  };
+
+  // -------- HISTÓRICO ADMIN --------
+  function ensureHistoryUI(){
+    var admin=document.getElementById('tab-admin'); if(!admin)return; var nav=admin.querySelector('.flex.gap-2.border-b');
+    if(nav&&!document.getElementById('admin-btn-tab-payment-history')){var b=document.createElement('button');b.id='admin-btn-tab-payment-history';b.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';b.textContent='🧾 Histórico';b.onclick=function(){window.showAdminTab('payment-history');};nav.appendChild(b);}
+    if(!document.getElementById('admin-sec-payment-history')){var s=document.createElement('div');s.id='admin-sec-payment-history';s.className='space-y-4 hidden';s.innerHTML='<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3"><div class="flex justify-between items-center"><div><h3 class="font-bold text-sm">Histórico de pagamentos</h3><p class="text-[11px] text-slate-500">Aprovados, rejeitados e reconsiderações dos dois idiomas</p></div><button onclick="loadPaymentHistory()" class="px-3 py-2 rounded-xl bg-slate-100 text-[11px] font-bold">Atualizar</button></div><div id="admin-payment-history-list" class="space-y-2 text-xs text-slate-500">Carregando...</div></div>';admin.appendChild(s);}
+  }
+  var prevShow=window.showAdminTab;
+  window.showAdminTab=function(type){
+    ensureHistoryUI();
+    if(type==='payment-history'){
+      document.querySelectorAll('[id^="admin-sec-"]').forEach(function(el){el.classList.add('hidden');}); document.getElementById('admin-sec-payment-history')?.classList.remove('hidden');
+      document.querySelectorAll('[id^="admin-btn-tab-"]').forEach(function(el){el.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';}); var b=document.getElementById('admin-btn-tab-payment-history');if(b)b.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap'; window.loadPaymentHistory(); return;
+    }
+    if(typeof prevShow==='function')prevShow(type);
+  };
+
+  window.loadPaymentHistory=async function(){
+    var c=document.getElementById('admin-payment-history-list'),sb=hRaw(); if(!c||!sb)return; c.innerHTML='Carregando...';
+    var q=await sb.from('student_receipts').select('id,student_email,receipt_type,note,file_url,created_at,course_type,validation_status,validated_at,validated_by_email,amount,currency').in('validation_status',['approved','rejected']).order('validated_at',{ascending:false}).limit(300);
+    if(q.error){c.innerHTML='<p class="text-red-500">'+hEsc(q.error.message)+'</p>';return;}
+    var rows=q.data||[]; if(!rows.length){c.innerHTML='<p class="text-slate-400">Nenhum pagamento validado ou rejeitado ainda.</p>';return;}
+    c.innerHTML=rows.map(function(r){var ok=r.validation_status==='approved',t=r.course_type||'pt';return '<div class="p-3.5 rounded-2xl border bg-slate-50"><div class="flex justify-between gap-2"><div><b class="text-xs">'+(r.receipt_type==='clase_meet'?'📅 Aula Meet':'🛒 Curso')+'</b><div class="text-[10px] font-bold text-slate-500">'+hCfg(t).flag+' '+hCfg(t).name+'</div></div><span class="'+(ok?'bg-green-100 text-green-700':'bg-red-100 text-red-700')+' px-2 py-1 rounded-full text-[9px] font-bold h-fit">'+(ok?'APROVADO':'REJEITADO')+'</span></div><div class="text-[11px] mt-1"><b>'+hEsc(r.student_email||'Aluno')+'</b><br>'+hEsc(r.note||'')+'</div><div class="text-[10px] text-slate-500 mt-2">Decidido por: <b>'+hEsc(r.validated_by_email||'Administrador')+'</b><br>'+(r.validated_at?new Date(r.validated_at).toLocaleString('pt-BR'):'')+'</div><div class="flex justify-between items-center mt-2">'+(r.file_url?'<a href="'+hEsc(r.file_url)+'" target="_blank" class="text-[10px] text-blue-600 underline font-bold">Ver comprovante</a>':'<span></span>')+'<button onclick="reconsiderReceipt(\''+r.id+'\')" class="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 text-[10px] font-bold">↩ Reconsiderar</button></div></div>';}).join('');
+  };
+
+  // -------- CENTRAL: SÓ PENDENTES --------
+  window.loadAdminNotifications=async function(){
+    var c=document.getElementById('admin-notifications-list'),sb=hRaw(); if(!c||!sb)return; c.innerHTML='<p class="text-slate-400">Carregando...</p>';
+    var rr=await sb.from('student_receipts').select('id,student_email,receipt_type,note,file_url,created_at,course_type,validation_status,amount,currency,booking_ids').eq('validation_status','pending').order('created_at',{ascending:false}).limit(300);
+    if(rr.error){c.innerHTML='<p class="text-red-500">'+hEsc(rr.error.message)+'</p>';return;}
+    var rows=(rr.data||[]).filter(function(r){return !!r.file_url;});
+    if(!rows.length){c.innerHTML='<p class="text-slate-400">Nenhum pagamento aguardando validação.</p>';return;}
+    c.innerHTML=rows.map(function(r){var t=r.course_type||'pt',title=r.receipt_type==='clase_meet'?'📅 Comprovante de aula Meet':'🛒 Comprovante do curso';return '<div class="p-3.5 rounded-2xl border bg-slate-50"><div class="flex justify-between"><div><b class="text-xs">'+title+'</b><div class="text-[10px] font-bold text-slate-500">'+hCfg(t).flag+' '+hCfg(t).name+'</div></div><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-[9px] font-bold h-fit">AGUARDANDO VALIDAÇÃO</span></div><div class="text-[11px] mt-1"><b>'+hEsc(r.student_email||'Aluno')+'</b><br>'+hEsc(r.note||'')+'</div><div class="flex justify-between mt-2">'+(r.file_url?'<a href="'+hEsc(r.file_url)+'" target="_blank" class="text-[10px] text-blue-600 underline font-bold">Ver comprovante</a>':'<span></span>')+'<div class="flex gap-2"><button onclick="validateReceipt(\''+r.id+'\',\'approved\')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold">✅ Aprovar</button><button onclick="validateReceipt(\''+r.id+'\',\'rejected\')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-xl text-[10px] font-bold">❌ Rejeitar</button></div></div></div>';}).join('');
+  };
+
+  // -------- VALIDAÇÃO COM NOTIFICAÇÃO E AUDITORIA --------
+  window.validateReceipt=async function(receiptId,decision){
+    var approve=decision==='approved',sb=hRaw(); if(!sb)return; var qr=await sb.from('student_receipts').select('*').eq('id',receiptId).single(); if(qr.error)return alert(qr.error.message); var r=qr.data,old=r.validation_status||'pending',type=r.course_type||'pt';
+    if(!confirm(approve?'Confirmar este pagamento?':'Rejeitar este comprovante?'))return;
+    var admin=await hAdminName();
+    if(r.receipt_type==='clase_meet'&&approve){
+      var ids=Array.isArray(r.booking_ids)?r.booking_ids:[]; var bq=ids.length?await sb.from('bookings').select('id,slot_id,status').in('id',ids):await sb.from('bookings').select('id,slot_id,status').eq('student_email',r.student_email).eq('course_type',type).in('status',['pending_validation','pending_receipt','payment_rejected']);
+      var bs=bq.data||[];
+      for(const b of bs){ if(b.status==='payment_rejected'&&b.slot_id){var sq=await sb.from('available_slots').select('is_booked').eq('id',b.slot_id).single();if(!sq.error&&sq.data&&sq.data.is_booked){return alert('Este horário já foi ocupado por outro aluno após a rejeição. Escolha outro horário antes de aprovar.');}} }
+      var slots=bs.map(function(x){return x.slot_id;}).filter(Boolean); if(slots.length)await sb.from('available_slots').update({is_booked:true}).in('id',slots); if(bs.length)await sb.from('bookings').update({status:'confirmed'}).in('id',bs.map(function(x){return x.id;}));
+    }
+    if(r.receipt_type==='clase_meet'&&!approve){
+      var ids2=Array.isArray(r.booking_ids)?r.booking_ids:[]; var bq2=ids2.length?await sb.from('bookings').select('id,slot_id').in('id',ids2):await sb.from('bookings').select('id,slot_id').eq('student_email',r.student_email).eq('course_type',type).in('status',['pending_validation','pending_receipt','confirmed']); var bs2=bq2.data||[]; if(bs2.length){await sb.from('bookings').update({status:'payment_rejected'}).in('id',bs2.map(function(x){return x.id;}));var slots2=bs2.map(function(x){return x.slot_id;}).filter(Boolean);if(slots2.length)await sb.from('available_slots').update({is_booked:false}).in('id',slots2);}
+    }
+    if(r.receipt_type==='curso_completo'||r.receipt_type==='curso_pendente'){
+      if(approve)await sb.from('profiles').update({has_course_access:true}).eq('email',r.student_email).eq('course_type',type); else await sb.from('profiles').update({has_course_access:false}).eq('email',r.student_email).eq('course_type',type);
+    }
+    var up=await sb.from('student_receipts').update({validation_status:decision,validated_at:new Date().toISOString(),validated_by:admin.id,validated_by_email:admin.email}).eq('id',receiptId); if(up.error)return alert(up.error.message);
+    await hLog(r,old,decision,approve?'Pagamento aprovado':'Comprovante rejeitado');
+    await hNotifyStudent(r.student_email,type,approve?(r.receipt_type==='clase_meet'?'✅ ¡Tu pago fue aprobado y tu clase por Google Meet quedó confirmada! Revisá “Mis reservas” para ver el estado de tu clase.':'✅ ¡Tu pago fue aprobado! Tu acceso al curso ya está liberado.'):(r.receipt_type==='clase_meet'?'❌ Tu comprobante de la clase Meet fue rechazado. Revisá los datos del pago y enviá un nuevo comprobante.':'❌ Tu comprobante del curso fue rechazado. Revisá los datos del pago y enviá un nuevo comprobante.'));
+    alert(approve?'Pagamento aprovado e aluno notificado.':'Comprovante rejeitado e aluno notificado.');
+    await window.loadAdminNotifications(); if(typeof window.loadPaymentHistory==='function')await window.loadPaymentHistory(); if(typeof window.loadFinanceData==='function')await window.loadFinanceData(); if(typeof window.loadAdminBookings==='function')await window.loadAdminBookings();
+  };
+
+  window.reconsiderReceipt=async function(receiptId){
+    var sb=hRaw();if(!sb)return;var qr=await sb.from('student_receipts').select('*').eq('id',receiptId).single();if(qr.error)return alert(qr.error.message);var r=qr.data,old=r.validation_status||'pending';if(!confirm('Reabrir esta decisão e devolver o pagamento para “Aguardando validação”?'))return;
+    var up=await sb.from('student_receipts').update({validation_status:'pending',validated_at:null,validated_by:null,validated_by_email:null}).eq('id',receiptId);if(up.error)return alert(up.error.message);await hLog(r,old,'pending','Decisão reaberta para reconsideração');
+    await hNotifyStudent(r.student_email,r.course_type||'pt','ℹ️ La validación de tu pago fue reabierta para una nueva revisión. Te avisaremos cuando haya una nueva decisión.');
+    alert('Pagamento reaberto para validação. Ele voltou para a Central de notificações.');await window.loadPaymentHistory();await window.loadAdminNotifications();
+  };
+
+  // navegação: carrega Mis reservas e mensagens atualizadas
+  var oldNav=window.navigate;
+  if(typeof oldNav==='function')window.navigate=function(tab){oldNav(tab);setTimeout(function(){if(tab==='calendar')window.loadStudentMyBookings();if(tab==='info'&&typeof window.loadInfoCenter==='function')window.loadInfoCenter();},60);};
+  function init(){ensureMyBookingsBox();ensureHistoryUI();if(!hIsAdmin()&&typeof currentUser!=='undefined'&&currentUser)window.loadStudentMyBookings();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(init,350);});else setTimeout(init,350);
 })();
 </script>
 
