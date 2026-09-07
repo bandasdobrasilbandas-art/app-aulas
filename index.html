@@ -3129,10 +3129,21 @@
       }).join('');
     };
 
+    // Alternância de visibilidade: usa o cliente bruto e filtra explicitamente
+    // pelo universo administrativo para não depender do proxy de isolamento.
     window.toggleLessonVisibility = async function(lessonId, currentStatus) {
-      var sb = getSupabase();
-      await sb.from('course_lessons').update({ is_active: !currentStatus }).eq('id', lessonId);
-      window.loadAdminLessonsManagement();
+      var sb = rawClient();
+      if (!sb) return alert('Conexão com o banco indisponível.');
+      var type = ADMIN_COURSE_TYPE || 'pt';
+      var result = await sb.from('course_lessons')
+        .update({ is_active: currentStatus !== true })
+        .eq('id', lessonId)
+        .eq('course_type', type);
+      if (result.error) {
+        console.error('Erro ao alterar visibilidade da aula:', result.error);
+        return alert('Não foi possível alterar a visibilidade da aula: ' + result.error.message);
+      }
+      await window.loadAdminLessonsManagement();
     };
 
     window.deleteLessonPermanently = async function(lessonId) {
