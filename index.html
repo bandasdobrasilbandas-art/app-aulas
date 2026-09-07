@@ -4218,19 +4218,44 @@
     c.innerHTML=(r.data||[]).map(function(l){
       var active=l.is_active!==false;
       var drive=l.material_url?'<div class="text-[10px] text-emerald-700 truncate">📎 Drive: '+esc(l.material_url)+'</div>':'<div class="text-[10px] text-slate-400">Sem link do Drive</div>';
-      return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2"><div class="flex justify-between items-start gap-2"><div class="min-w-0"><h4 class="font-bold text-slate-900 text-xs">'+esc(l.title)+'</h4><span class="text-[10px] text-slate-500">'+universeLabel(type)+' · '+esc(labels[l.level]||l.level)+'</span>'+drive+'</div><span class="px-2 py-0.5 rounded-full text-[10px] font-bold '+(active?'bg-green-100 text-green-700':'bg-red-100 text-red-600')+'">'+(active?'Visível':'Oculta')+'</span></div><div class="grid grid-cols-3 gap-2"><button type="button" onclick="toggleLessonVisibility(\''+l.id+'\','+active+')" class="py-2 px-2 rounded-xl text-[11px] font-bold '+(active?'bg-amber-500 text-white':'bg-green-600 text-white')+'">'+(active?'Ocultar':'Mostrar')+'</button><button type="button" onclick="editLessonDriveLink(\''+l.id+'\', '+JSON.stringify(l.material_url||'')+')" class="py-2 px-2 rounded-xl bg-blue-100 text-blue-700 font-bold text-[11px]">📎 Drive</button><button type="button" onclick="deleteLessonPermanently(\''+l.id+'\')" class="py-2 px-2 rounded-xl bg-red-100 text-red-700 font-bold text-[11px]"><i class="fa-solid fa-trash"></i> Excluir</button></div></div>';
+      return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2"><div class="flex justify-between items-start gap-2"><div class="min-w-0"><h4 class="font-bold text-slate-900 text-xs">'+esc(l.title)+'</h4><span class="text-[10px] text-slate-500">'+universeLabel(type)+' · '+esc(labels[l.level]||l.level)+'</span>'+drive+'</div><span class="px-2 py-0.5 rounded-full text-[10px] font-bold '+(active?'bg-green-100 text-green-700':'bg-red-100 text-red-600')+'">'+(active?'Visível':'Oculta')+'</span></div><div class="grid grid-cols-3 gap-2"><button type="button" onclick="toggleLessonVisibility(\''+l.id+'\','+active+')" class="py-2 px-2 rounded-xl text-[11px] font-bold '+(active?'bg-amber-500 text-white':'bg-green-600 text-white')+'">'+(active?'Ocultar':'Mostrar')+'</button><button type="button" onclick="editLessonDriveLink(\''+l.id+'\')" class="py-2 px-2 rounded-xl bg-blue-100 text-blue-700 font-bold text-[11px]">📎 Drive</button><button type="button" onclick="deleteLessonPermanently(\''+l.id+'\')" class="py-2 px-2 rounded-xl bg-red-100 text-red-700 font-bold text-[11px]"><i class="fa-solid fa-trash"></i> Excluir</button></div></div>';
     }).join('')||'<p class="text-slate-400">Nenhuma aula cadastrada neste universo.</p>';
   };
 
-  window.editLessonDriveLink = async function(id,current){
-    var value=prompt('Cole o link do Google Drive desta aula.\nDeixe vazio para remover o link:', current||'');
-    if(value===null)return;
-    value=value.trim();
+  window.editLessonDriveLink = async function(id){
     var sb=sbRaw();
-    var r=await sb.from('course_lessons').update({material_url:value||null}).eq('id',id).eq('course_type',ADMIN_COURSE_TYPE).select('id');
-    if(r.error)return alert('Erro ao salvar o link do Drive: '+r.error.message);
-    if(!r.data||!r.data.length)return alert('Aula não encontrada neste universo.');
-    alert(value?'Link do Drive salvo.':'Link do Drive removido.');
+    if(!sb) return alert('Não foi possível conectar ao banco.');
+
+    var type=(typeof ADMIN_COURSE_TYPE!=='undefined' && ADMIN_COURSE_TYPE) ? ADMIN_COURSE_TYPE : 'pt';
+    var current='';
+    var q=await sb.from('course_lessons')
+      .select('id,material_url,course_type')
+      .eq('id',id)
+      .eq('course_type',type)
+      .maybeSingle();
+
+    if(q.error) return alert('Erro ao buscar a aula: '+q.error.message);
+    if(!q.data) return alert('Aula não encontrada neste universo.');
+    current=q.data.material_url||'';
+
+    var value=prompt('Cole o link do Google Drive desta aula.\n\nVocê pode colar o link da pasta, PDF ou material.\nDeixe vazio para remover o link:', current);
+    if(value===null) return;
+    value=value.trim();
+
+    if(value && !/^https?:\/\//i.test(value)){
+      return alert('Cole um link completo, começando com https://');
+    }
+
+    var r=await sb.from('course_lessons')
+      .update({material_url:value||null})
+      .eq('id',id)
+      .eq('course_type',type)
+      .select('id,material_url');
+
+    if(r.error) return alert('Erro ao salvar o link do Drive: '+r.error.message);
+    if(!r.data||!r.data.length) return alert('Não foi possível atualizar esta aula.');
+
+    alert(value ? 'Link do Drive salvo com sucesso.' : 'Link do Drive removido.');
     await window.loadAdminLessonsManagement();
   };
 
@@ -4430,5 +4455,300 @@
 })();
 </script>
 
+
+<script>
+/* ==========================================================
+   CAMADA FINAL ESTAVEL — 2026-09
+   Unifica universos, aulas, tarefas, progresso, Drive,
+   notificacoes, pedidos, quizzes, pagamentos e fullscreen.
+   Esta camada e intencionalmente a ultima definicao das funcoes.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  function raw(){
+    try { return (typeof rawClient === 'function') ? rawClient() : ((typeof getSupabase === 'function') ? getSupabase() : null); }
+    catch(e){ return null; }
+  }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function adminIsLogged(){
+    return !!(typeof currentUser !== 'undefined' && currentUser && typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase()));
+  }
+  function studentUniverse(){
+    if(typeof CURRENT_COURSE_TYPE !== 'undefined' && (CURRENT_COURSE_TYPE==='pt'||CURRENT_COURSE_TYPE==='es')) return CURRENT_COURSE_TYPE;
+    if(typeof userProfileData !== 'undefined' && userProfileData && (userProfileData.course_type==='pt'||userProfileData.course_type==='es')) return userProfileData.course_type;
+    return localStorage.getItem('learning_universe')==='es'?'es':'pt';
+  }
+  function adminUniverse(){
+    if(typeof ADMIN_COURSE_TYPE !== 'undefined' && (ADMIN_COURSE_TYPE==='pt'||ADMIN_COURSE_TYPE==='es')) return ADMIN_COURSE_TYPE;
+    return localStorage.getItem('admin_universe')==='es'?'es':'pt';
+  }
+  function cfg(type){
+    if(typeof COURSE_CONFIG !== 'undefined' && COURSE_CONFIG[type]) return COURSE_CONFIG[type];
+    return type==='es'
+      ? {flag:'🇦🇷',name:'Espanhol',ui:'pt',currency:'BRL',paymentLabel:'PIX',paymentValue:'40447470833'}
+      : {flag:'🇧🇷',name:'Português',ui:'es',currency:'ARS',paymentLabel:'Mercado Pago'};
+  }
+  function money(v,type){
+    type=type||studentUniverse(); var c=cfg(type); var n=Number(v)||0;
+    try{return new Intl.NumberFormat(type==='es'?'pt-BR':'es-AR',{style:'currency',currency:c.currency,maximumFractionDigits:0}).format(n);}catch(e){return n+' '+c.currency;}
+  }
+  function courseLabel(type){ return type==='es'?'🇦🇷 Espanhol':'🇧🇷 Português'; }
+  function isUuidLike(v){ return /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(String(v||'')); }
+
+  // ---------- textos dos dois universos ----------
+  window.updateCourseUniverseTexts=function(type){
+    type=type||studentUniverse();
+    var subtitle=document.querySelector('#course-unlocked-content h2 + p');
+    if(subtitle) subtitle.textContent=type==='es'?'Aprenda espanhol no seu próprio ritmo':'Aprendé portugués a tu propio ritmo';
+    var title=document.querySelector('#course-unlocked-content h2');
+    if(title) title.textContent=type==='es'?'Curso gravado':'Curso grabado';
+    var first=document.querySelector('#language-screen button[onclick*="selectLearningUniverse(\'pt\')"] .text-\\[10px\\]');
+    if(first) first.textContent='Portugués para Hispanohablantes';
+    var second=document.querySelector('#language-screen button[onclick*="selectLearningUniverse(\'es\')"] .text-\\[10px\\]');
+    if(second) second.textContent='Espanhol para brasileiros';
+  };
+
+  // ---------- YouTube protegido + fullscreen ----------
+  window.extractYouTubeId=function(url){
+    try{
+      var u=new URL(url);
+      if(u.hostname.includes('youtu.be')) return u.pathname.split('/').filter(Boolean)[0]||'';
+      if(u.pathname.includes('/shorts/')) return u.pathname.split('/shorts/')[1].split('/')[0];
+      if(u.pathname.includes('/embed/')) return u.pathname.split('/embed/')[1].split('/')[0];
+      return u.searchParams.get('v')||'';
+    }catch(e){
+      var m=String(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/); return m?m[1]:'';
+    }
+  };
+  window.toggleSecureFullscreen=async function(containerId){
+    var el=document.getElementById(containerId); if(!el)return;
+    try{
+      var fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(!fs){
+        if(el.requestFullscreen) await el.requestFullscreen({navigationUI:'hide'});
+        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if(el.msRequestFullscreen) el.msRequestFullscreen();
+        else alert('Seu navegador não permite tela cheia neste modo.');
+      } else {
+        if(document.exitFullscreen) await document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }catch(err){ console.error(err); alert('Não foi possível abrir a tela cheia neste navegador.'); }
+  };
+  window.createYouTubePlayer=function(playerId,videoId){
+    function make(){
+      if(!(window.YT&&window.YT.Player)){setTimeout(make,150);return;}
+      if(typeof ytPlayersMap==='undefined') window.ytPlayersMap={};
+      try{
+        ytPlayersMap[playerId]=new YT.Player(playerId,{
+          videoId:videoId,
+          playerVars:{rel:0,modestbranding:1,fs:0,playsinline:1,iv_load_policy:3,disablekb:0,controls:1},
+          events:{onStateChange:function(ev){if(ev.data===YT.PlayerState.ENDED){ev.target.seekTo(0);ev.target.pauseVideo();}}}
+        });
+      }catch(e){console.error('YouTube player:',e);}
+    }
+    make();
+  };
+
+  // ---------- niveis e desbloqueio ----------
+  function unlockedLevels(){
+    var order=['iniciante','medio','avancado','extras'];
+    var arr=[];
+    var rawLevels=(typeof userProfileData!=='undefined'&&userProfileData&&userProfileData.unlocked_levels)||'iniciante';
+    String(rawLevels).split(',').forEach(function(x){x=x.trim();if(order.includes(x)&&!arr.includes(x))arr.push(x);});
+    if(!arr.includes('iniciante'))arr.unshift('iniciante');
+    // Compatibilidade com alunos antigos: student_level significa que ele ja chegou ate esse nivel.
+    var cur=(typeof userProfileData!=='undefined'&&userProfileData&&userProfileData.student_level)||'iniciante';
+    var idx=order.indexOf(cur);
+    if(idx>=0){for(var i=0;i<=idx;i++){if(!arr.includes(order[i]))arr.push(order[i]);}}
+    return arr.sort(function(a,b){return order.indexOf(a)-order.indexOf(b);});
+  }
+  window.switchCourseLevel=function(level){
+    if(!unlockedLevels().includes(level) && !adminIsLogged()) return alert(studentUniverse()==='es'?'Este módulo ainda está bloqueado.':'Este módulo todavía está bloqueado.');
+    if(typeof currentCourseLevel!=='undefined') currentCourseLevel=level;
+    ['iniciante','medio','avancado','extras'].forEach(function(l){
+      var b=document.getElementById('lvl-btn-'+l);if(!b)return;
+      var on=l===level;b.className='px-3.5 py-2 rounded-xl '+(on?'bg-green-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200')+' whitespace-nowrap shadow-sm transition';
+      if(!unlockedLevels().includes(l)&&!adminIsLogged()){b.innerHTML='<i class="fa-solid fa-lock text-[9px]"></i> '+({iniciante:'Iniciante (A1-A2)',medio:'Intermedio (B1-B2)',avancado:'Avanzado (C1-C2)',extras:'Extras'}[l]);}
+    });
+    window.loadLessons();
+  };
+
+  // ---------- aulas do aluno ----------
+  window.loadLessons=async function(){
+    var c=document.getElementById('lessons-container'), sb=raw(); if(!c||!sb)return;
+    var type=studentUniverse(), level=(typeof currentCourseLevel!=='undefined'?currentCourseLevel:'iniciante');
+    var lr=await sb.from('course_lessons').select('*').eq('course_type',type).eq('level',level).neq('is_active',false).order('created_at',{ascending:true});
+    if(lr.error){c.innerHTML='<p class="text-red-500 text-xs">Erro ao carregar aulas: '+esc(lr.error.message)+'</p>';return;}
+    var lessons=lr.data||[];
+    var done=[];
+    if(typeof currentUser!=='undefined'&&currentUser){
+      var pr=await sb.from('lesson_progress').select('lesson_id').eq('user_id',currentUser.id).eq('completed',true);
+      if(!pr.error)done=(pr.data||[]).map(function(x){return x.lesson_id;});
+    }
+    if(typeof userCompletedLessons!=='undefined') userCompletedLessons=new Set(done);
+    var allr=await sb.from('course_lessons').select('id').eq('course_type',type).neq('is_active',false);
+    var allIds=(allr.data||[]).map(function(x){return x.id;});
+    var completed=done.filter(function(id){return allIds.includes(id);}).length, total=allIds.length, pct=total?Math.round(completed/total*100):0;
+    var tx=document.getElementById('course-progress-text'),bar=document.getElementById('course-progress-bar');if(tx)tx.textContent=completed+' / '+total+' aulas ('+pct+'%)';if(bar)bar.style.width=pct+'%';
+    if(!lessons.length){c.innerHTML='<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-film text-3xl"></i><p class="text-sm mt-2">'+(type==='es'?'Ainda não há vídeos neste nível.':'Aún no hay videos en este nivel.')+'</p></div>';return;}
+    var hasFull=adminIsLogged() || (typeof userProfileData!=='undefined'&&userProfileData&&userProfileData.has_course_access===true);
+    var trial=(typeof userProfileData!=='undefined'&&userProfileData)?userProfileData.trial_lesson_id:null;
+    c.innerHTML=lessons.map(function(l,idx){
+      var allowed=hasFull||trial===l.id;
+      if(!allowed)return '<div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 opacity-75"><h4 class="font-bold text-sm"><i class="fa-solid fa-lock text-amber-500"></i> '+esc(l.title)+'</h4><p class="text-[11px] text-slate-500 mt-1">'+(type==='es'?'Aula bloqueada.':'Lección bloqueada.')+'</p></div>';
+      var seen=done.includes(l.id), box='video-box-final-'+idx, player='yt-player-final-'+idx, video='';
+      if(/youtu(?:\.be|be\.com)/i.test(l.video_url||'')){
+        var vid=window.extractYouTubeId(l.video_url);
+        video='<div id="'+box+'" class="video-secure-container mt-2.5 shadow-sm"><div class="video-top-left-shield" title="Proteção do vídeo"></div><div class="video-bottom-left-shield"></div><div class="video-bottom-right-shield"></div><div id="'+player+'"></div><button type="button" onclick="toggleSecureFullscreen(\''+box+'\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> '+(type==='es'?'Tela cheia':'Pantalla completa')+'</button></div>';
+        setTimeout(function(){window.createYouTubePlayer(player,vid);},80);
+      }else video='<div id="'+box+'" class="video-secure-container mt-2.5"><video src="'+esc(l.video_url)+'" controls controlsList="nodownload noremoteplayback" disablePictureInPicture class="w-full h-full object-cover"></video><button type="button" onclick="toggleSecureFullscreen(\''+box+'\')" class="fs-custom-btn"><i class="fa-solid fa-expand"></i> '+(type==='es'?'Tela cheia':'Pantalla completa')+'</button></div>';
+      var mat=l.material_url?'<a href="'+esc(l.material_url)+'" target="_blank" rel="noopener noreferrer" class="w-full mt-2.5 bg-emerald-50 border border-emerald-200 py-2.5 rounded-xl font-bold text-xs flex justify-center gap-2"><i class="fa-brands fa-google-drive"></i> '+(type==='es'?'Abrir material no Drive':'Abrir material en Drive')+'</a>':'';
+      return '<div class="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm"><h4 class="font-extrabold text-sm text-slate-900">'+esc(l.title)+'</h4>'+(l.description?'<p class="text-xs text-slate-500 mt-1">'+esc(l.description)+'</p>':'')+video+mat+'<button type="button" onclick="toggleLessonProgress(\''+l.id+'\')" class="w-full mt-2.5 py-2.5 rounded-xl text-xs font-bold '+(seen?'bg-green-600 text-white':'bg-slate-100 text-slate-700 hover:bg-slate-200')+'">'+(seen?'<i class="fa-solid fa-check"></i> '+(type==='es'?'Aula concluída':'Aula concluida'):(type==='es'?'Marcar como vista':'Marcar como vista'))+'</button></div>';
+    }).join('');
+    window.updateCourseUniverseTexts(type);
+  };
+
+  window.toggleLessonProgress=async function(lessonId){
+    var sb=raw(); if(!sb||typeof currentUser==='undefined'||!currentUser)return alert('Faça login novamente.');
+    var q=await sb.from('lesson_progress').select('id,completed').eq('user_id',currentUser.id).eq('lesson_id',lessonId).limit(1);
+    if(q.error)return alert('Erro ao verificar progresso: '+q.error.message);
+    if(q.data&&q.data.length){
+      var now=!q.data[0].completed;
+      var u=await sb.from('lesson_progress').update({completed:now,completed_at:now?new Date().toISOString():null}).eq('id',q.data[0].id);
+      if(u.error)return alert('Erro ao atualizar aula: '+u.error.message);
+    }else{
+      var ins=await sb.from('lesson_progress').insert([{user_id:currentUser.id,lesson_id:lessonId,completed:true,completed_at:new Date().toISOString()}]);
+      if(ins.error)return alert('Erro ao marcar aula como vista: '+ins.error.message);
+    }
+    await window.loadLessons();
+  };
+
+  // ---------- aulas: admin ----------
+  window.addVideo=async function(){
+    var title=(document.getElementById('admin-video-title')?.value||'').trim(), url=(document.getElementById('admin-video-url')?.value||'').trim(), level=document.getElementById('admin-video-level')?.value||'iniciante', mat=(document.getElementById('admin-video-material')?.value||'').trim(), notify=!!document.getElementById('admin-video-notify')?.checked;
+    if(!title||!url)return alert('Preencha o título e o link do vídeo.');
+    var sb=raw(),type=adminUniverse(); if(!sb)return alert('Banco indisponível.');
+    var r=await sb.from('course_lessons').insert([{title:title,video_url:url,level:level,material_url:mat||null,is_active:true,course_type:type}]);
+    if(r.error)return alert('Erro ao cadastrar aula: '+r.error.message);
+    if(notify){await sb.from('student_messages').insert([{student_email:'nivel_'+level,sender:'Profesor Renan Barbosa',sender_type:'teacher',message_text:(type==='es'?'Nova aula publicada: ':'Nueva clase publicada: ')+title,file_url:mat||null,course_type:type}]);}
+    ['admin-video-title','admin-video-url','admin-video-material'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});var ch=document.getElementById('admin-video-notify');if(ch)ch.checked=false;
+    alert('Aula cadastrada em '+courseLabel(type)+'.'); await window.loadAdminLessonsManagement();
+  };
+  window.loadAdminLessonsManagement=async function(){
+    var c=document.getElementById('admin-lessons-management-list'),sb=raw(),type=adminUniverse();if(!c||!sb)return;
+    var r=await sb.from('course_lessons').select('*').eq('course_type',type).order('created_at',{ascending:false});
+    if(r.error){c.innerHTML='<p class="text-red-500">Erro: '+esc(r.error.message)+'</p>';return;}
+    var labels={iniciante:'Iniciante (A1-A2)',medio:'Intermediário (B1-B2)',avancado:'Avançado (C1-C2)',extras:'Extras'};
+    c.innerHTML=(r.data||[]).map(function(l){var active=l.is_active!==false;return '<div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2"><div class="flex justify-between gap-2"><div class="min-w-0"><h4 class="font-bold text-xs">'+esc(l.title)+'</h4><div class="text-[10px] text-slate-500">'+courseLabel(type)+' · '+esc(labels[l.level]||l.level)+'</div><div class="text-[10px] '+(l.material_url?'text-emerald-700':'text-slate-400')+' truncate">'+(l.material_url?'📎 '+esc(l.material_url):'Sem link do Drive')+'</div></div><span class="px-2 py-0.5 h-fit rounded-full text-[10px] font-bold '+(active?'bg-green-100 text-green-700':'bg-red-100 text-red-600')+'">'+(active?'Visível':'Oculta')+'</span></div><div class="grid grid-cols-3 gap-2"><button type="button" onclick="toggleLessonVisibility(\''+l.id+'\','+active+')" class="py-2 rounded-xl text-[11px] font-bold '+(active?'bg-amber-500 text-white':'bg-green-600 text-white')+'">'+(active?'Ocultar':'Mostrar')+'</button><button type="button" onclick="editLessonDriveLink(\''+l.id+'\')" class="py-2 rounded-xl bg-blue-100 text-blue-700 font-bold text-[11px]">📎 Drive</button><button type="button" onclick="deleteLessonPermanently(\''+l.id+'\')" class="py-2 rounded-xl bg-red-100 text-red-700 font-bold text-[11px]"><i class="fa-solid fa-trash"></i> Excluir</button></div></div>';}).join('')||'<p class="text-slate-400">Nenhuma aula cadastrada neste universo.</p>';
+  };
+  window.toggleLessonVisibility=async function(id,current){var sb=raw(),type=adminUniverse();var r=await sb.from('course_lessons').update({is_active:!current}).eq('id',id).eq('course_type',type).select('id');if(r.error)return alert('Erro ao alterar visibilidade: '+r.error.message);if(!r.data?.length)return alert('Aula não encontrada neste universo.');await window.loadAdminLessonsManagement();};
+  window.editLessonDriveLink=async function(id){
+    var sb=raw(),type=adminUniverse();if(!sb)return;
+    var q=await sb.from('course_lessons').select('id,title,material_url').eq('id',id).eq('course_type',type).single();if(q.error)return alert('Erro ao abrir aula: '+q.error.message);
+    var v=prompt('Cole o link do Google Drive para "'+q.data.title+'".\n\nDeixe vazio para remover o link:',q.data.material_url||'');if(v===null)return;v=v.trim();
+    var r=await sb.from('course_lessons').update({material_url:v||null}).eq('id',id).eq('course_type',type).select('id');if(r.error)return alert('Erro ao salvar link do Drive: '+r.error.message);alert(v?'Link do Drive salvo com sucesso.':'Link do Drive removido.');await window.loadAdminLessonsManagement();
+  };
+  window.deleteLessonPermanently=async function(id){
+    if(!confirm('Excluir esta aula permanentemente? Essa ação não pode ser desfeita.'))return;var sb=raw(),type=adminUniverse();
+    var p=await sb.from('lesson_progress').delete().eq('lesson_id',id);if(p.error)console.warn(p.error);
+    var r=await sb.from('course_lessons').delete().eq('id',id).eq('course_type',type).select('id');if(r.error)return alert('Erro ao excluir aula: '+r.error.message);if(!r.data?.length)return alert('Aula não encontrada neste universo.');alert('Aula excluída.');await window.loadAdminLessonsManagement();
+  };
+
+  // ---------- tarefas ----------
+  window.createAssignment=async function(){
+    var title=(document.getElementById('assign-title')?.value||'').trim(),desc=(document.getElementById('assign-desc')?.value||'').trim(),url=(document.getElementById('assign-url')?.value||'').trim(),target=document.getElementById('assign-target-student')?.value||'';
+    if(!title)return alert('Informe o título da tarefa.');if(!target)return alert('Escolha o destinatário.');var sb=raw(),type=adminUniverse();
+    var r=await sb.from('student_assignments').insert([{title:title,description:desc||null,material_url:url||null,target_student_email:target,course_type:type}]);if(r.error)return alert('Erro ao publicar tarefa: '+r.error.message);
+    ['assign-title','assign-desc','assign-url'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});alert('Tarefa publicada em '+courseLabel(type)+'.');await window.loadAdminAssignments();
+  };
+  window.loadAdminAssignments=async function(){var c=document.getElementById('admin-assignments-list'),sb=raw(),type=adminUniverse();if(!c||!sb)return;var r=await sb.from('student_assignments').select('*').eq('course_type',type).order('created_at',{ascending:false});if(r.error){c.innerHTML='<p class="text-red-500">'+esc(r.error.message)+'</p>';return;}c.innerHTML=(r.data||[]).map(function(a){return '<div class="p-3 bg-slate-50 rounded-xl border"><b class="text-xs">'+esc(a.title)+'</b><div class="text-[10px] text-slate-500">'+esc(a.target_student_email||'')+'</div>'+(a.material_url?'<a class="text-[10px] text-blue-600 underline" target="_blank" href="'+esc(a.material_url)+'">Abrir material</a>':'')+'<button type="button" onclick="deleteAssignment(\''+a.id+'\')" class="float-right text-[10px] text-red-600 font-bold">Excluir</button></div>';}).join('')||'<p class="text-slate-400">Nenhuma tarefa publicada.</p>';};
+  window.deleteAssignment=async function(id){if(!confirm('Excluir esta tarefa?'))return;var sb=raw(),r=await sb.from('student_assignments').delete().eq('id',id).eq('course_type',adminUniverse()).select('id');if(r.error)return alert(r.error.message);await window.loadAdminAssignments();};
+  window.loadStudentTasksAndQuizzes=async function(){
+    var sb=raw();if(!sb||typeof currentUser==='undefined'||!currentUser)return;var type=studentUniverse(),email=currentUser.email,level=(userProfileData&&userProfileData.student_level)||'iniciante';
+    var ar=await sb.from('student_assignments').select('*').eq('course_type',type).or('target_student_email.eq.TODOS,target_student_email.eq.'+email).order('created_at',{ascending:false});
+    var ac=document.getElementById('student-assignments-list');if(ac){if(ar.error)ac.innerHTML='<p class="text-red-500">'+esc(ar.error.message)+'</p>';else ac.innerHTML=(ar.data||[]).map(function(a){return '<div class="bg-white p-4 rounded-2xl border"><h4 class="font-bold text-sm">'+esc(a.title)+'</h4>'+(a.description?'<p class="text-xs text-slate-600 mt-1">'+esc(a.description)+'</p>':'')+(a.material_url?'<a target="_blank" href="'+esc(a.material_url)+'" class="inline-block mt-2 text-xs font-bold text-blue-600 underline">📎 Abrir material</a>':'')+'</div>';}).join('')||'<div class="bg-white p-6 rounded-3xl text-center text-slate-400"><p class="text-sm">'+(type==='es'?'Sem tarefas no momento.':'Sin tareas por el momento.')+'</p></div>';}
+    var qr=await sb.from('online_quizzes').select('*').eq('course_type',type).eq('level',level).order('created_at',{ascending:false});var qc=document.getElementById('student-quizzes-list');if(qc){qc.innerHTML=(qr.data||[]).map(function(q){return '<div class="bg-white p-4 rounded-2xl border"><div class="flex justify-between"><div><b class="text-sm">'+esc(q.title)+'</b><div class="text-[10px] text-slate-500">'+(q.is_final_exam?'🏁 Prova final':'Avaliação')+'</div></div><button onclick="startStudentQuiz(\''+q.id+'\')" class="px-3 py-1.5 bg-green-600 text-white rounded-xl text-xs font-bold">Iniciar</button></div></div>';}).join('')||'<p class="text-slate-400 text-xs">Nenhuma avaliação disponível.</p>';}
+  };
+
+  // ---------- quizzes ----------
+  function ensureFinalExamField(){var select=document.getElementById('quiz-level');if(!select||document.getElementById('quiz-final-exam'))return;var l=document.createElement('label');l.className='flex items-center gap-2 text-[11px] font-bold text-slate-700 mt-2';l.innerHTML='<input id="quiz-final-exam" type="checkbox"> Esta avaliação é a prova final do módulo';select.parentElement.appendChild(l);}
+  var legacySaveQuiz=window.saveNewQuiz;
+  window.saveNewQuiz=async function(){
+    ensureFinalExamField();
+    if(typeof editingQuizId!=='undefined'&&editingQuizId && typeof legacySaveQuiz==='function') return legacySaveQuiz();
+    var title=(document.getElementById('quiz-title')?.value||'').trim(),desc=(document.getElementById('quiz-desc')?.value||'').trim(),level=document.getElementById('quiz-level')?.value||'iniciante',qs=(typeof quizQuestions!=='undefined'?quizQuestions:[]);
+    if(!title)return alert('Informe o título.');if(!qs.length)return alert('Adicione pelo menos uma pergunta.');
+    var sb=raw(),r=await sb.from('online_quizzes').insert([{title:title,description:desc||null,questions_json:qs,level:level,course_type:adminUniverse(),is_final_exam:!!document.getElementById('quiz-final-exam')?.checked}]);if(r.error)return alert('Erro: '+r.error.message);alert('Avaliação criada.');if(typeof quizQuestions!=='undefined')quizQuestions=[];window.initQuizBuilder?.();
+  };
+  window.loadAdminCreatedQuizzes=async function(){var c=document.getElementById('admin-created-quizzes-list'),sb=raw();if(!c||!sb)return;var r=await sb.from('online_quizzes').select('*').eq('course_type',adminUniverse()).order('created_at',{ascending:false});c.innerHTML=(r.data||[]).map(function(q){return '<div class="p-3 bg-slate-50 rounded-xl border flex justify-between"><div><b>'+esc(q.title)+'</b><div class="text-[10px]">'+esc(q.level)+(q.is_final_exam?' · PROVA FINAL':'')+'</div></div><div><button onclick="startEditQuiz(\''+q.id+'\')" class="px-2 py-1 bg-slate-200 rounded text-[10px]">Editar</button> <button onclick="deleteQuizPermanently(\''+q.id+'\')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px]">Excluir</button></div></div>';}).join('')||'<p class="text-slate-400">Nenhuma avaliação.</p>';};
+  window.startStudentQuiz=async function(id){var sb=raw(),type=studentUniverse();var r=await sb.from('online_quizzes').select('*').eq('id',id).eq('course_type',type).single();if(r.error)return alert(r.error.message);activeQuizData=r.data;document.getElementById('student-quizzes-list')?.classList.add('hidden');document.getElementById('quiz-review-container')?.classList.add('hidden');document.getElementById('active-quiz-container')?.classList.remove('hidden');document.getElementById('active-quiz-title').textContent=r.data.title;document.getElementById('active-quiz-desc').textContent=r.data.description||'';var qs=r.data.questions_json||[];document.getElementById('active-quiz-questions').innerHTML=qs.map(function(q,i){return '<div class="p-3 bg-slate-50 rounded-xl border"><p class="font-bold">'+(i+1)+'. '+esc(q.question)+'</p>'+q.options.map(function(o,j){return '<label class="flex gap-2 p-2 bg-white rounded-lg border mt-1"><input type="radio" name="student-ans-'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join('')+'</div>';}).join('');};
+  window.submitQuizAnswers=async function(){
+    if(typeof activeQuizData==='undefined'||!activeQuizData)return;var quiz=activeQuizData,qs=quiz.questions_json||[],detail=[],score=0;
+    for(var i=0;i<qs.length;i++){var s=document.querySelector('input[name="student-ans-'+i+'"]:checked');if(!s)return alert('Responda a pergunta '+(i+1)+'.');var choice=Number(s.value),ok=choice===Number(qs[i].correct);if(ok)score++;detail.push({question_number:i+1,question:qs[i].question,options:qs[i].options,user_choice_idx:choice,user_choice:qs[i].options[choice],correct_choice_idx:qs[i].correct,correct_choice:qs[i].options[qs[i].correct],is_correct:ok});}
+    var total=qs.length,pct=total?Math.round(score/total*100):0,passed=pct>60,type=studentUniverse(),level=quiz.level||((userProfileData&&userProfileData.student_level)||'iniciante'),name=(currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email,sb=raw();
+    var r=await sb.from('quiz_submissions').insert([{quiz_id:quiz.id,quiz_title:quiz.title,student_email:currentUser.email,student_name:name,score:score,total_questions:total,answers_detail:detail,student_level:level,is_passed:passed,course_type:type}]);if(r.error)return alert('Erro ao salvar prova: '+r.error.message);
+    var quizCopy=quiz;activeQuizData=null;document.getElementById('active-quiz-container')?.classList.add('hidden');document.getElementById('student-quizzes-list')?.classList.remove('hidden');window.showStudentQuizReview?.(quizCopy.title,score,total,pct,passed,level,detail);
+    if(passed&&quizCopy.is_final_exam){var order=['iniciante','medio','avancado'],idx=order.indexOf(quizCopy.level);if(idx>=0&&idx<order.length-1){var next=order[idx+1],u=unlockedLevels();if(!u.includes(next))u.push(next);var up=await sb.from('profiles').update({unlocked_levels:u.join(','),student_level:next}).eq('id',currentUser.id);if(!up.error){userProfileData.unlocked_levels=u.join(',');userProfileData.student_level=next;alert(type==='es'?'Aprovado! O próximo módulo foi liberado.':'¡Aprobado! Se desbloqueó el próximo módulo.');}}}
+    await window.loadStudentTasksAndQuizzes();
+  };
+  window.loadAdminQuizScores=async function(){var sb=raw(),r=await sb.from('quiz_submissions').select('*').eq('course_type',adminUniverse()).order('created_at',{ascending:false});if(typeof allScoresCache!=='undefined')allScoresCache=r.data||[];var sel=document.getElementById('score-filter-student');if(sel)sel.innerHTML='<option value="all">Todos os alunos</option>'+Array.from(new Set((r.data||[]).map(function(x){return x.student_email;}))).map(function(x){return '<option value="'+esc(x)+'">'+esc(x)+'</option>';}).join('');window.filterAdminQuizScores?.();};
+
+  // ---------- notificacoes + pedido pendente ----------
+  function ensureNotificationsUI(){
+    var admin=document.getElementById('tab-admin');if(!admin)return;var nav=admin.querySelector('.flex.gap-2.border-b');
+    if(nav&&!document.getElementById('admin-btn-tab-notifications')){var b=document.createElement('button');b.id='admin-btn-tab-notifications';b.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';b.textContent='🔔 Notificações';b.onclick=function(){window.showAdminTab('notifications');};nav.appendChild(b);}
+    if(!document.getElementById('admin-sec-notifications')){var sec=document.createElement('div');sec.id='admin-sec-notifications';sec.className='space-y-4 hidden';sec.innerHTML='<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-3"><div><h3 class="font-bold text-sm">Central de notificações</h3><p class="text-[11px] text-slate-500">Português e Espanhol no mesmo lugar</p></div><button onclick="loadAdminNotifications()" class="px-3 py-2 rounded-xl bg-slate-100 text-[11px] font-bold">Atualizar</button></div><div id="admin-notifications-list" class="space-y-2 text-xs">Carregando...</div></div>';admin.appendChild(sec);}
+  }
+  var baseShowAdmin=window.showAdminTab;
+  window.showAdminTab=function(type){
+    ensureNotificationsUI();
+    if(type==='notifications'){
+      document.querySelectorAll('[id^="admin-sec-"]').forEach(function(el){el.classList.add('hidden');});document.getElementById('admin-sec-notifications')?.classList.remove('hidden');document.querySelectorAll('[id^="admin-btn-tab-"]').forEach(function(el){el.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 whitespace-nowrap';});var b=document.getElementById('admin-btn-tab-notifications');if(b)b.className='px-3 py-1.5 rounded-xl text-xs font-bold bg-green-600 text-white whitespace-nowrap';window.loadAdminNotifications();return;
+    }
+    if(typeof baseShowAdmin==='function')baseShowAdmin(type);
+    if(type==='videos')window.loadAdminLessonsManagement();if(type==='assignments')window.loadAdminAssignments();if(type==='quizzes'){ensureFinalExamField();window.loadAdminCreatedQuizzes();window.loadAdminQuizScores();}
+  };
+  window.requestCourseAccessWhatsApp=async function(){
+    if(typeof currentUser==='undefined'||!currentUser)return alert('Faça login para solicitar o curso.');var sb=raw(),type=studentUniverse();if(!sb)return;
+    var existing=await sb.from('student_receipts').select('id').eq('student_email',currentUser.email).eq('course_type',type).eq('receipt_type','curso_pendente').limit(1);if(existing.error)return alert('Não foi possível registrar o pedido: '+existing.error.message);
+    var price=(typeof COURSE_PRICES!=='undefined'&&COURSE_PRICES[type])?Number(COURSE_PRICES[type].course)||0:(typeof PRICE_COURSE!=='undefined'?Number(PRICE_COURSE)||0:0);
+    if(!existing.data?.length){var ins=await sb.from('student_receipts').insert([{student_id:currentUser.id,student_email:currentUser.email,receipt_type:'curso_pendente',note:'Pedido pendente · '+(type==='es'?'Curso de Espanhol':'Curso de Português')+' · '+money(price,type),file_url:null,course_type:type}]);if(ins.error)return alert('Não foi possível registrar o pedido: '+ins.error.message);}
+    var name=(currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email,msg=(type==='es'?'Olá Renan! Quero comprar o Curso Gravado de Espanhol.':'¡Hola Renan! Quiero comprar el Curso Grabado de Portugués.')+'\nValor: '+money(price,type)+'\nAluno: '+name+'\nE-mail: '+currentUser.email+'\n\nMeu pedido já foi registrado como pendente.';window.open('https://wa.me/'+(typeof WHATSAPP_NUMBER!=='undefined'?WHATSAPP_NUMBER:'541122515098')+'?text='+encodeURIComponent(msg),'_blank');
+  };
+  window.loadAdminNotifications=async function(){
+    var c=document.getElementById('admin-notifications-list'),sb=raw();if(!c||!sb)return;c.innerHTML='<p class="text-slate-400">Carregando...</p>';
+    var br=await sb.from('bookings').select('id,student_name,student_email,slot_date,slot_time,status,receipt_url,created_at,course_type').order('created_at',{ascending:false}).limit(150),rr=await sb.from('student_receipts').select('id,student_email,receipt_type,note,file_url,created_at,course_type').order('created_at',{ascending:false}).limit(200);
+    if(br.error||rr.error){c.innerHTML='<p class="text-red-500">Erro: '+esc((br.error||rr.error).message)+'</p>';return;}var receipts=rr.data||[],paid=new Set();receipts.forEach(function(r){if(r.receipt_type==='curso_completo')paid.add((r.student_email||'')+'|'+(r.course_type||'pt'));});var items=[];
+    (br.data||[]).forEach(function(b){items.push({date:b.created_at,icon:'📅',course:b.course_type||'pt',title:b.status==='pending_receipt'?'Meet aguardando comprovante':'Novo agendamento Meet',who:b.student_name||b.student_email,detail:(b.slot_date||'')+' '+(b.slot_time||''),status:b.status==='pending_receipt'?'Pendente':'Registrado',link:b.receipt_url});});
+    receipts.forEach(function(r){var key=(r.student_email||'')+'|'+(r.course_type||'pt');if(r.receipt_type==='curso_pendente'&&!paid.has(key))items.push({date:r.created_at,icon:'🛒',course:r.course_type||'pt',title:'Novo pedido de compra',who:r.student_email,detail:r.note,status:'Pendente'});if(r.receipt_type==='curso_completo')items.push({date:r.created_at,icon:'✅',course:r.course_type||'pt',title:'Pagamento do curso registrado',who:r.student_email,detail:r.note,status:'Pago',link:r.file_url});});items.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+    c.innerHTML=items.map(function(n){var cls=n.status==='Pendente'?'bg-amber-100 text-amber-700':n.status==='Pago'?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700';return '<div class="p-3.5 rounded-2xl border bg-slate-50"><div class="flex justify-between"><div><b class="text-xs">'+n.icon+' '+esc(n.title)+'</b><div class="text-[10px] font-bold text-slate-500">'+courseLabel(n.course)+'</div></div><span class="px-2 py-0.5 h-fit rounded-full text-[9px] font-bold '+cls+'">'+esc(n.status)+'</span></div><div class="text-[11px] mt-1"><b>'+esc(n.who||'Aluno')+'</b><br>'+esc(n.detail||'')+'</div>'+(n.link?'<a target="_blank" href="'+esc(n.link)+'" class="text-[10px] text-blue-600 underline font-bold">Ver comprovante</a>':'')+'<div class="text-[9px] text-slate-400 mt-1">'+(n.date?new Date(n.date).toLocaleString('pt-BR'):'')+'</div></div>';}).join('')||'<p class="text-slate-400">Nenhuma notificação.</p>';
+  };
+
+  // ---------- reserva Meet: grava universo ----------
+  // As funcoes antigas continuam cuidando do upload; esta rotina corrige bookings sem course_type apos o cadastro.
+  async function repairRecentBookings(){
+    if(typeof currentUser==='undefined'||!currentUser)return;var sb=raw();if(!sb)return;var type=studentUniverse();
+    try{var q=await sb.from('bookings').select('id,course_type').eq('user_id',currentUser.id).is('course_type',null);if(!q.error&&q.data?.length)await sb.from('bookings').update({course_type:type}).in('id',q.data.map(function(x){return x.id;}));}catch(e){}
+  }
+
+  // ---------- admin troca universo ----------
+  window.toggleAdminUniverse=function(){
+    if(!adminIsLogged())return;var next=adminUniverse()==='pt'?'es':'pt';ADMIN_COURSE_TYPE=next;localStorage.setItem('admin_universe',next);
+    if(typeof setCourseVisual==='function')setCourseVisual(next);var lab=document.getElementById('admin-universe-label');if(lab)lab.textContent=courseLabel(next);
+    alert(next==='pt'?'Agora você está gerenciando Português.':'Agora você está gerenciando Espanhol.');
+    // Atualiza o que estiver aberto sem sair do painel.
+    if(!document.getElementById('admin-sec-videos')?.classList.contains('hidden'))window.loadAdminLessonsManagement();
+    if(!document.getElementById('admin-sec-assignments')?.classList.contains('hidden'))window.loadAdminAssignments();
+    if(!document.getElementById('admin-sec-quizzes')?.classList.contains('hidden')){window.loadAdminCreatedQuizzes();window.loadAdminQuizScores();}
+  };
+
+  // ---------- inicializacao ----------
+  function init(){ensureNotificationsUI();ensureFinalExamField();window.updateCourseUniverseTexts(studentUniverse());repairRecentBookings();if(adminIsLogged()){var l=document.getElementById('admin-universe-label');if(l)l.textContent=courseLabel(adminUniverse());}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(init,150);});else setTimeout(init,150);
+})();
+
+</script>
 </body>
 </html>
