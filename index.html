@@ -5235,5 +5235,141 @@
 })();
 </script>
 
+
+<style id="modern-navigation-fix-css">
+/* Navegação tipo app: módulos abrem como telas internas, sem empilhar conteúdo abaixo. */
+#modern-admin-module-viewport{display:none;}
+#modern-admin-module-viewport.active{display:block;}
+#modern-admin-module-viewport > [id^="admin-sec-"]{margin-top:0!important;}
+#modern-admin-module-viewport .modern-admin-module-head{position:sticky;top:56px;z-index:32;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);}
+#tab-admin.modern-admin-shell.module-open #modern-admin-dashboard{display:none!important;}
+#tab-admin.modern-admin-shell.module-open #modern-admin-module-viewport{display:block!important;}
+
+/* Área do aluno — mesma linguagem visual moderna, sem alterar a lógica. */
+body:not(.admin-mode) #tab-home.student-modern-home{padding-bottom:8px;}
+.student-modern-hero{border-radius:29px;padding:22px 19px 19px;background:linear-gradient(145deg,#f0fdf4 0%,#fffdf2 52%,#eff6ff 100%);border:1px solid #e7f0e8;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.06);}
+.student-modern-hero:after{content:'🌿 ☀️';position:absolute;right:12px;top:13px;font-size:32px;opacity:.5;transform:rotate(-4deg);}
+.student-modern-kicker{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#15803d;}
+.student-modern-title{font-size:25px;font-weight:900;letter-spacing:-.035em;color:#0f172a;line-height:1.06;margin-top:5px;max-width:78%;}
+.student-modern-sub{font-size:10.5px;color:#64748b;margin-top:6px;max-width:72%;font-weight:600;}
+.student-modern-universe{display:inline-flex;margin-top:13px;background:rgba(255,255,255,.78);border:1px solid rgba(226,232,240,.9);padding:4px;border-radius:999px;font-size:9px;font-weight:900;color:#166534;}
+.student-modern-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:14px;}
+.student-modern-card{min-height:118px;background:#fff;border:1px solid #edf2ef;border-radius:23px;padding:14px;box-shadow:0 8px 22px rgba(15,23,42,.045);text-align:left;position:relative;transition:.18s ease;}
+.student-modern-card:active{transform:scale(.985);}
+.student-modern-icon{width:44px;height:44px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.student-modern-card b{display:block;font-size:12px;color:#0f172a;margin-top:9px;line-height:1.15;}
+.student-modern-card span{display:block;font-size:9px;color:#94a3b8;margin-top:3px;font-weight:600;line-height:1.2;max-width:88%;}
+.student-modern-card i.chev{position:absolute;right:11px;bottom:12px;font-size:9px;color:#94a3b8;}
+.student-modern-banner{margin-top:14px;border-radius:24px;padding:16px 17px;background:linear-gradient(120deg,#fff7ed,#fffbeb 55%,#ecfdf5);border:1px solid #f6ead8;box-shadow:0 8px 20px rgba(15,23,42,.04);position:relative;overflow:hidden;}
+.student-modern-banner b{font-size:13px;color:#134e4a;display:block;max-width:72%;line-height:1.2;}.student-modern-banner span{font-size:9px;color:#64748b;display:block;margin-top:4px;max-width:72%;}.student-modern-banner:after{content:'☕🌿';position:absolute;right:12px;bottom:8px;font-size:30px;}
+#app-screen.student-modern-app main > section:not(#tab-admin) > .bg-white,#app-screen.student-modern-app #tab-calendar > .bg-white,#app-screen.student-modern-app #tab-course > .bg-white,#app-screen.student-modern-app #tab-tasks > .bg-white,#app-screen.student-modern-app #tab-info > .bg-white,#app-screen.student-modern-app #tab-profile .bg-white{border-radius:25px!important;border-color:#edf2ef!important;box-shadow:0 9px 25px rgba(15,23,42,.055)!important;}
+#app-screen.student-modern-app nav{border-radius:22px 22px 0 0;box-shadow:0 -8px 24px rgba(15,23,42,.055);border-top-color:#eef2f0!important;}
+#app-screen.student-modern-app input,#app-screen.student-modern-app select,#app-screen.student-modern-app textarea{border-radius:14px!important;}
+</style>
+<script id="modern-navigation-fix-js">
+(function(){
+  function adminTab(){return document.getElementById('tab-admin');}
+  function isAdmin(){try{return !!(currentUser&&ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase()));}catch(e){return false;}}
+  function universe(){try{return ADMIN_COURSE_TYPE||'pt';}catch(e){return 'pt';}}
+
+  function ensureAdminViewport(){
+    var tab=adminTab(); if(!tab)return null;
+    var vp=document.getElementById('modern-admin-module-viewport');
+    if(!vp){vp=document.createElement('div');vp.id='modern-admin-module-viewport';tab.appendChild(vp);}
+    // Coloca TODAS as seções administrativas dentro do viewport, inclusive as criadas dinamicamente depois.
+    Array.from(tab.querySelectorAll(':scope > [id^="admin-sec-"]')).forEach(function(sec){vp.appendChild(sec);});
+    Array.from(tab.querySelectorAll('[id^="admin-sec-"]')).forEach(function(sec){if(sec.parentElement!==vp && sec!==vp)vp.appendChild(sec);});
+    return vp;
+  }
+  function scrollAdminTop(){var t=adminTab();if(t){try{t.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){window.scrollTo(0,0);}}}
+
+  // Substitui apenas a navegação visual dos módulos. As funções internas continuam as mesmas.
+  window.showModernAdminHome=function(){
+    var tab=adminTab();if(!tab)return;
+    if(typeof ensureDashboard==='function')try{ensureDashboard();}catch(e){}
+    var vp=ensureAdminViewport();
+    tab.classList.remove('module-open');
+    if(vp)vp.classList.remove('active');
+    if(vp)vp.querySelectorAll('[id^="admin-sec-"]').forEach(function(s){s.classList.add('hidden');});
+    document.querySelectorAll('.modern-admin-module-head').forEach(function(x){x.remove();});
+    var d=document.getElementById('modern-admin-dashboard');if(d)d.classList.remove('hidden');
+    if(typeof loadModernAdminStats==='function')try{loadModernAdminStats();}catch(e){}
+    scrollAdminTop();
+  };
+
+  window.openModernAdminModule=function(type){
+    var tab=adminTab();if(!tab)return;
+    var vp=ensureAdminViewport();
+    var d=document.getElementById('modern-admin-dashboard');if(d)d.classList.add('hidden');
+    tab.classList.add('module-open'); if(vp)vp.classList.add('active');
+    if(typeof window.showAdminTab==='function')window.showAdminTab(type);
+    // showAdminTab pode criar novas seções (Histórico/Notificações). Recolhe novamente antes de mostrar.
+    setTimeout(function(){
+      vp=ensureAdminViewport();
+      vp.querySelectorAll('[id^="admin-sec-"]').forEach(function(s){s.classList.toggle('hidden',s.id!=='admin-sec-'+type);});
+      document.querySelectorAll('.modern-admin-module-head').forEach(function(x){x.remove();});
+      var sec=document.getElementById('admin-sec-'+type);
+      if(sec){
+        var meta=(typeof moduleMeta!=='undefined'&&moduleMeta[type])||null;
+        var titles={students:['Alunos','Gerencie seus alunos'],videos:['Aulas Gravadas','Conteúdo e materiais'],assignments:['Tarefas','Atividades e correções'],quizzes:['Avaliações','Notas e feedbacks'],bookings:['Reservas','Aulas agendadas'],slots:['Horários','Disponibilidade'],notifications:['Notificações','Pagamentos aguardando validação'],'payment-history':['Histórico','Aprovados, rejeitados e reconsiderações'],finance:['Financeiro','Pagamentos e receitas'],broadcast:['Mensagens','Avisos e conversa'],design:['Design','Fotos e aparência'],prices:['Configurações','Preços e preferências'],syllabus:['Programa','Conteúdo do curso']};
+        var info=titles[type]||['Módulo','Painel administrativo'];
+        var h=document.createElement('div');h.className='modern-admin-module-head';h.innerHTML='<button type="button" class="modern-admin-back" onclick="showModernAdminHome()"><i class="fa-solid fa-arrow-left"></i></button><div><b>'+info[0]+'</b><span>'+info[1]+' · '+(universe()==='pt'?'🇧🇷 Português':'🇦🇷 Espanhol')+'</span></div>';
+        sec.insertBefore(h,sec.firstChild);
+      }
+      scrollAdminTop();
+    },45);
+  };
+
+  // A central mostra EXCLUSIVAMENTE os pendentes. Aprovado/rejeitado sai imediatamente e fica no Histórico.
+  var oldValidate=window.validateReceipt;
+  if(typeof oldValidate==='function')window.validateReceipt=async function(id,decision){
+    await oldValidate(id,decision);
+    var card=document.querySelector('[data-pending-receipt="'+id+'"]');if(card)card.remove();
+    if(typeof window.loadAdminNotifications==='function')await window.loadAdminNotifications();
+    if(typeof window.loadPaymentHistory==='function')await window.loadPaymentHistory();
+    if(typeof window.loadModernAdminStats==='function')window.loadModernAdminStats();
+  };
+  var oldLoadNotif=window.loadAdminNotifications;
+  if(typeof oldLoadNotif==='function')window.loadAdminNotifications=async function(){
+    await oldLoadNotif();
+    var list=document.getElementById('admin-notifications-list');if(!list)return;
+    // Marca os cards pelo id do comprovante a partir dos handlers já renderizados para remoção instantânea.
+    Array.from(list.children).forEach(function(el){var b=el.querySelector('button[onclick*="validateReceipt("]');if(!b)return;var m=(b.getAttribute('onclick')||'').match(/validateReceipt\('([^']+)'/);if(m)el.setAttribute('data-pending-receipt',m[1]);});
+  };
+  var oldReconsider=window.reconsiderReceipt;
+  if(typeof oldReconsider==='function')window.reconsiderReceipt=async function(id){await oldReconsider(id);if(typeof window.loadModernAdminStats==='function')window.loadModernAdminStats();};
+
+  // ---------- MESMA ESTÉTICA NA ÁREA DO ALUNO ----------
+  function studentType(){try{return CURRENT_COURSE_TYPE||((userProfileData&&userProfileData.course_type)||'pt');}catch(e){return 'pt';}}
+  function makeStudentHome(){
+    if(isAdmin())return;
+    var home=document.getElementById('tab-home');if(!home||document.getElementById('student-modern-dashboard'))return;
+    home.classList.add('student-modern-home');
+    // preserva o conteúdo original no DOM e apenas troca a apresentação da tela inicial.
+    Array.from(home.children).forEach(function(ch){ch.classList.add('student-home-original');ch.style.display='none';});
+    var t=studentType(),isEs=t==='es';
+    var wrap=document.createElement('div');wrap.id='student-modern-dashboard';
+    wrap.innerHTML='<div class="student-modern-hero"><div class="student-modern-kicker">Sua escola de idiomas</div><div class="student-modern-title">'+(isEs?'Aprenda espanhol no seu ritmo':'Aprendé portugués a tu ritmo')+'</div><div class="student-modern-sub">'+(isEs?'Aulas, materiais e acompanhamento em um só lugar.':'Clases, materiales y acompañamiento en un solo lugar.')+'</div><div class="student-modern-universe">'+(isEs?'🇦🇷 Español para brasileiros':'🇧🇷 Portugués para Hispanohablantes')+'</div></div>'+ 
+      '<div class="student-modern-grid">'+
+      '<button class="student-modern-card" onclick="navigate(\'calendar\')"><div class="student-modern-icon" style="background:#dcfce7;color:#15803d"><i class="fa-regular fa-calendar"></i></div><b>'+(isEs?'Agendar aulas':'Agendar clases')+'</b><span>'+(isEs?'Escolha seu horário no Meet':'Elegí tu horario por Meet')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '<button class="student-modern-card" onclick="navigate(\'course\')"><div class="student-modern-icon" style="background:#dbeafe;color:#2563eb"><i class="fa-solid fa-circle-play"></i></div><b>'+(isEs?'Curso gravado':'Curso grabado')+'</b><span>'+(isEs?'Vídeos, materiais e progresso':'Videos, materiales y progreso')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '<button class="student-modern-card" onclick="navigate(\'tasks\')"><div class="student-modern-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-clipboard-list"></i></div><b>'+(isEs?'Tarefas e provas':'Tareas y evaluaciones')+'</b><span>'+(isEs?'Atividades e avaliações':'Actividades y exámenes')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '<button class="student-modern-card" onclick="navigate(\'info\')"><div class="student-modern-icon" style="background:#ffe4e6;color:#e11d48"><i class="fa-solid fa-bell"></i></div><b>'+(isEs?'Mensagens':'Mensajes')+'</b><span>'+(isEs?'Avisos e confirmações':'Avisos y confirmaciones')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '<button class="student-modern-card" onclick="navigate(\'profile\')"><div class="student-modern-icon" style="background:#ede9fe;color:#6d28d9"><i class="fa-regular fa-user"></i></div><b>'+(isEs?'Meu perfil':'Mi perfil')+'</b><span>'+(isEs?'Conta, reservas e acesso':'Cuenta, reservas y acceso')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '<button class="student-modern-card" onclick="openWhatsApp()"><div class="student-modern-icon" style="background:#dcfce7;color:#16a34a"><i class="fa-brands fa-whatsapp"></i></div><b>WhatsApp</b><span>'+(isEs?'Fale diretamente com Renan':'Hablá directamente con Renan')+'</span><i class="fa-solid fa-chevron-right chev"></i></button>'+ 
+      '</div><div class="student-modern-banner"><b>'+(isEs?'Aprender aproxima pessoas 💛':'Aprender nos acerca 💛')+'</b><span>'+(isEs?'Um passo de cada vez, no seu ritmo.':'Un paso a la vez, a tu ritmo.')+'</span></div>';
+    home.appendChild(wrap);
+    var app=document.getElementById('app-screen');if(app)app.classList.add('student-modern-app');
+  }
+  function refreshStudentHome(){var old=document.getElementById('student-modern-dashboard');if(old){old.remove();var home=document.getElementById('tab-home');if(home)Array.from(home.querySelectorAll('.student-home-original')).forEach(function(ch){ch.classList.remove('student-home-original');ch.style.display='';});}makeStudentHome();}
+
+  var prevNavigate2=window.navigate;
+  if(typeof prevNavigate2==='function')window.navigate=function(tab){prevNavigate2(tab);setTimeout(function(){if(tab==='home'&&!isAdmin())refreshStudentHome();},30);};
+
+  function init(){ensureAdminViewport();if(!isAdmin())makeStudentHome();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(init,800);});else setTimeout(init,800);
+})();
+</script>
+
 </body>
 </html>
