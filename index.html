@@ -5371,5 +5371,178 @@ body:not(.admin-mode) #tab-home.student-modern-home{padding-bottom:8px;}
 })();
 </script>
 
+
+<script id="fix-notifications-validation-clean-v2">
+(function(){
+  function nSb(){
+    try{return typeof rawClient==='function'?rawClient():(typeof getSupabase==='function'?getSupabase():null);}catch(e){return null;}
+  }
+  function nEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function nCfg(t){return t==='es'?{flag:'🇦🇷',name:'Espanhol'}:{flag:'🇧🇷',name:'Português'};}
+  function arr(v){return Array.isArray(v)?v.filter(Boolean):[];}
+  function receiptKey(r){
+    var ids=arr(r.booking_ids).slice().sort();
+    if(ids.length) return 'booking:'+ids.join(',');
+    if(r.file_url) return 'file:'+(r.student_email||'')+'|'+(r.course_type||'pt')+'|'+(r.receipt_type||'')+'|'+r.file_url;
+    return 'id:'+r.id;
+  }
+  async function adminIdentity(){
+    var id=null,email='Administrador';
+    try{if(typeof currentUser!=='undefined'&&currentUser){id=currentUser.id||null;email=currentUser.email||email;}}catch(e){}
+    return {id:id,email:email};
+  }
+  async function notifyStudent(email,type,message){
+    if(!email)return;
+    var sb=nSb();if(!sb)return;
+    try{await sb.from('student_messages').insert([{student_email:email,sender:'Profesor Renan Barbosa',sender_type:'teacher',message_text:message,file_url:null,course_type:type||'pt'}]);}catch(e){console.warn('Falha ao notificar aluno',e);}
+  }
+  async function logDecision(r,fromStatus,toStatus,admin,note){
+    var sb=nSb();if(!sb)return;
+    try{await sb.from('payment_validation_history').insert([{
+      receipt_id:r.id,student_email:r.student_email||null,course_type:r.course_type||'pt',receipt_type:r.receipt_type||null,
+      from_status:fromStatus||'pending',to_status:toStatus,admin_id:admin.id||null,admin_email:admin.email||null,note:note||null
+    }]);}catch(e){console.warn('Histórico de validação não pôde ser gravado',e);}
+  }
+
+  // Central limpa: exibe um único card por comprovante/pagamento e somente o que ainda está pendente.
+  window.loadAdminNotifications=async function(){
+    var c=document.getElementById('admin-notifications-list'),sb=nSb();
+    if(!c||!sb)return;
+    c.innerHTML='<p class="text-slate-400">Carregando...</p>';
+
+    var q=await sb.from('student_receipts')
+      .select('id,student_email,receipt_type,note,file_url,created_at,course_type,validation_status,validated_at,amount,currency,booking_ids')
+      .not('file_url','is',null)
+      .order('created_at',{ascending:false})
+      .limit(500);
+    if(q.error){c.innerHTML='<p class="text-red-500">'+nEsc(q.error.message)+'</p>';return;}
+
+    var all=q.data||[];
+    var resolvedByKey=new Map();
+    all.forEach(function(r){
+      if(r.validation_status==='approved'||r.validation_status==='rejected'){
+        var k=receiptKey(r),prev=resolvedByKey.get(k);
+        if(!prev||new Date(r.validated_at||r.created_at||0)>new Date(prev.validated_at||prev.created_at||0))resolvedByKey.set(k,r);
+      }
+    });
+
+    // Repara registros duplicados antigos: se o mesmo comprovante já foi decidido, os duplicados pendentes recebem a mesma decisão.
+    var stale=[];
+    all.forEach(function(r){
+      if((r.validation_status||'pending')==='pending'){
+        var solved=resolvedByKey.get(receiptKey(r));
+        if(solved) stale.push({id:r.id,status:solved.validation_status,at:solved.validated_at||new Date().toISOString()});
+      }
+    });
+    for(var i=0;i<stale.length;i++){
+      try{await sb.from('student_receipts').update({validation_status:stale[i].status,validated_at:stale[i].at}).eq('id',stale[i].id);}catch(e){}
+    }
+
+    var pending=all.filter(function(r){return (r.validation_status||'pending')==='pending'&&!resolvedByKey.has(receiptKey(r));});
+    var unique=new Map();
+    pending.forEach(function(r){var k=receiptKey(r);if(!unique.has(k))unique.set(k,r);});
+    var rows=Array.from(unique.values());
+
+    if(!rows.length){c.innerHTML='<div class="text-center py-8 text-slate-400"><div class="text-2xl mb-2">✅</div><p class="text-xs font-bold text-slate-500">Nenhum pagamento aguardando validação.</p><p class="text-[10px] mt-1">Aprovados e rejeitados ficam no Histórico.</p></div>';return;}
+
+    c.innerHTML=rows.map(function(r){
+      var t=r.course_type||'pt',title=r.receipt_type==='clase_meet'?'📅 Comprovante de aula Meet':'🛒 Comprovante do curso';
+      return '<div data-pending-receipt="'+nEsc(r.id)+'" class="p-3.5 rounded-2xl border bg-slate-50">'+
+        '<div class="flex justify-between gap-2"><div><b class="text-xs">'+title+'</b><div class="text-[10px] font-bold text-slate-500">'+nCfg(t).flag+' '+nCfg(t).name+'</div></div><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-[9px] font-bold h-fit">AGUARDANDO VALIDAÇÃO</span></div>'+
+        '<div class="text-[11px] mt-1"><b>'+nEsc(r.student_email||'Aluno')+'</b><br>'+nEsc(r.note||'')+'</div>'+
+        '<div class="flex justify-between items-end gap-2 mt-2">'+(r.file_url?'<a href="'+nEsc(r.file_url)+'" target="_blank" rel="noopener noreferrer" class="text-[10px] text-blue-600 underline font-bold">Ver comprovante</a>':'<span></span>')+
+        '<div class="flex gap-2"><button type="button" onclick="validateReceipt(\''+r.id+'\',\'approved\')" class="bg-green-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold">✅ Aprovar</button><button type="button" onclick="validateReceipt(\''+r.id+'\',\'rejected\')" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-xl text-[10px] font-bold">❌ Rejeitar</button></div></div></div>';
+    }).join('');
+  };
+
+  // Resolve o comprovante e qualquer registro duplicado criado para o MESMO upload/reserva.
+  window.validateReceipt=async function(receiptId,decision){
+    var approve=decision==='approved',sb=nSb();if(!sb)return alert('Não foi possível conectar ao banco.');
+    if(decision!=='approved'&&decision!=='rejected')return;
+    if(!confirm(approve?'Confirmar este pagamento?':'Rejeitar este comprovante?'))return;
+
+    var qr=await sb.from('student_receipts').select('*').eq('id',receiptId).single();
+    if(qr.error||!qr.data)return alert('Não foi possível localizar o comprovante: '+(qr.error?qr.error.message:'registro inexistente'));
+    var r=qr.data,old=r.validation_status||'pending',type=r.course_type||'pt';
+    if(old==='approved'||old==='rejected'){
+      await window.loadAdminNotifications();
+      return alert('Este comprovante já foi '+(old==='approved'?'aprovado.':'rejeitado.'));
+    }
+
+    // Localiza duplicados inequívocos do mesmo pagamento.
+    var dupIds=[r.id];
+    var dq=await sb.from('student_receipts').select('id,file_url,booking_ids,validation_status,student_email,course_type,receipt_type')
+      .eq('student_email',r.student_email).eq('course_type',type).eq('receipt_type',r.receipt_type);
+    if(!dq.error){
+      var targetBookings=arr(r.booking_ids),targetFile=r.file_url||'';
+      (dq.data||[]).forEach(function(x){
+        if((x.validation_status||'pending')!=='pending')return;
+        var sameFile=targetFile&&x.file_url===targetFile;
+        var xb=arr(x.booking_ids),sameBooking=targetBookings.length&&xb.some(function(id){return targetBookings.indexOf(id)!==-1;});
+        if(sameFile||sameBooking)dupIds.push(x.id);
+      });
+    }
+    dupIds=Array.from(new Set(dupIds));
+
+    // Descobre as reservas ligadas ao comprovante.
+    var bookingIds=arr(r.booking_ids),bookings=[];
+    if(r.receipt_type==='clase_meet'){
+      var bq;
+      if(bookingIds.length){
+        bq=await sb.from('bookings').select('id,slot_id,status,receipt_url').in('id',bookingIds);
+      }else if(r.file_url){
+        bq=await sb.from('bookings').select('id,slot_id,status,receipt_url').eq('student_email',r.student_email).eq('course_type',type).eq('receipt_url',r.file_url);
+      }else{
+        bq=await sb.from('bookings').select('id,slot_id,status,receipt_url').eq('student_email',r.student_email).eq('course_type',type).in('status',['pending_validation','pending_receipt']);
+      }
+      if(bq&&!bq.error)bookings=bq.data||[];
+
+      if(approve){
+        // Se foi rejeitado antes, só reaproveita o horário se ele ainda estiver livre.
+        for(var bi=0;bi<bookings.length;bi++){
+          var b=bookings[bi];
+          if(b.status==='payment_rejected'&&b.slot_id){
+            var sq=await sb.from('available_slots').select('is_booked').eq('id',b.slot_id).single();
+            if(!sq.error&&sq.data&&sq.data.is_booked)return alert('Este horário já foi ocupado por outro aluno. Use o Histórico para revisar o caso e escolha outro horário.');
+          }
+        }
+        var slots=bookings.map(function(b){return b.slot_id;}).filter(Boolean);
+        if(slots.length){var su=await sb.from('available_slots').update({is_booked:true}).in('id',slots);if(su.error)return alert('Erro ao confirmar o horário: '+su.error.message);}
+        if(bookings.length){var bu=await sb.from('bookings').update({status:'confirmed'}).in('id',bookings.map(function(b){return b.id;}));if(bu.error)return alert('Erro ao confirmar a reserva: '+bu.error.message);}
+      }else{
+        if(bookings.length){var br=await sb.from('bookings').update({status:'payment_rejected'}).in('id',bookings.map(function(b){return b.id;}));if(br.error)return alert('Erro ao rejeitar a reserva: '+br.error.message);}
+        var slots2=bookings.map(function(b){return b.slot_id;}).filter(Boolean);
+        if(slots2.length){var sr=await sb.from('available_slots').update({is_booked:false}).in('id',slots2);if(sr.error)return alert('Erro ao liberar o horário: '+sr.error.message);}
+      }
+    }
+
+    if(r.receipt_type==='curso_completo'||r.receipt_type==='curso_pendente'){
+      var pu=await sb.from('profiles').update({has_course_access:approve}).eq('email',r.student_email).eq('course_type',type);
+      if(pu.error)return alert('Erro ao atualizar o acesso ao curso: '+pu.error.message);
+    }
+
+    var admin=await adminIdentity(),now=new Date().toISOString();
+    // O status é salvo por último e confirmado com SELECT. Assim a central só limpa após o banco realmente aceitar a decisão.
+    var up=await sb.from('student_receipts').update({validation_status:decision,validated_at:now,validated_by:admin.id,validated_by_email:admin.email}).in('id',dupIds).select('id,validation_status');
+    if(up.error)return alert('O pagamento não foi atualizado no banco: '+up.error.message);
+    if(!up.data||!up.data.length)return alert('O Supabase não confirmou a alteração do comprovante. Verifique as políticas RLS de student_receipts.');
+
+    await logDecision(r,old,decision,admin,approve?'Pagamento aprovado':'Comprovante rejeitado');
+    await notifyStudent(r.student_email,type,approve?
+      (r.receipt_type==='clase_meet'?'✅ ¡Tu pago fue aprobado y tu clase por Google Meet quedó confirmada! Revisá “Mis reservas”.':'✅ ¡Tu pago fue aprobado! Tu acceso al curso ya está liberado.'):
+      (r.receipt_type==='clase_meet'?'❌ Tu comprobante de la clase Meet fue rechazado. Revisá los datos y enviá un nuevo comprobante.':'❌ Tu comprobante del curso fue rechazado. Revisá los datos y enviá un nuevo comprobante.'));
+
+    // Remove imediatamente da tela antes mesmo da nova consulta.
+    dupIds.forEach(function(id){var el=document.querySelector('[data-pending-receipt="'+id+'"]');if(el)el.remove();});
+    await window.loadAdminNotifications();
+    if(typeof window.loadPaymentHistory==='function')await window.loadPaymentHistory();
+    if(typeof window.loadFinanceData==='function')await window.loadFinanceData();
+    if(typeof window.loadAdminBookings==='function')await window.loadAdminBookings();
+    if(typeof window.loadModernAdminStats==='function')window.loadModernAdminStats();
+    alert(approve?'Pagamento aprovado. Ele saiu das Notificações e foi para o Histórico.':'Comprovante rejeitado. Ele saiu das Notificações e foi para o Histórico.');
+  };
+})();
+</script>
+
 </body>
 </html>
