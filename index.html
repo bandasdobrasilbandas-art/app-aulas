@@ -5124,5 +5124,116 @@
 })();
 </script>
 
+
+<style id="modern-admin-2026-css">
+/* ==========================================================
+   PAINEL ADMIN MODERNO — visual modular, clean e brasileiro
+   Somente apresentação/navegação do painel administrativo.
+   ========================================================== */
+#tab-admin.modern-admin-shell{position:relative;padding-bottom:24px;}
+#tab-admin.modern-admin-shell > .flex.gap-2.border-b{display:none!important;}
+#modern-admin-dashboard{display:block;}
+.modern-admin-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#f0fdf4 48%,#eff6ff 100%);border:1px solid #e8f0ea;border-radius:28px;padding:20px 18px 18px;box-shadow:0 14px 35px rgba(15,35,25,.08);}
+.modern-admin-hero:before{content:"";position:absolute;right:-26px;top:-34px;width:175px;height:175px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fde047 0 14%,transparent 15%),linear-gradient(145deg,transparent 0 36%,rgba(22,163,74,.18) 37% 55%,rgba(37,99,235,.12) 56% 72%,transparent 73%);transform:rotate(-8deg);}
+.modern-admin-hero:after{content:"🌿";position:absolute;right:13px;bottom:-13px;font-size:60px;opacity:.35;transform:rotate(-18deg);}
+.modern-admin-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:#15803d;}
+.modern-admin-title{font-size:28px;line-height:1.05;font-weight:900;letter-spacing:-.04em;color:#10211d;margin-top:4px;}
+.modern-admin-subtitle{font-size:12px;color:#64748b;margin-top:4px;font-weight:600;}
+.modern-admin-universe{display:inline-flex;gap:4px;padding:4px;background:rgba(255,255,255,.8);border:1px solid rgba(226,232,240,.9);border-radius:999px;margin-top:14px;box-shadow:0 5px 15px rgba(15,23,42,.04);}
+.modern-admin-universe button{border:0;border-radius:999px;padding:8px 13px;font-size:11px;font-weight:800;color:#64748b;background:transparent;transition:.2s;}
+.modern-admin-universe button.active-pt{background:#16a34a;color:white;box-shadow:0 5px 12px rgba(22,163,74,.22);}
+.modern-admin-universe button.active-es{background:#2563eb;color:white;box-shadow:0 5px 12px rgba(37,99,235,.22);}
+.modern-admin-note{position:relative;z-index:2;margin-top:14px;max-width:72%;font-size:11px;line-height:1.35;color:#166534;font-weight:700;font-style:italic;}
+.modern-admin-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.modern-admin-stat{background:#fff;border:1px solid #edf2ef;border-radius:22px;padding:14px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 22px rgba(15,23,42,.055);cursor:pointer;transition:.18s;}
+.modern-admin-stat:active{transform:scale(.98)}
+.modern-admin-stat-icon{width:42px;height:42px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
+.modern-admin-stat strong{display:block;font-size:21px;line-height:1;font-weight:900;color:#0f172a;}
+.modern-admin-stat span{display:block;font-size:10px;line-height:1.15;color:#64748b;margin-top:4px;font-weight:700;}
+.modern-admin-section-title{display:flex;align-items:end;justify-content:space-between;margin:19px 2px 10px;}
+.modern-admin-section-title h3{font-size:14px;font-weight:900;color:#0f172a;}
+.modern-admin-section-title p{font-size:10px;color:#94a3b8;font-weight:600;}
+.modern-admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.modern-admin-card{min-height:128px;background:rgba(255,255,255,.96);border:1px solid #edf1ef;border-radius:23px;padding:13px 11px 12px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 8px 24px rgba(15,23,42,.055);transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;}
+.modern-admin-card:hover{transform:translateY(-2px);box-shadow:0 13px 28px rgba(15,23,42,.09);border-color:#dfe8e2}.modern-admin-card:active{transform:scale(.98)}
+.modern-admin-card-icon{width:43px;height:43px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);}
+.modern-admin-card-title{font-size:11.5px;font-weight:900;color:#0f172a;line-height:1.15;margin-top:9px;}
+.modern-admin-card-sub{font-size:9px;color:#94a3b8;line-height:1.2;margin-top:3px;font-weight:600;}
+.modern-admin-card-arrow{position:absolute;right:10px;bottom:11px;color:#94a3b8;font-size:10px;}
+.modern-admin-footer{margin-top:16px;border-radius:25px;padding:17px 17px;background:linear-gradient(125deg,#fff7ed,#fffbeb 52%,#ecfdf5);border:1px solid #f5ead8;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.04);}
+.modern-admin-footer:after{content:"☕🌿";position:absolute;right:12px;bottom:8px;font-size:34px;opacity:.85;}
+.modern-admin-footer b{display:block;font-size:14px;color:#134e4a;max-width:68%;line-height:1.2;}.modern-admin-footer span{display:block;font-size:9.5px;color:#64748b;margin-top:4px;max-width:68%;}
+.modern-admin-module-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;background:linear-gradient(135deg,#fff,#f8fafc);border:1px solid #edf2f7;border-radius:20px;padding:11px 12px;box-shadow:0 6px 16px rgba(15,23,42,.04);}
+.modern-admin-back{width:34px;height:34px;border-radius:12px;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;flex:none;}
+.modern-admin-module-head b{font-size:13px;color:#0f172a}.modern-admin-module-head span{font-size:9.5px;color:#94a3b8;display:block;margin-top:1px;}
+#tab-admin.modern-admin-shell [id^="admin-sec-"] > .bg-white{border-radius:25px!important;border-color:#edf2ef!important;box-shadow:0 9px 25px rgba(15,23,42,.055)!important;}
+#tab-admin.modern-admin-shell input,#tab-admin.modern-admin-shell textarea,#tab-admin.modern-admin-shell select{border-radius:14px!important;}
+#tab-admin.modern-admin-shell button{touch-action:manipulation;}
+@media(max-width:380px){.modern-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.modern-admin-card{min-height:120px}.modern-admin-title{font-size:25px;}}
+@media(min-width:700px){#tab-admin.modern-admin-shell{max-width:680px;margin:0 auto}.modern-admin-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.modern-admin-card{min-height:135px}}
+</style>
+
+<script id="modern-admin-2026-js">
+(function(){
+  var moduleMeta={
+    students:{icon:'fa-users',title:'Alunos',sub:'Gerencie seus alunos',tone:'#dcfce7',ink:'#15803d'},
+    videos:{icon:'fa-circle-play',title:'Aulas Gravadas',sub:'Conteúdo e materiais',tone:'#dbeafe',ink:'#2563eb'},
+    assignments:{icon:'fa-clipboard-list',title:'Tarefas',sub:'Atividades e correções',tone:'#fef3c7',ink:'#d97706'},
+    quizzes:{icon:'fa-star',title:'Avaliações',sub:'Notas e feedbacks',tone:'#fee2e2',ink:'#dc2626'},
+    bookings:{icon:'fa-calendar-check',title:'Reservas',sub:'Aulas agendadas',tone:'#dcfce7',ink:'#15803d'},
+    slots:{icon:'fa-clock',title:'Horários',sub:'Disponibilidade',tone:'#ede9fe',ink:'#6d28d9'},
+    notifications:{icon:'fa-bell',title:'Notificações',sub:'Pagamentos pendentes',tone:'#fef3c7',ink:'#d97706'},
+    'payment-history':{icon:'fa-file-lines',title:'Histórico',sub:'Validações e decisões',tone:'#dbeafe',ink:'#1d4ed8'},
+    finance:{icon:'fa-chart-column',title:'Financeiro',sub:'Pagamentos e receitas',tone:'#dcfce7',ink:'#047857'},
+    broadcast:{icon:'fa-comments',title:'Mensagens',sub:'Avisos e conversa',tone:'#ffe4e6',ink:'#e11d48'},
+    design:{icon:'fa-paintbrush',title:'Design',sub:'Fotos e aparência',tone:'#cffafe',ink:'#0e7490'},
+    prices:{icon:'fa-gear',title:'Configurações',sub:'Preços e preferências',tone:'#e2e8f0',ink:'#475569'},
+    syllabus:{icon:'fa-book-open',title:'Programa',sub:'Conteúdo do curso',tone:'#fef9c3',ink:'#a16207'}
+  };
+  function adminRaw(){try{return typeof rawClient==='function'?rawClient():getSupabase();}catch(e){return null;}}
+  function isAdminUser(){try{return !!(currentUser&&ADMIN_EMAILS.includes((currentUser.email||'').toLowerCase()));}catch(e){return false;}}
+  function activeUniverse(){try{return ADMIN_COURSE_TYPE||'pt';}catch(e){return 'pt';}}
+  function moduleCard(key){var m=moduleMeta[key];return '<button type="button" class="modern-admin-card" onclick="openModernAdminModule(\''+key+'\')"><div class="modern-admin-card-icon" style="background:'+m.tone+';color:'+m.ink+'"><i class="fa-solid '+m.icon+'"></i></div><div><div class="modern-admin-card-title">'+m.title+'</div><div class="modern-admin-card-sub">'+m.sub+'</div></div><i class="fa-solid fa-chevron-right modern-admin-card-arrow"></i></button>';}
+  function dashboardHTML(){
+    var keys=['students','videos','assignments','quizzes','bookings','slots','notifications','payment-history','finance','broadcast','design','prices','syllabus'];
+    return '<div id="modern-admin-dashboard">'+
+      '<div class="modern-admin-hero"><div class="modern-admin-eyebrow">Gestão da sua escola</div><div class="modern-admin-title">Painel Admin</div><div class="modern-admin-subtitle">Portugués con Renan</div><div class="modern-admin-universe"><button id="modern-u-pt" onclick="setModernAdminUniverse(\'pt\')">🇧🇷 Português</button><button id="modern-u-es" onclick="setModernAdminUniverse(\'es\')">🇦🇷 Espanhol</button></div><div class="modern-admin-note">Mais organização, mais tempo para ensinar 💛</div></div>'+
+      '<div class="modern-admin-stats"><button class="modern-admin-stat" onclick="openModernAdminModule(\'notifications\')"><div class="modern-admin-stat-icon" style="background:#dcfce7;color:#15803d"><i class="fa-solid fa-circle-check"></i></div><div><strong id="modern-pending-count">—</strong><span>Validações pendentes</span></div></button><button class="modern-admin-stat" onclick="openModernAdminModule(\'bookings\')"><div class="modern-admin-stat-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-calendar-day"></i></div><div><strong id="modern-today-count">—</strong><span>Reservas hoje</span></div></button></div>'+
+      '<div class="modern-admin-section-title"><div><h3>Ferramentas</h3><p>Toque em um módulo para acessar</p></div><span style="font-size:22px">🌿</span></div><div class="modern-admin-grid">'+keys.map(moduleCard).join('')+'</div>'+
+      '<div class="modern-admin-footer"><b>Educação aproxima pessoas 💛</b><span>Seu painel agora está organizado por módulos, sem aquela barra apertada de abas.</span></div></div>';
+  }
+  function syncUniverseButtons(){var t=activeUniverse(),p=document.getElementById('modern-u-pt'),e=document.getElementById('modern-u-es');if(p)p.className=t==='pt'?'active-pt':'';if(e)e.className=t==='es'?'active-es':'';}
+  window.setModernAdminUniverse=function(t){
+    if(!isAdminUser())return;
+    try{ADMIN_COURSE_TYPE=t;localStorage.setItem('admin_universe',t);if(typeof setCourseVisual==='function')setCourseVisual(t);}catch(e){}
+    syncUniverseButtons();loadModernAdminStats();
+  };
+  function ensureDashboard(){
+    var tab=document.getElementById('tab-admin');if(!tab)return;tab.classList.add('modern-admin-shell');
+    var d=document.getElementById('modern-admin-dashboard');if(!d){var holder=document.createElement('div');holder.innerHTML=dashboardHTML();tab.insertBefore(holder.firstElementChild,tab.firstChild);}
+    syncUniverseButtons();
+  }
+  function removeModuleHead(){document.querySelectorAll('.modern-admin-module-head').forEach(function(x){x.remove();});}
+  function addModuleHead(type){var sec=document.getElementById('admin-sec-'+type);if(!sec)return;removeModuleHead();var m=moduleMeta[type]||{title:'Módulo',sub:'Painel administrativo'};var h=document.createElement('div');h.className='modern-admin-module-head';h.innerHTML='<button type="button" class="modern-admin-back" onclick="showModernAdminHome()"><i class="fa-solid fa-arrow-left"></i></button><div><b>'+m.title+'</b><span>'+m.sub+' · '+(activeUniverse()==='pt'?'🇧🇷 Português':'🇦🇷 Espanhol')+'</span></div>';sec.insertBefore(h,sec.firstChild);}
+  window.showModernAdminHome=function(){
+    ensureDashboard();document.querySelectorAll('#tab-admin [id^="admin-sec-"]').forEach(function(s){s.classList.add('hidden');});removeModuleHead();var d=document.getElementById('modern-admin-dashboard');if(d)d.classList.remove('hidden');syncUniverseButtons();loadModernAdminStats();window.scrollTo({top:0,behavior:'smooth'});
+  };
+  window.openModernAdminModule=function(type){
+    ensureDashboard();var d=document.getElementById('modern-admin-dashboard');if(d)d.classList.add('hidden');
+    if(typeof window.showAdminTab==='function')window.showAdminTab(type);
+    setTimeout(function(){addModuleHead(type);window.scrollTo({top:0,behavior:'smooth'});},30);
+  };
+  window.loadModernAdminStats=async function(){
+    var sb=adminRaw();if(!sb||!isAdminUser())return;var pc=document.getElementById('modern-pending-count'),tc=document.getElementById('modern-today-count');
+    try{var p=await sb.from('student_receipts').select('id',{count:'exact',head:true}).eq('validation_status','pending').not('file_url','is',null);if(pc)pc.textContent=p.error?'—':(p.count||0);}catch(e){if(pc)pc.textContent='—';}
+    try{var now=new Date(),y=now.getFullYear(),m=String(now.getMonth()+1).padStart(2,'0'),d=String(now.getDate()).padStart(2,'0'),today=y+'-'+m+'-'+d;var q=await sb.from('bookings').select('id',{count:'exact',head:true}).eq('slot_date',today).neq('status','payment_rejected');if(tc)tc.textContent=q.error?'—':(q.count||0);}catch(e){if(tc)tc.textContent='—';}
+  };
+  var previousNavigate=window.navigate;
+  if(typeof previousNavigate==='function')window.navigate=function(tab){previousNavigate(tab);if(tab==='admin')setTimeout(function(){ensureDashboard();showModernAdminHome();},80);};
+  function init(){ensureDashboard();if(isAdminUser()&&!document.getElementById('tab-admin').classList.contains('hidden'))showModernAdminHome();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(init,550);});else setTimeout(init,550);
+})();
+</script>
+
 </body>
 </html>
