@@ -5544,5 +5544,413 @@ body:not(.admin-mode) #tab-home.student-modern-home{padding-bottom:8px;}
 })();
 </script>
 
+
+<script id="admin-team-system-v1">
+(function(){
+  /* ==========================================================
+     EQUIPE ADMINISTRATIVA
+     - mantém o visual atual
+     - administrador principal gerencia a equipe
+     - novos membros são reconhecidos pelo e-mail no Supabase
+     - permissões controlam os módulos visíveis
+     ========================================================== */
+
+  var STATIC_OWNER_EMAILS = (typeof ADMIN_EMAILS!=='undefined' ? ADMIN_EMAILS.slice() : []).map(function(x){return String(x||'').toLowerCase();});
+  var ADMIN_TEAM_PROFILE = null;
+  var TEAM_EDIT_ID = null;
+
+  var TEAM_PERMISSIONS = [
+    {key:'students', label:'Alunos'},
+    {key:'videos', label:'Aulas gravadas'},
+    {key:'assignments', label:'Tarefas'},
+    {key:'quizzes', label:'Avaliações'},
+    {key:'bookings', label:'Reservas'},
+    {key:'slots', label:'Horários'},
+    {key:'payments', label:'Pagamentos e validações'},
+    {key:'finance', label:'Financeiro'},
+    {key:'messages', label:'Mensagens'},
+    {key:'settings', label:'Configurações, design e programa'}
+  ];
+
+  var MODULE_PERMISSION = {
+    students:'students',
+    videos:'videos',
+    assignments:'assignments',
+    quizzes:'quizzes',
+    bookings:'bookings',
+    slots:'slots',
+    notifications:'payments',
+    'payment-history':'payments',
+    finance:'finance',
+    broadcast:'messages',
+    design:'settings',
+    prices:'settings',
+    syllabus:'settings',
+    team:'owner'
+  };
+
+  function teamRaw(){
+    try{return typeof rawClient==='function' ? rawClient() : getSupabase();}
+    catch(e){return null;}
+  }
+  function teamEsc(v){
+    return String(v==null?'':v).replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function currentEmail(){
+    try{return String((currentUser&&currentUser.email)||'').toLowerCase();}
+    catch(e){return '';}
+  }
+  function isStaticOwner(email){ return STATIC_OWNER_EMAILS.indexOf(String(email||'').toLowerCase())!==-1; }
+  function isTeamOwner(){
+    return !!((ADMIN_TEAM_PROFILE&&ADMIN_TEAM_PROFILE.active!==false&&ADMIN_TEAM_PROFILE.role==='owner') || isStaticOwner(currentEmail()));
+  }
+  function adminCan(permission){
+    if(isTeamOwner()) return true;
+    if(!ADMIN_TEAM_PROFILE || ADMIN_TEAM_PROFILE.active===false) return false;
+    if(permission==='owner') return false;
+    var p=ADMIN_TEAM_PROFILE.permissions||{};
+    return p[permission]===true;
+  }
+  window.adminCan = adminCan;
+  window.isTeamOwner = isTeamOwner;
+
+  async function loadAdminTeamIdentity(user){
+    var email=String((user&&user.email)||'').toLowerCase();
+    ADMIN_TEAM_PROFILE=null;
+    if(!email)return null;
+    var sb=teamRaw(); if(!sb)return null;
+    try{
+      var q=await sb.from('admin_users').select('*').eq('email',email).eq('active',true).maybeSingle();
+      if(!q.error && q.data){
+        ADMIN_TEAM_PROFILE=q.data;
+        if(typeof ADMIN_EMAILS!=='undefined' && !ADMIN_EMAILS.includes(email)) ADMIN_EMAILS.push(email);
+      }else if(!isStaticOwner(email) && typeof ADMIN_EMAILS!=='undefined'){
+        var ix=ADMIN_EMAILS.indexOf(email); if(ix!==-1)ADMIN_EMAILS.splice(ix,1);
+      }
+    }catch(e){
+      console.warn('Equipe administrativa ainda não configurada:',e);
+    }
+    return ADMIN_TEAM_PROFILE;
+  }
+  window.loadAdminTeamIdentity=loadAdminTeamIdentity;
+
+  function updateAdminRoleBadge(){
+    try{
+      if(!currentUser || !ADMIN_TEAM_PROFILE)return;
+      var badge=document.getElementById('profile-badge');
+      if(!badge)return;
+      if(ADMIN_TEAM_PROFILE.role==='assistant')badge.innerText='ASSISTENTE';
+      else if(ADMIN_TEAM_PROFILE.role==='owner')badge.innerText='ADMIN PRINCIPAL';
+      else badge.innerText='ADMIN';
+    }catch(e){}
+  }
+
+  // Carrega o vínculo administrativo ANTES da rotina de sessão decidir se a conta é aluno/admin.
+  var previousCheckSession=window.checkSession;
+  if(typeof previousCheckSession==='function'){
+    window.checkSession=async function(){
+      try{
+        var sb=teamRaw();
+        if(sb){
+          var sr=await sb.auth.getSession();
+          if(sr&&sr.data&&sr.data.session)await loadAdminTeamIdentity(sr.data.session.user);
+        }
+      }catch(e){console.warn(e);}
+      var r=await previousCheckSession.apply(this,arguments);
+      updateAdminRoleBadge();
+      setTimeout(function(){ensureTeamCard();applyModulePermissions();},60);
+      return r;
+    };
+  }
+
+  // Login: depois de autenticar, verifica admin_users antes de comparar o "universo" do perfil.
+  window.handleAuth=async function(){
+    var email=(document.getElementById('auth-email')?.value||'').trim().toLowerCase();
+    var password=document.getElementById('auth-password')?.value||'';
+    var name=(document.getElementById('auth-name')?.value||'').trim();
+    var btn=document.getElementById('auth-btn');
+    if(!CURRENT_COURSE_TYPE)return alert('Escolha primeiro Português ou Espanhol.');
+    if(!email||!password)return alert(CURRENT_COURSE_TYPE==='es'?'Informe e-mail e senha.':'Ingresá email y contraseña.');
+    if(btn){btn.disabled=true;btn.innerText='Entrando...';}
+    try{
+      var sb=getSupabase();
+      if(isSignUp){
+        var reg=await sb.auth.signUp({email:email,password:password,options:{data:{full_name:name||'Estudante'}}});
+        if(reg.error)throw reg.error;
+        if(reg.data.user){
+          var token='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+          localStorage.setItem('user_session_token',token);
+          var up=await teamRaw().from('profiles').upsert([{
+            id:reg.data.user.id,full_name:name||'Estudante',email:email,status:'Ativo',
+            student_level:'iniciante',has_course_access:false,trial_lesson_id:null,
+            current_session_token:token,last_sign_in_at:new Date().toISOString(),
+            last_content_viewed:'Registro',course_type:CURRENT_COURSE_TYPE,unlocked_levels:'iniciante'
+          }]);
+          if(up.error)console.warn('Profile insert:',up.error.message);
+        }
+        alert(CURRENT_COURSE_TYPE==='es'?'Conta criada com sucesso!':'¡Cuenta creada con éxito!');
+        await window.checkSession();
+      }else{
+        var login=await sb.auth.signInWithPassword({email:email,password:password});
+        if(login.error)throw login.error;
+        currentUser=login.data.user;
+        await loadAdminTeamIdentity(login.data.user);
+        var isAdm=(typeof ADMIN_EMAILS!=='undefined'&&ADMIN_EMAILS.includes(email));
+        var prof=await teamRaw().from('profiles').select('*').eq('id',login.data.user.id).single();
+        if(!isAdm && prof.data && prof.data.course_type && prof.data.course_type!==CURRENT_COURSE_TYPE){
+          await sb.auth.signOut();
+          throw new Error(CURRENT_COURSE_TYPE==='es'?'Esta conta pertence ao universo Português.':'Esta cuenta pertenece al universo Español.');
+        }
+        var token2='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+        localStorage.setItem('user_session_token',token2);
+        var row={id:login.data.user.id,email:email,current_session_token:token2,last_sign_in_at:new Date().toISOString()};
+        if(!isAdm)row.course_type=(prof.data&&prof.data.course_type)||CURRENT_COURSE_TYPE;
+        await teamRaw().from('profiles').upsert([row]);
+        await window.checkSession();
+      }
+    }catch(err){alert('Erro: '+(err.message||err));}
+    finally{if(btn){btn.disabled=false;btn.innerText=isSignUp?'Cadastrar':'Entrar';}}
+  };
+
+  function permissionLabel(role){
+    if(role==='owner')return '👑 Administrador principal';
+    if(role==='assistant')return '🧩 Assistente';
+    return '🛡️ Administrador';
+  }
+  function permissionSummary(row){
+    if(row.role==='owner')return 'Acesso total';
+    var p=row.permissions||{};
+    var names=TEAM_PERMISSIONS.filter(function(x){return p[x.key]===true;}).map(function(x){return x.label;});
+    return names.length?names.join(' · '):'Sem módulos liberados';
+  }
+
+  function teamFormHTML(){
+    return '<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">'+
+      '<div><h3 class="font-extrabold text-sm text-slate-900">Adicionar membro</h3><p class="text-[11px] text-slate-500 mt-1">Cadastre o e-mail que a pessoa usará para entrar no app. Ela pode criar a conta normalmente com esse mesmo e-mail.</p></div>'+
+      '<input type="hidden" id="team-edit-id" value="">'+
+      '<div class="grid grid-cols-1 gap-2">'+
+        '<input id="team-name" type="text" placeholder="Nome da pessoa" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-green-600">'+
+        '<input id="team-email" type="email" placeholder="email@exemplo.com" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-green-600">'+
+        '<select id="team-role" onchange="applyTeamRolePreset()" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs bg-white outline-none"><option value="admin">🛡️ Administrador</option><option value="assistant">🧩 Assistente</option></select>'+
+      '</div>'+
+      '<div><div class="text-[11px] font-extrabold text-slate-700 mb-2">Permissões</div><div class="grid grid-cols-2 gap-2">'+
+        TEAM_PERMISSIONS.map(function(p){return '<label class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-[10px] font-bold text-slate-700"><input type="checkbox" class="team-permission" value="'+p.key+'"> '+p.label+'</label>';}).join('')+
+      '</div></div>'+
+      '<div class="flex gap-2"><button id="team-save-btn" onclick="saveAdminTeamMember()" class="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2.5 text-xs font-extrabold">Adicionar à equipe</button><button id="team-cancel-btn" onclick="cancelTeamEdit()" class="hidden px-4 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">Cancelar</button></div>'+
+      '<div class="rounded-2xl bg-amber-50 border border-amber-100 p-3 text-[10px] text-amber-900"><b>Segurança:</b> somente o Administrador principal pode adicionar, editar ou remover membros. O acesso ao Financeiro e a Pagamentos é concedido separadamente.</div>'+
+    '</div>';
+  }
+
+  function ensureTeamSection(){
+    var tab=document.getElementById('tab-admin'); if(!tab)return null;
+    var sec=document.getElementById('admin-sec-team');
+    if(!sec){
+      sec=document.createElement('div');
+      sec.id='admin-sec-team';
+      sec.className='space-y-4 hidden';
+      sec.innerHTML=teamFormHTML()+
+        '<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3"><div class="flex justify-between items-center"><div><h3 class="font-extrabold text-sm text-slate-900">Equipe administrativa</h3><p class="text-[11px] text-slate-500">Contas, funções e permissões</p></div><button onclick="loadAdminTeamList()" class="px-3 py-2 bg-slate-100 rounded-xl text-[10px] font-bold">Atualizar</button></div><div id="admin-team-list" class="space-y-2 text-xs text-slate-500">Carregando...</div></div>';
+      var vp=document.getElementById('modern-admin-module-viewport');
+      (vp||tab).appendChild(sec);
+    }
+    return sec;
+  }
+
+  function teamCardHTML(){
+    return '<button id="modern-admin-team-card" type="button" class="modern-admin-card" onclick="openAdminTeamModule()">'+
+      '<div class="modern-admin-card-icon" style="background:#e0f2fe;color:#0369a1"><i class="fa-solid fa-user-shield"></i></div>'+
+      '<div><div class="modern-admin-card-title">Equipe</div><div class="modern-admin-card-sub">Administradores e permissões</div></div>'+
+      '<i class="fa-solid fa-chevron-right modern-admin-card-arrow"></i></button>';
+  }
+
+  function ensureTeamCard(){
+    var grid=document.querySelector('#modern-admin-dashboard .modern-admin-grid');
+    var old=document.getElementById('modern-admin-team-card');
+    if(!isTeamOwner()){if(old)old.remove();return;}
+    if(grid&&!old)grid.insertAdjacentHTML('beforeend',teamCardHTML());
+  }
+
+  function applyModulePermissions(){
+    var cards=document.querySelectorAll('#modern-admin-dashboard .modern-admin-card');
+    cards.forEach(function(card){
+      if(card.id==='modern-admin-team-card'){card.style.display=isTeamOwner()?'':'none';return;}
+      var onclick=card.getAttribute('onclick')||'';
+      var m=onclick.match(/openModernAdminModule\('([^']+)'\)/);
+      if(!m)return;
+      var perm=MODULE_PERMISSION[m[1]];
+      card.style.display=(!perm||adminCan(perm))?'':'none';
+    });
+  }
+
+  var baseShowModernHome=window.showModernAdminHome;
+  if(typeof baseShowModernHome==='function'){
+    window.showModernAdminHome=function(){
+      var r=baseShowModernHome.apply(this,arguments);
+      setTimeout(function(){ensureTeamCard();applyModulePermissions();},30);
+      return r;
+    };
+  }
+
+  var baseOpenModern=window.openModernAdminModule;
+  if(typeof baseOpenModern==='function'){
+    window.openModernAdminModule=function(type){
+      var perm=MODULE_PERMISSION[type];
+      if(perm&&!adminCan(perm))return alert('Sua conta não tem permissão para acessar este módulo.');
+      return baseOpenModern.apply(this,arguments);
+    };
+  }
+
+  window.openAdminTeamModule=function(){
+    if(!isTeamOwner())return alert('Somente o Administrador principal pode gerenciar a equipe.');
+    ensureTeamSection();
+    var tab=document.getElementById('tab-admin'),d=document.getElementById('modern-admin-dashboard'),vp=document.getElementById('modern-admin-module-viewport');
+    if(d)d.classList.add('hidden');
+    if(tab)tab.classList.add('module-open');
+    if(vp)vp.classList.add('active');
+    document.querySelectorAll('#tab-admin [id^="admin-sec-"]').forEach(function(s){s.classList.toggle('hidden',s.id!=='admin-sec-team');});
+    document.querySelectorAll('.modern-admin-module-head').forEach(function(x){x.remove();});
+    var sec=document.getElementById('admin-sec-team');
+    if(sec){
+      var h=document.createElement('div');
+      h.className='modern-admin-module-head';
+      h.innerHTML='<button type="button" class="modern-admin-back" onclick="showModernAdminHome()"><i class="fa-solid fa-arrow-left"></i></button><div><b>Equipe</b><span>Administradores e permissões</span></div>';
+      sec.insertBefore(h,sec.firstChild);
+    }
+    window.loadAdminTeamList();
+    try{tab.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){window.scrollTo(0,0);}
+  };
+
+  function selectedPermissions(){
+    var obj={};
+    document.querySelectorAll('.team-permission').forEach(function(ch){obj[ch.value]=!!ch.checked;});
+    return obj;
+  }
+  function setPermissionChecks(p){
+    p=p||{};
+    document.querySelectorAll('.team-permission').forEach(function(ch){ch.checked=p[ch.value]===true;});
+  }
+
+  window.applyTeamRolePreset=function(){
+    var role=document.getElementById('team-role')?.value||'admin';
+    var p={};
+    TEAM_PERMISSIONS.forEach(function(x){p[x.key]=false;});
+    if(role==='admin'){
+      ['students','videos','assignments','quizzes','bookings','slots','payments','messages'].forEach(function(k){p[k]=true;});
+    }else{
+      ['students','bookings','slots','messages'].forEach(function(k){p[k]=true;});
+    }
+    setPermissionChecks(p);
+  };
+
+  window.cancelTeamEdit=function(){
+    TEAM_EDIT_ID=null;
+    var id=document.getElementById('team-edit-id');if(id)id.value='';
+    var n=document.getElementById('team-name');if(n)n.value='';
+    var e=document.getElementById('team-email');if(e){e.value='';e.disabled=false;}
+    var r=document.getElementById('team-role');if(r)r.value='admin';
+    window.applyTeamRolePreset();
+    var b=document.getElementById('team-save-btn');if(b)b.textContent='Adicionar à equipe';
+    document.getElementById('team-cancel-btn')?.classList.add('hidden');
+  };
+
+  window.saveAdminTeamMember=async function(){
+    if(!isTeamOwner())return alert('Somente o Administrador principal pode alterar a equipe.');
+    var name=(document.getElementById('team-name')?.value||'').trim();
+    var email=(document.getElementById('team-email')?.value||'').trim().toLowerCase();
+    var role=document.getElementById('team-role')?.value||'admin';
+    if(!name||!email)return alert('Informe nome e e-mail.');
+    if(role!=='admin'&&role!=='assistant')return alert('Função inválida.');
+    var permissions=selectedPermissions(),sb=teamRaw();if(!sb)return;
+    var row={full_name:name,email:email,role:role,permissions:permissions,active:true,created_by_email:currentEmail(),updated_at:new Date().toISOString()};
+    var res;
+    if(TEAM_EDIT_ID)res=await sb.from('admin_users').update(row).eq('id',TEAM_EDIT_ID).select('*');
+    else res=await sb.from('admin_users').insert([row]).select('*');
+    if(res.error)return alert('Não foi possível salvar o membro: '+res.error.message);
+    alert(TEAM_EDIT_ID?'Membro atualizado.':'Membro adicionado à equipe.');
+    window.cancelTeamEdit();
+    await window.loadAdminTeamList();
+  };
+
+  window.editAdminTeamMember=async function(id){
+    if(!isTeamOwner())return;
+    var sb=teamRaw();var q=await sb.from('admin_users').select('*').eq('id',id).single();
+    if(q.error)return alert(q.error.message);
+    var m=q.data;if(m.role==='owner')return alert('O Administrador principal não pode ser alterado por esta tela.');
+    TEAM_EDIT_ID=id;
+    document.getElementById('team-edit-id').value=id;
+    document.getElementById('team-name').value=m.full_name||'';
+    document.getElementById('team-email').value=m.email||'';
+    document.getElementById('team-email').disabled=true;
+    document.getElementById('team-role').value=m.role||'admin';
+    setPermissionChecks(m.permissions||{});
+    document.getElementById('team-save-btn').textContent='Salvar alterações';
+    document.getElementById('team-cancel-btn').classList.remove('hidden');
+    document.getElementById('team-name').scrollIntoView({behavior:'smooth',block:'center'});
+  };
+
+  window.toggleAdminTeamMember=async function(id,active){
+    if(!isTeamOwner())return;
+    var sb=teamRaw();var q=await sb.from('admin_users').select('*').eq('id',id).single();
+    if(q.error)return alert(q.error.message);
+    if(q.data.role==='owner')return alert('O Administrador principal não pode ser desativado por esta tela.');
+    var u=await sb.from('admin_users').update({active:!active,updated_at:new Date().toISOString()}).eq('id',id);
+    if(u.error)return alert(u.error.message);
+    await window.loadAdminTeamList();
+  };
+
+  window.deleteAdminTeamMember=async function(id){
+    if(!isTeamOwner())return;
+    var sb=teamRaw();var q=await sb.from('admin_users').select('*').eq('id',id).single();
+    if(q.error)return alert(q.error.message);
+    if(q.data.role==='owner')return alert('O Administrador principal não pode ser removido.');
+    if(!confirm('Remover '+(q.data.full_name||q.data.email)+' da equipe administrativa?'))return;
+    var d=await sb.from('admin_users').delete().eq('id',id);
+    if(d.error)return alert(d.error.message);
+    await window.loadAdminTeamList();
+  };
+
+  window.loadAdminTeamList=async function(){
+    var c=document.getElementById('admin-team-list');if(!c)return;
+    if(!isTeamOwner()){c.innerHTML='<p class="text-red-500">Acesso restrito ao Administrador principal.</p>';return;}
+    var sb=teamRaw();if(!sb)return;
+    c.innerHTML='<p class="text-slate-400">Carregando equipe...</p>';
+    var q=await sb.from('admin_users').select('*').order('role',{ascending:true}).order('created_at',{ascending:true});
+    if(q.error){c.innerHTML='<p class="text-red-500">Erro: '+teamEsc(q.error.message)+'</p>';return;}
+    var rows=q.data||[];
+    c.innerHTML=rows.map(function(m){
+      var owner=m.role==='owner';
+      return '<div class="p-3.5 rounded-2xl border border-slate-100 bg-slate-50 space-y-2">'+
+        '<div class="flex justify-between gap-2"><div><div class="font-extrabold text-xs text-slate-900">'+teamEsc(m.full_name||m.email)+'</div><div class="text-[10px] text-slate-500">'+teamEsc(m.email)+'</div></div><div class="text-right"><span class="inline-block px-2 py-1 rounded-full text-[9px] font-extrabold '+(m.active?'bg-green-100 text-green-700':'bg-slate-200 text-slate-500')+'">'+(m.active?'ATIVO':'DESATIVADO')+'</span><div class="text-[9px] font-bold text-slate-500 mt-1">'+permissionLabel(m.role)+'</div></div></div>'+
+        '<div class="text-[10px] text-slate-600 leading-relaxed">'+teamEsc(permissionSummary(m))+'</div>'+
+        (owner?'<div class="text-[10px] font-bold text-amber-700">Conta protegida de Administrador principal.</div>':
+        '<div class="flex gap-2 pt-1"><button onclick="editAdminTeamMember(\''+m.id+'\')" class="flex-1 bg-blue-50 text-blue-700 rounded-xl py-2 text-[10px] font-bold">Editar</button><button onclick="toggleAdminTeamMember(\''+m.id+'\','+(m.active?'true':'false')+')" class="flex-1 bg-amber-50 text-amber-800 rounded-xl py-2 text-[10px] font-bold">'+(m.active?'Desativar':'Reativar')+'</button><button onclick="deleteAdminTeamMember(\''+m.id+'\')" class="px-3 bg-red-50 text-red-700 rounded-xl py-2 text-[10px] font-bold">Remover</button></div>')+
+      '</div>';
+    }).join('')||'<p class="text-slate-400">Nenhum membro cadastrado.</p>';
+  };
+
+  // Ao abrir diretamente uma aba administrativa, aplica a permissão correspondente.
+  var previousShowAdminTab=window.showAdminTab;
+  if(typeof previousShowAdminTab==='function'){
+    window.showAdminTab=function(type){
+      var perm=MODULE_PERMISSION[type];
+      if(perm&&!adminCan(perm))return alert('Sua conta não tem permissão para acessar este módulo.');
+      return previousShowAdminTab.apply(this,arguments);
+    };
+  }
+
+  // Inicialização visual sem mudar o design existente.
+  function initTeamSystem(){
+    ensureTeamSection();
+    ensureTeamCard();
+    applyModulePermissions();
+    window.applyTeamRolePreset();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(initTeamSystem,1100);});
+  else setTimeout(initTeamSystem,1100);
+})();
+</script>
+
 </body>
 </html>
