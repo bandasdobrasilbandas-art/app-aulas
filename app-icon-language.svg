@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f7fbf4"/>
+      <stop offset="100%" stop-color="#e6f4df"/>
+    </linearGradient>
+    <linearGradient id="bubble1" x1="0" x2="1">
+      <stop offset="0%" stop-color="#1fa34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <linearGradient id="bubble2" x1="0" x2="1">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <circle cx="404" cy="108" r="38" fill="#facc15" opacity="0.85"/>
+  <g opacity="0.95">
+    <path d="M395 122c20 2 40 18 46 39 8 26-6 54-29 66-13 7-27 9-40 5l-13 17c-3 4-9 1-8-4l4-22c-14-12-22-31-19-50 4-31 31-54 59-51z" fill="#f3a2a8"/>
+    <path d="M92 124c17-26 53-31 77-11 27 22 28 62 4 86-10 10-22 16-35 18l-12 25c-2 4-8 3-9-2l-5-25c-16-6-29-19-35-35-8-20-5-40 15-56z" fill="#c7f1a7"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M104 270c0-61 49-110 110-110h71c61 0 110 49 110 110s-49 110-110 110h-32l-46 52c-10 11-28 4-28-11v-41h-15c-33 0-60-27-60-60v-50z" fill="white"/>
+    <path d="M189 141c0-39 32-71 71-71h92c39 0 71 32 71 71s-32 71-71 71h-12v29c0 12-15 17-23 8l-38-37h-19c-39 0-71-32-71-71z" fill="url(#bubble1)"/>
+    <path d="M92 252c0-46 37-83 83-83h83c46 0 83 37 83 83s-37 83-83 83h-22l-35 38c-8 9-23 3-23-9v-29h-3c-46 0-83-37-83-83z" fill="url(#bubble2)"/>
+  </g>
+  <text x="306" y="155" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="white" text-anchor="middle">PT</text>
+  <text x="220" y="265" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="white" text-anchor="middle">ES</text>
+  <g transform="translate(256 388)">
+    <rect x="-78" y="-16" width="156" height="82" rx="20" fill="#ffffff" filter="url(#shadow)"/>
+    <rect x="-60" y="4" width="46" height="10" rx="5" fill="#dbeafe"/>
+    <rect x="-60" y="24" width="86" height="10" rx="5" fill="#dcfce7"/>
+    <rect x="-60" y="44" width="66" height="10" rx="5" fill="#fde68a"/>
+    <path d="M48 -2l20 12v38c0 5-4 9-9 9H33c-5 0-9-4-9-9V10L48 -2z" fill="#facc15"/>
+    <path d="M24 10l24 14 24-14" fill="none" stroke="#ca8a04" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+</svg>
